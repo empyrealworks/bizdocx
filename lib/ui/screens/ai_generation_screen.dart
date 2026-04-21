@@ -16,8 +16,7 @@ class AiGenerationScreen extends ConsumerStatefulWidget {
       _AiGenerationScreenState();
 }
 
-class _AiGenerationScreenState
-    extends ConsumerState<AiGenerationScreen> {
+class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
   final _promptCtrl = TextEditingController();
   final _titleCtrl = TextEditingController();
   DocumentType _selectedType = DocumentType.invoice;
@@ -31,9 +30,8 @@ class _AiGenerationScreenState
   }
 
   Future<void> _generate() async {
-    // 1. Dismiss keyboard and wait for layout to settle
     FocusScope.of(context).unfocus();
-    
+
     if (_promptCtrl.text.trim().isEmpty || _titleCtrl.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a title and prompt.')),
@@ -41,10 +39,8 @@ class _AiGenerationScreenState
       return;
     }
 
-    final notifier = ref.read(
-        documentGenerationProvider(widget.portfolioId).notifier);
-
-    // Give a small frame for keyboard animation to finish
+    final notifier =
+    ref.read(documentGenerationProvider(widget.portfolioId).notifier);
     await Future.delayed(const Duration(milliseconds: 300));
 
     final asset = await notifier.generate(
@@ -97,8 +93,8 @@ class _AiGenerationScreenState
                 const SizedBox(height: 12),
                 TextField(
                   controller: _titleCtrl,
-                  decoration: const InputDecoration(
-                    hintText: 'e.g. Invoice for Acme Corp — June 2025',
+                  decoration: InputDecoration(
+                    hintText: _titleHint(_selectedType),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -112,17 +108,23 @@ class _AiGenerationScreenState
                 TextField(
                   controller: _promptCtrl,
                   maxLines: 7,
-                  decoration: const InputDecoration(
-                    hintText:
-                    'e.g. Create a professional invoice for a shipment of 200 units of blue ceramic vases at \$45 each. Bill to: Luxe Home Decor Ltd, payment due in 30 days.',
+                  decoration: InputDecoration(
+                    hintText: _promptHint(_selectedType),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 FilledButton.icon(
                   onPressed: genState.isLoading ? null : _generate,
                   icon: const Icon(Icons.auto_awesome, size: 18),
                   label: const Text('Generate'),
                 ),
+                const SizedBox(height: 20),
+                // External editing note (for content-heavy types)
+                if (_externalEditNote(_selectedType) != null)
+                  _ExternalEditBanner(note: _externalEditNote(_selectedType)!),
+                // Document field hints
+                _DocumentHints(type: _selectedType),
+                const SizedBox(height: 40),
               ],
             ),
           ),
@@ -138,21 +140,274 @@ class _AiGenerationScreenState
           _ErrorOverlay(
             error: genState.error.toString(),
             onDismiss: () => ref
-                .read(documentGenerationProvider(widget.portfolioId)
-                .notifier)
+                .read(documentGenerationProvider(widget.portfolioId).notifier)
                 .reset(),
           ),
         if (genState.isCancelled)
-           _CancelledOverlay(
+          _CancelledOverlay(
             onDismiss: () => ref
-                .read(documentGenerationProvider(widget.portfolioId)
-                .notifier)
+                .read(documentGenerationProvider(widget.portfolioId).notifier)
                 .reset(),
           ),
       ],
     );
   }
+
+  String _titleHint(DocumentType t) {
+    switch (t) {
+      case DocumentType.invoice:
+        return 'e.g. Invoice for Acme Corp — June 2025';
+      case DocumentType.proposal:
+        return 'e.g. Web Redesign Proposal — Luxe Retail';
+      case DocumentType.letterhead:
+        return 'e.g. Official Letterhead Template';
+      case DocumentType.businessCard:
+        return 'e.g. Business Card — John Doe';
+      case DocumentType.contract:
+        return 'e.g. Service Agreement — Q3 2025';
+      case DocumentType.logo:
+        return 'e.g. Primary Logo Concept';
+      case DocumentType.icon:
+        return 'e.g. App Icon — Blue Minimal';
+      case DocumentType.other:
+        return 'e.g. Company Profile Sheet';
+    }
+  }
+
+  String _promptHint(DocumentType t) {
+    switch (t) {
+      case DocumentType.invoice:
+        return 'e.g. Invoice for 200 units of blue ceramic vases at \$45 each. Bill to: Luxe Home Décor Ltd. Due in 30 days. Include 7.5% VAT.';
+      case DocumentType.proposal:
+        return 'e.g. Proposal for a full website redesign including UX audit, 5 pages, and CMS integration. Project timeline: 8 weeks. Budget: \$12,000.';
+      case DocumentType.letterhead:
+        return 'e.g. Create a formal letterhead template with our logo placeholder, contact details section, and signature line at the bottom.';
+      case DocumentType.businessCard:
+        return 'e.g. Business card for Sarah Mitchell, Head of Sales. Include email sarah@company.com, phone +1 555 0123, and LinkedIn handle.';
+      case DocumentType.contract:
+        return 'e.g. Service agreement template for freelance design services. Include scope, payment terms, IP ownership clause, and termination notice period.';
+      case DocumentType.logo:
+        return 'e.g. A modern minimalist logo for a ceramics brand. Use earth tones. Incorporate a subtle wave or vessel shape.';
+      case DocumentType.icon:
+        return 'e.g. A clean app icon for a document management app. Blue and white palette. Flat design with a subtle paper/fold motif.';
+      case DocumentType.other:
+        return 'e.g. A one-page company profile with our mission, key services, team size, and founding year.';
+    }
+  }
+
+  String? _externalEditNote(DocumentType t) {
+    switch (t) {
+      case DocumentType.contract:
+        return 'Contracts require specific legal language and review. BizDocx generates the structure and standard clauses — export as HTML and complete the specifics in Word or Google Docs before signing.';
+      case DocumentType.letterhead:
+        return 'This generates a reusable branded template. Export it and add your letter body content in Word or Google Docs each time you write.';
+      default:
+        return null;
+    }
+  }
 }
+
+// ── External Edit Banner ─────────────────────────────────────────────────────
+
+class _ExternalEditBanner extends StatelessWidget {
+  const _ExternalEditBanner({required this.note});
+  final String note;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1C1A00),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFF4A4200)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.tips_and_updates_outlined,
+              size: 16, color: Color(0xFFFFD60A)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(note,
+                style: const TextStyle(
+                    color: Color(0xFFFFD60A),
+                    fontSize: 12,
+                    height: 1.5)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Document Hints ────────────────────────────────────────────────────────────
+
+class _DocumentHints extends StatefulWidget {
+  const _DocumentHints({required this.type});
+  final DocumentType type;
+
+  @override
+  State<_DocumentHints> createState() => _DocumentHintsState();
+}
+
+class _DocumentHintsState extends State<_DocumentHints> {
+  bool _expanded = true;
+
+  static const _hints = <DocumentType, List<String>>{
+    DocumentType.invoice: [
+      '🏢  Client name & billing address',
+      '📦  Line items: description, quantity, unit price',
+      '💰  Currency & total amount',
+      '🏦  Your payment / bank account details',
+      '📅  Invoice date & due date',
+      '🔢  Invoice or PO number',
+      '🧾  Tax rate (e.g. VAT 7.5%)',
+    ],
+    DocumentType.proposal: [
+      '🎯  Project scope & objectives',
+      '📋  Deliverables & milestones',
+      '⏱  Estimated timeline',
+      '💵  Pricing breakdown or range',
+      '✅  Terms & acceptance conditions',
+      '👤  Your credentials or portfolio link',
+    ],
+    DocumentType.letterhead: [
+      '🏢  Company name & registered address',
+      '📞  Phone, email & website',
+      '🎨  Brand color preference',
+      '🖼  Logo placement (top-left, centre, etc.)',
+      '📝  Optional tagline or slogan',
+    ],
+    DocumentType.businessCard: [
+      '👤  Full name & job title',
+      '📧  Email address',
+      '📞  Phone number',
+      '🌐  Website or LinkedIn URL',
+      '🏢  Company name & address (optional)',
+      '🎨  Style preference (minimal, bold, etc.)',
+    ],
+    DocumentType.contract: [
+      '👥  Parties involved (full legal names)',
+      '📋  Scope of services or work',
+      '💰  Payment terms & schedule',
+      '📅  Start date & duration',
+      '⚖️  Governing law / jurisdiction',
+      '🔒  IP ownership & confidentiality clauses',
+      '🚪  Termination notice period',
+    ],
+    DocumentType.logo: [
+      '🏢  Business name (exact spelling)',
+      '🎨  Brand colors (hex codes if possible)',
+      '✏️  Style: wordmark, lettermark, emblem, or combo mark',
+      '💡  Mood: minimal, bold, playful, luxury, etc.',
+      '🔍  Industry & any symbol ideas',
+    ],
+    DocumentType.icon: [
+      '🔷  Concept or metaphor (e.g. speed, security, nature)',
+      '🎨  Color palette preference',
+      '✏️  Style: flat, gradient, outline, 3D',
+      '📐  Platform: iOS, Android, Web favicon',
+      '📏  Background: solid, transparent',
+    ],
+    DocumentType.other: [
+      '📄  Document purpose & audience',
+      '📋  Key sections to include',
+      '🎨  Tone: formal, friendly, technical',
+      '📏  Approximate length or page count',
+    ],
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final hints = _hints[widget.type] ?? [];
+    if (hints.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.graphite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => setState(() => _expanded = !_expanded),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+              child: Row(
+                children: [
+                  const Icon(Icons.checklist_rtl_rounded,
+                      size: 16, color: AppColors.silver),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Suggested fields for ${_typeLabel(widget.type)}',
+                    style: const TextStyle(
+                      color: AppColors.silver,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    _expanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    size: 18,
+                    color: AppColors.muted,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_expanded) ...[
+            Divider(height: 1, color: AppColors.border),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Include these in your prompt for best results:',
+                    style: const TextStyle(
+                        color: AppColors.muted, fontSize: 11),
+                  ),
+                  const SizedBox(height: 10),
+                  ...hints.map((h) => Padding(
+                    padding: const EdgeInsets.only(bottom: 7),
+                    child: Text(h,
+                        style: const TextStyle(
+                            color: AppColors.silver,
+                            fontSize: 13,
+                            height: 1.3)),
+                  )),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String _typeLabel(DocumentType t) {
+    switch (t) {
+      case DocumentType.invoice: return 'Invoice';
+      case DocumentType.proposal: return 'Proposal';
+      case DocumentType.letterhead: return 'Letterhead';
+      case DocumentType.businessCard: return 'Business Card';
+      case DocumentType.contract: return 'Contract';
+      case DocumentType.logo: return 'Logo';
+      case DocumentType.icon: return 'Icon';
+      case DocumentType.other: return 'Other';
+    }
+  }
+}
+
+// ── Supporting Widgets ────────────────────────────────────────────────────────
 
 class _SectionLabel extends StatelessWidget {
   const _SectionLabel(this.text);
@@ -186,18 +441,13 @@ class _TypeSelector extends StatelessWidget {
     DocumentType.contract,
     DocumentType.other,
   ];
-
-  static const _graphical = [
-    DocumentType.logo,
-    DocumentType.icon,
-  ];
+  static const _graphical = [DocumentType.logo, DocumentType.icon];
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Pipeline toggle
         Row(
           children: AssetPipeline.values.map((p) {
             final active = pipeline == p;
@@ -216,7 +466,8 @@ class _TypeSelector extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  margin: EdgeInsets.only(right: p == AssetPipeline.structural ? 6 : 0),
+                  margin: EdgeInsets.only(
+                      right: p == AssetPipeline.structural ? 6 : 0),
                   decoration: BoxDecoration(
                     color: active ? AppColors.white : AppColors.graphite,
                     borderRadius: BorderRadius.circular(8),
@@ -239,7 +490,6 @@ class _TypeSelector extends StatelessWidget {
           }).toList(),
         ),
         const SizedBox(height: 12),
-        // Document type chips
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -264,8 +514,7 @@ class _TypeSelector extends StatelessWidget {
                 child: Text(
                   _label(t),
                   style: TextStyle(
-                    color:
-                    active ? AppColors.black : AppColors.silver,
+                    color: active ? AppColors.black : AppColors.silver,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -321,15 +570,12 @@ class _ErrorOverlay extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
                 Text(error,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: AppColors.error),
+                    style: const TextStyle(
+                        color: AppColors.error, fontSize: 13),
                     textAlign: TextAlign.center),
                 const SizedBox(height: 20),
                 FilledButton(
-                    onPressed: onDismiss,
-                    child: const Text('Dismiss')),
+                    onPressed: onDismiss, child: const Text('Dismiss')),
               ],
             ),
           ),
@@ -371,8 +617,7 @@ class _CancelledOverlay extends StatelessWidget {
                     textAlign: TextAlign.center),
                 const SizedBox(height: 20),
                 FilledButton(
-                    onPressed: onDismiss,
-                    child: const Text('Dismiss')),
+                    onPressed: onDismiss, child: const Text('Dismiss')),
               ],
             ),
           ),

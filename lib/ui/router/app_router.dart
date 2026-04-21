@@ -9,6 +9,7 @@ import '../screens/portfolio_dashboard_screen.dart';
 import '../screens/portfolio_detail_screen.dart';
 import '../screens/ai_generation_screen.dart';
 import '../screens/document_viewer_screen.dart';
+import '../screens/settings_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -26,6 +27,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/auth',
         builder: (_, __) => const AuthGateScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (_, __) => const SettingsScreen(),
       ),
       GoRoute(
         path: '/',
@@ -46,8 +51,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'doc/:docId',
                 builder: (context, state) {
-                  final asset =
-                  state.extra as DocumentAsset;
+                  final asset = state.extra as DocumentAsset;
                   return DocumentViewerScreen(asset: asset);
                 },
               ),

@@ -54,18 +54,11 @@ class FirebaseService {
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      // google_sign_in 7.2.0+ uses a singleton and authenticate() method.
       final googleUser = await GoogleSignIn.instance.authenticate();
-
-      // Authentication (ID Token) is now a synchronous getter.
       final googleAuth = googleUser.authentication;
-
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
-        // accessToken is moved to googleUser.authorizationClient.authorizeScopes(...)
-        // but idToken is sufficient for Firebase Auth sign-in.
       );
-
       return await _auth.signInWithCredential(credential);
     } catch (e) {
       debugPrint('[FirebaseService] Google Sign-In error: $e');
@@ -81,7 +74,8 @@ class FirebaseService {
         .collection(FirestorePaths.portfoliosCol(currentUid))
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map(BusinessPortfolio.fromFirestore).toList());
+        .map((snap) =>
+        snap.docs.map(BusinessPortfolio.fromFirestore).toList());
   }
 
   Future<BusinessPortfolio> createPortfolio({
@@ -109,7 +103,6 @@ class FirebaseService {
         .doc(FirestorePaths.portfolio(uid, id))
         .set(portfolio.toFirestore());
 
-    // Initialise the empty context profile
     final ctx = UserContext(
       userId: uid,
       portfolioId: id,
@@ -126,15 +119,33 @@ class FirebaseService {
     return portfolio;
   }
 
+  /// Updates portfolio and keeps the RAG context profile in sync.
   Future<void> updatePortfolio(BusinessPortfolio portfolio) async {
-    await _db
-        .doc(FirestorePaths.portfolio(currentUid, portfolio.id))
-        .update({...portfolio.toFirestore(), 'updatedAt': Timestamp.now()});
+    final uid = currentUid;
+    final batch = _db.batch();
+
+    batch.update(
+      _db.doc(FirestorePaths.portfolio(uid, portfolio.id)),
+      {...portfolio.toFirestore(), 'updatedAt': Timestamp.now()},
+    );
+
+    // Keep the context profile in sync so future AI calls use fresh info
+    batch.update(
+      _db.doc(FirestorePaths.userContextDoc(uid, portfolio.id)),
+      {
+        'companyName': portfolio.name,
+        'mission': portfolio.mission,
+        'brandColors': portfolio.brandColors,
+        'targetAudience': portfolio.targetAudience,
+        'lastUpdated': Timestamp.now(),
+      },
+    );
+
+    await batch.commit();
   }
 
   Future<void> deletePortfolio(String portfolioId) async {
     final uid = currentUid;
-    // Batch-delete all sub-documents
     final batch = _db.batch();
     final docs = await _db
         .collection(FirestorePaths.documentsCol(uid, portfolioId))
@@ -164,15 +175,24 @@ class FirebaseService {
         .doc(FirestorePaths.document(uid, asset.portfolioId, id))
         .set(doc.toFirestore());
 
-    // Update document list on the portfolio record
-    await _db
-        .doc(FirestorePaths.portfolio(uid, asset.portfolioId))
-        .update({
+    await _db.doc(FirestorePaths.portfolio(uid, asset.portfolioId)).update({
       'documentIds': FieldValue.arrayUnion([id]),
       'updatedAt': Timestamp.now(),
     });
 
     return doc;
+  }
+
+  /// Updates an existing document asset (e.g. after iterative refinement).
+  Future<DocumentAsset> updateDocumentAsset(DocumentAsset asset) async {
+    final uid = currentUid;
+    await _db
+        .doc(FirestorePaths.document(uid, asset.portfolioId, asset.id))
+        .update({
+      ...asset.toFirestore(),
+      'updatedAt': Timestamp.now(),
+    });
+    return asset.copyWith(updatedAt: DateTime.now());
   }
 
   Future<void> deleteDocumentAsset(DocumentAsset asset) async {
@@ -181,7 +201,6 @@ class FirebaseService {
         .doc(FirestorePaths.document(uid, asset.portfolioId, asset.id))
         .delete();
 
-    // Remove from Storage if graphical
     if (asset.isGraphical && asset.storageUrl != null) {
       try {
         await _storage.refFromURL(asset.storageUrl!).delete();
@@ -212,23 +231,22 @@ class FirebaseService {
   Future<void> updateContext(UserContext ctx) async {
     await _db
         .doc(FirestorePaths.userContextDoc(currentUid, ctx.portfolioId))
-        .set(ctx.copyWith(lastUpdated: DateTime.now()).toFirestore(),
-        SetOptions(merge: true));
+        .set(
+      ctx.copyWith(lastUpdated: DateTime.now()).toFirestore(),
+      SetOptions(merge: true),
+    );
   }
 
   Future<void> appendRecentDocument(
       String portfolioId, String docTitle) async {
     final uid = currentUid;
-    await _db
-        .doc(FirestorePaths.userContextDoc(uid, portfolioId))
-        .update({
+    await _db.doc(FirestorePaths.userContextDoc(uid, portfolioId)).update({
       'recentDocumentTitles': FieldValue.arrayUnion([docTitle]),
       'lastUpdated': Timestamp.now(),
     });
   }
 
   // ── Storage ───────────────────────────────────────────────────────────────
-  /// Uploads a local file to Firebase Storage and returns its download URL.
   Future<String> uploadAsset({
     required File file,
     required String storagePath,

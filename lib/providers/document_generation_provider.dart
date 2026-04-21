@@ -19,7 +19,14 @@ StreamProvider.family.autoDispose<List<DocumentAsset>, String>(
 );
 
 // ── Generation State ──────────────────────────────────────────────────────────
-enum GenerationPhase { idle, fetchingContext, generating, converting, saving, cancelled }
+enum GenerationPhase {
+  idle,
+  fetchingContext,
+  generating,
+  converting,
+  saving,
+  cancelled,
+}
 
 class GenerationState {
   const GenerationState({
@@ -32,7 +39,11 @@ class GenerationState {
   final DocumentAsset? result;
   final Object? error;
 
-  bool get isLoading => phase != GenerationPhase.idle && phase != GenerationPhase.cancelled && error == null && result == null;
+  bool get isLoading =>
+      phase != GenerationPhase.idle &&
+          phase != GenerationPhase.cancelled &&
+          error == null &&
+          result == null;
   bool get hasError => error != null;
   bool get hasResult => result != null;
   bool get isCancelled => phase == GenerationPhase.cancelled;
@@ -47,14 +58,9 @@ class GenerationState {
         result: result ?? this.result,
         error: error ?? this.error,
       );
-
-  @override
-  String toString() => 'GenerationState(phase: $phase)';
 }
 
-class DocumentGenerationNotifier
-    extends Notifier<GenerationState> {
-  
+class DocumentGenerationNotifier extends Notifier<GenerationState> {
   DocumentGenerationNotifier(this._portfolioId);
   final String _portfolioId;
   bool _isCancelled = false;
@@ -85,12 +91,10 @@ class DocumentGenerationNotifier
     _isCancelled = false;
 
     try {
-      // 1. Fetch RAG context
       state = const GenerationState(phase: GenerationPhase.fetchingContext);
       final context = await fb.fetchContext(_portfolioId);
       _checkCancelled();
 
-      // 2. Generate content
       state = const GenerationState(phase: GenerationPhase.generating);
 
       if (pipeline == AssetPipeline.structural) {
@@ -125,6 +129,53 @@ class DocumentGenerationNotifier
     }
   }
 
+  // ── Iterative Refinement ─────────────────────────────────────────────────
+  Future<DocumentAsset?> refineDocument({
+    required DocumentAsset existingAsset,
+    required String refinementPrompt,
+  }) async {
+    if (!existingAsset.isStructural || existingAsset.htmlContent == null) {
+      state = GenerationState(
+          error: Exception('Refinement is only supported for structural documents.'));
+      return null;
+    }
+
+    final fb = FirebaseService.instance;
+    final gemini = GeminiRagService.instance;
+    _isCancelled = false;
+
+    try {
+      state = const GenerationState(phase: GenerationPhase.fetchingContext);
+      final context = await fb.fetchContext(existingAsset.portfolioId);
+      _checkCancelled();
+
+      state = const GenerationState(phase: GenerationPhase.generating);
+      final html = await gemini.refineStructuralDocument(
+        existingHtml: existingAsset.htmlContent!,
+        refinementPrompt: refinementPrompt,
+        documentType: existingAsset.type,
+        context: context,
+      );
+      _checkCancelled();
+
+      state = const GenerationState(phase: GenerationPhase.saving);
+      final updated = existingAsset.copyWith(
+        htmlContent: html,
+        updatedAt: DateTime.now(),
+        isCached: false,
+      );
+      final saved = await fb.updateDocumentAsset(updated);
+      _checkCancelled();
+
+      state = GenerationState(phase: GenerationPhase.idle, result: saved);
+      return saved;
+    } catch (e) {
+      if (_isCancelled) return null;
+      state = GenerationState(error: e);
+      return null;
+    }
+  }
+
   Future<DocumentAsset> _generateStructural({
     required String uid,
     required String portfolioId,
@@ -136,7 +187,6 @@ class DocumentGenerationNotifier
     required FirebaseService fb,
     required GeminiRagService gemini,
   }) async {
-    // 1. Generate HTML (The high-fidelity design phase)
     final html = await gemini.generateStructuralDocument(
       userPrompt: prompt,
       documentType: type,
@@ -145,9 +195,8 @@ class DocumentGenerationNotifier
     _checkCancelled();
 
     final docId = uuid.v4();
-
-    // 2. Save to Firestore (Skipping immediate PDF conversion to prevent hangs)
     state = const GenerationState(phase: GenerationPhase.saving);
+
     final asset = DocumentAsset(
       id: docId,
       portfolioId: portfolioId,
@@ -157,20 +206,17 @@ class DocumentGenerationNotifier
       pipeline: AssetPipeline.structural,
       htmlContent: html,
       prompt: prompt,
-      isCached: false, // PDF will be generated on-demand in the viewer
+      isCached: false,
       createdAt: DateTime.now(),
     );
 
     final saved = await fb.saveDocumentAsset(asset);
     _checkCancelled();
-    
+
     await fb.appendRecentDocument(portfolioId, title);
     _checkCancelled();
 
-    state = GenerationState(
-      phase: GenerationPhase.idle,
-      result: saved,
-    );
+    state = GenerationState(phase: GenerationPhase.idle, result: saved);
     return saved;
   }
 
@@ -185,7 +231,6 @@ class DocumentGenerationNotifier
     required FirebaseService fb,
     required GeminiRagService gemini,
   }) async {
-    // 2. Generate Image Bytes
     final bytes = await gemini.generateImage(
       userPrompt: prompt,
       context: context,
@@ -195,14 +240,14 @@ class DocumentGenerationNotifier
     final docId = uuid.v4();
     final cache = LocalCacheService.instance;
 
-    // 3. Cache locally first
     state = const GenerationState(phase: GenerationPhase.converting);
-    final localFile = await cache.cacheImageBytes(bytes, uid, portfolioId, docId);
+    final localFile =
+    await cache.cacheImageBytes(bytes, uid, portfolioId, docId);
     _checkCancelled();
 
-    // 4. Upload to Storage
     state = const GenerationState(phase: GenerationPhase.saving);
-    final storagePath = 'users/$uid/portfolios/$portfolioId/images/$docId.png';
+    final storagePath =
+        'users/$uid/portfolios/$portfolioId/images/$docId.png';
     final downloadUrl = await fb.uploadAsset(
       file: localFile,
       storagePath: storagePath,
@@ -226,7 +271,7 @@ class DocumentGenerationNotifier
 
     final saved = await fb.saveDocumentAsset(asset);
     _checkCancelled();
-    
+
     state = GenerationState(phase: GenerationPhase.idle, result: saved);
     return saved;
   }
@@ -234,8 +279,7 @@ class DocumentGenerationNotifier
   void reset() => state = const GenerationState();
 }
 
-// In Riverpod 3.0, the family factory takes (ref, arg)
 final documentGenerationProvider = NotifierProvider.family<
     DocumentGenerationNotifier, GenerationState, String>(
-  (ref, arg) => DocumentGenerationNotifier(arg),
+  DocumentGenerationNotifier.new,
 );

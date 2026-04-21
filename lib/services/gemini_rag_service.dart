@@ -10,13 +10,15 @@ import '../models/user_context.dart';
 class GeminiRagService {
   GeminiRagService._();
   static final GeminiRagService instance = GeminiRagService._();
-  
+
   static final _apiKey = Env.geminiApiKey;
 
-  static const _geminiUrl = 'https://generativelanguage.googleapis.com/v1alpha/models/gemini-3.1-pro-preview:generateContent';
-  static const _imagenUrl = 'https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict';
+  static const _geminiUrl =
+      'https://generativelanguage.googleapis.com/v1alpha/models/gemini-3.1-pro-preview:generateContent';
+  static const _imagenUrl =
+      'https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict';
 
-  // ── Structural Document Generation (Gemini 3.1 Pro Preview) ────────────────
+  // ── Structural Document Generation ────────────────────────────────────────
   Future<String> generateStructuralDocument({
     required String userPrompt,
     required DocumentType documentType,
@@ -27,36 +29,53 @@ class GeminiRagService {
       documentType: documentType,
       context: context,
     );
-
-    final payload = {
-      'contents': [
-        {
-          'parts': [{'text': augmented}]
-        }
-      ],
-      'generationConfig': {
-        'temperature': 0.5, // Lower temperature for more stable HTML structure
-        'maxOutputTokens': 8192,
-      }
-    };
-
-    final response = await _post(_geminiUrl, payload);
-    
-    try {
-      final text = response['candidates'][0]['content']['parts'][0]['text'] as String;
-      return _stripMarkdownFences(text);
-    } catch (e) {
-      debugPrint('[Gemini] Error parsing structural response: $e');
-      throw Exception('Failed to parse Gemini response');
-    }
+    debugPrint('[Gemini] Structural prompt length: ${augmented.length}');
+    return _callTextModel(augmented);
   }
 
-  // ── Graphical Asset Generation (Imagen 4.0) ────────────────────────────────
+  // ── Iterative Refinement ─────────────────────────────────────────────────
+  /// Takes the existing HTML and a natural-language refinement request.
+  /// Returns updated HTML with the changes applied.
+  Future<String> refineStructuralDocument({
+    required String existingHtml,
+    required String refinementPrompt,
+    required DocumentType documentType,
+    required UserContext context,
+  }) async {
+    final prompt = '''
+You are an expert business document designer. A user wants to refine an existing document.
+
+BUSINESS CONTEXT:
+- Company: ${context.companyName}
+- Mission: ${context.mission}
+- Brand Colors: ${context.brandColors.join(', ')}
+
+DOCUMENT TYPE: ${documentType.name}
+
+REFINEMENT REQUEST: "$refinementPrompt"
+
+EXISTING DOCUMENT HTML:
+$existingHtml
+
+INSTRUCTIONS:
+1. Apply the refinement request to the HTML document above.
+2. Keep all unchanged sections exactly as they are — only modify what was asked.
+3. Maintain the same visual design, layout, and inline CSS style.
+4. Return ONLY the complete updated HTML starting with <!DOCTYPE html>.
+5. Do NOT wrap the output in markdown code fences.
+6. AVOID 'display: grid' — use Flexbox or tables for layout.
+''';
+
+    debugPrint('[Gemini] Refinement prompt length: ${prompt.length}');
+    return _callTextModel(prompt);
+  }
+
+  // ── Graphical Asset Generation (Imagen 4.0) ───────────────────────────────
   Future<Uint8List> generateImage({
     required String userPrompt,
     required UserContext context,
   }) async {
-    final promptInstruction = '''
+    final instruction = '''
 Refine the following user request into a highly detailed, professional prompt for Imagen 4.0.
 Output ONLY the refined prompt.
 
@@ -68,7 +87,7 @@ CONTEXT:
 USER REQUEST: $userPrompt
 ''';
 
-    final refinedPrompt = await _refinePromptWithGemini(promptInstruction);
+    final refinedPrompt = await _refinePromptWithGemini(instruction);
     debugPrint('[Imagen] Refined Prompt: $refinedPrompt');
 
     final payload = {
@@ -84,21 +103,50 @@ USER REQUEST: $userPrompt
     final response = await _post(_imagenUrl, payload);
 
     try {
-      final base64String = response['predictions'][0]['bytesBase64Encoded'] as String;
+      final base64String =
+      response['predictions'][0]['bytesBase64Encoded'] as String;
       return base64Decode(base64String);
     } catch (e) {
       debugPrint('[Imagen] Error parsing prediction: $e');
-      throw Exception('Image generation failed: Invalid response from Imagen API');
+      throw Exception(
+          'Image generation failed: Invalid response from Imagen API');
     }
   }
 
-  // ── Helper: Manual POST for specific endpoints/versions ───────────────────
-  Future<Map<String, dynamic>> _post(String url, Map<String, dynamic> body) async {
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  Future<String> _callTextModel(String prompt) async {
+    final payload = {
+      'contents': [
+        {
+          'parts': [
+            {'text': prompt}
+          ]
+        }
+      ],
+      'generationConfig': {
+        'temperature': 0.4,
+        'maxOutputTokens': 8192,
+      }
+    };
+
+    final response = await _post(_geminiUrl, payload);
+
+    try {
+      final text = response['candidates'][0]['content']['parts'][0]['text']
+      as String;
+      return _stripMarkdownFences(text);
+    } catch (e) {
+      debugPrint('[Gemini] Error parsing response: $e');
+      throw Exception('Failed to parse Gemini response');
+    }
+  }
+
+  Future<Map<String, dynamic>> _post(
+      String url, Map<String, dynamic> body) async {
     final client = HttpClient();
     try {
       final uri = Uri.parse('$url?key=$_apiKey');
       final request = await client.postUrl(uri);
-      
       request.headers.set('Content-Type', 'application/json');
       request.add(utf8.encode(jsonEncode(body)));
 
@@ -120,7 +168,9 @@ USER REQUEST: $userPrompt
     final payload = {
       'contents': [
         {
-          'parts': [{'text': instruction}]
+          'parts': [
+            {'text': instruction}
+          ]
         }
       ]
     };
@@ -140,18 +190,20 @@ BUSINESS CONTEXT:
 - Company: ${context.companyName}
 - Mission: ${context.mission}
 - Colors: ${context.brandColors.join(', ')}
+- Recent documents: ${context.recentDocumentTitles.take(3).join(', ')}
 
 DOCUMENT TYPE: ${documentType.name}
 USER REQUEST: $userPrompt
 
-TECHNICAL REQUIREMENTS FOR PDF RENDERING:
+TECHNICAL REQUIREMENTS:
 1. Output ONLY raw HTML with 100% inline CSS.
-2. IMPORTANT: Use Flexbox or Standard HTML Tables for layout. AVOID 'display: grid' as it causes rendering hangs in mobile PDF engines.
-3. Keep the design aesthetically pleasing, minimal, and premium. Use ample white space.
-4. Avoid complex CSS filters, blurs, or heavy box-shadows.
-5. Use professional typography (serif for headers, sans-serif for body).
-6. Ensure all content is within A4 bounds.
+2. Use Flexbox or Standard HTML Tables for layout. NEVER use 'display: grid'.
+3. Design: clean, minimal, premium. Ample white space.
+4. Avoid CSS filters, blurs, or heavy box-shadows.
+5. Professional typography (serif headers, sans-serif body).
+6. All content within A4 bounds (max-width: 794px).
 7. Return only the HTML starting with <!DOCTYPE html>.
+8. Do NOT wrap the output in markdown code fences.
 ''';
   }
 

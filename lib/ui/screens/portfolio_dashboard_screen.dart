@@ -21,7 +21,13 @@ class PortfolioDashboardScreen extends ConsumerWidget {
         title: const Text('BizDocx'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.settings_outlined, size: 20),
+            tooltip: 'Settings',
+            onPressed: () => context.go('/settings'),
+          ),
+          IconButton(
             icon: const Icon(Icons.logout_rounded, size: 20),
+            tooltip: 'Sign out',
             onPressed: () async {
               await FirebaseService.instance.signOut();
             },
@@ -30,11 +36,13 @@ class PortfolioDashboardScreen extends ConsumerWidget {
       ),
       body: portfoliosAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) =>
-            Center(child: Text('Error: $e', style: TextStyle(color: AppColors.error))),
+        error: (e, _) => Center(
+            child: Text('Error: $e',
+                style: const TextStyle(color: AppColors.error))),
         data: (portfolios) => portfolios.isEmpty
-            ? _EmptyState(onCreateTap: () => _showCreateSheet(context, ref))
-            : _PortfolioGrid(portfolios: portfolios),
+            ? _EmptyState(
+            onCreateTap: () => _showCreateSheet(context, ref))
+            : _PortfolioList(portfolios: portfolios),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateSheet(context, ref),
@@ -59,8 +67,8 @@ class PortfolioDashboardScreen extends ConsumerWidget {
   }
 }
 
-class _PortfolioGrid extends StatelessWidget {
-  const _PortfolioGrid({required this.portfolios});
+class _PortfolioList extends StatelessWidget {
+  const _PortfolioList({required this.portfolios});
   final List<BusinessPortfolio> portfolios;
 
   @override
@@ -108,7 +116,7 @@ class _EmptyState extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
-              'Create a portfolio to start generating AI-powered documents for your business.',
+              'Create a portfolio to start generating AI-powered documents.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),

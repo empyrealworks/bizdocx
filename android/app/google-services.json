@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "776742749745",
+    "project_id": "bizdocx-app",
+    "storage_bucket": "bizdocx-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:776742749745:android:59c2e48401f35859613710",
+        "android_client_info": {
+          "package_name": "com.empyrealworks.bizdocx"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "776742749745-08dos1v3uk0th6e36komovsgk2hq3uqc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.empyrealworks.bizdocx",
+            "certificate_hash": "ca9a37dfd13804c999a594b2de18a2f09ac6d23d"
+          }
+        },
+        {
+          "client_id": "776742749745-f2mc16ds25bg94qc87v061bgsvg33k48.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA9oAn0WfxnS-9JBxugQnemzQ9vkA2h4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "776742749745-f2mc16ds25bg94qc87v061bgsvg33k48.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "776742749745-85c8p46cjt7l7mnllthpbpp9nivtab03.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.empyrealworks.bizdocx"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

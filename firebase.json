@@ -1,0 +1,34 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "bizdocx-app",
+          "appId": "1:776742749745:android:59c2e48401f35859613710",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "bizdocx-app",
+          "configurations": {
+            "android": "1:776742749745:android:59c2e48401f35859613710",
+            "ios": "1:776742749745:ios:fca3038204701e65613710",
+            "macos": "1:776742749745:ios:fca3038204701e65613710",
+            "web": "1:776742749745:web:ef6707a2a1ef1cb3613710",
+            "windows": "1:776742749745:web:b092e2531a725e97613710"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

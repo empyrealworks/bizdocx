@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper: Is the user signed in?
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Helper: Does the path belong to the user?
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/portfolios/{portfolioId}/{assetType}/{fileName} {
+
+      // Allow read/write if the user owns the path
+      allow read: if isOwner(userId);
+
+      allow write: if isOwner(userId)
+        // Limit file size to 10MB per asset for MVP
+        && request.resource.size < 10 * 1024 * 1024
+        // Enforce content types based on folder
+        && (
+          (assetType == 'logos' && request.resource.contentType.matches('image/.*')) ||
+          (assetType == 'images' && request.resource.contentType.matches('image/.*')) ||
+          (assetType == 'assets' && request.resource.contentType.matches('application/pdf|image/.*')) ||
+          (assetType == 'uploads' && request.resource.contentType.matches('image/.*|application/pdf|text/plain'))
+        );
+    }
+  }
+}

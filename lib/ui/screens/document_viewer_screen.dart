@@ -1,9 +1,8 @@
-import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -12,6 +11,7 @@ import '../../models/document_asset.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/document_generation_provider.dart';
 import '../../providers/offline_file_provider.dart';
+import '../sheets/version_history_sheet.dart';
 import '../widgets/generation_state_overlay.dart';
 
 class DocumentViewerScreen extends ConsumerStatefulWidget {
@@ -73,19 +73,46 @@ class _DocumentViewerScreenState
     );
 
     if (refined != null && mounted) {
-      setState(() {
-        _webReady = false;
-        _currentAsset = refined;
-      });
-      _webCtrl?.loadHtmlString(refined.htmlContent!);
+      _applyUpdatedAsset(refined);
     }
+  }
+
+  /// Central method to apply an updated or restored asset to the viewer.
+  void _applyUpdatedAsset(DocumentAsset asset) {
+    // Invalidate cached PDF so the next export re-renders fresh content
+    final user = ref.read(currentUserProvider);
+    if (user != null) {
+      HtmlToPdfPipeline.instance.invalidate(
+          user.uid, asset.portfolioId, asset.id);
+    }
+    setState(() {
+      _webReady = false;
+      _currentAsset = asset;
+    });
+    if (asset.htmlContent != null) {
+      _webCtrl?.loadHtmlString(asset.htmlContent!);
+    }
+  }
+
+  // ── Version History ─────────────────────────────────────────────────────────
+  void _showHistory() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => VersionHistorySheet(
+        asset: _currentAsset,
+        onVersionRestored: (restored) {
+          _applyUpdatedAsset(restored);
+        },
+      ),
+    );
   }
 
   // ── Export ──────────────────────────────────────────────────────────────────
   Future<void> _export() async {
     final user = ref.read(currentUserProvider);
     if (user == null) return;
-
     final asset = _currentAsset;
 
     if (asset.isStructural && asset.htmlContent != null) {
@@ -101,23 +128,21 @@ class _DocumentViewerScreenState
           filename: '${asset.title}.pdf',
         );
       } catch (e) {
-        // Fallback: share as HTML file
-        final tempDir = Directory.systemTemp;
-        final htmlFile =
-        File('${tempDir.path}/${asset.title.replaceAll(' ', '_')}.html');
-        await htmlFile.writeAsString(asset.htmlContent!);
-        await Share.shareXFiles(
-          [XFile(htmlFile.path)],
-          text: asset.title,
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Export failed: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ));
+        }
       }
     } else if (asset.isGraphical) {
       final fileAsync = ref.read(offlineFileProvider(asset));
       fileAsync.whenData((file) async {
         if (file != null) {
-          await Share.shareXFiles(
-            [XFile(file.path)],
-            text: asset.title,
+          await Printing.sharePdf(
+            bytes: await file.readAsBytes(),
+            filename: '${asset.title}.png',
           );
         }
       });
@@ -129,18 +154,26 @@ class _DocumentViewerScreenState
     final asset = _currentAsset;
     final genState =
     ref.watch(documentGenerationProvider(asset.portfolioId));
-    final isRefining = genState.isLoading;
+    final isWorking = genState.isLoading;
 
     return Stack(
       children: [
         Scaffold(
           appBar: AppBar(
-            title: Text(asset.title,
-                maxLines: 1, overflow: TextOverflow.ellipsis),
+            title:
+            Text(asset.title, maxLines: 1, overflow: TextOverflow.ellipsis),
             leading: BackButton(
               onPressed: () => context.go('/portfolio/${asset.portfolioId}'),
             ),
             actions: [
+              // History (structural only)
+              if (asset.isStructural)
+                IconButton(
+                  icon: const Icon(Icons.history_rounded, size: 22),
+                  tooltip: 'Version history',
+                  onPressed: isWorking ? null : _showHistory,
+                ),
+              // Refine toggle (structural only)
               if (asset.isStructural)
                 IconButton(
                   icon: AnimatedSwitcher(
@@ -154,13 +187,15 @@ class _DocumentViewerScreenState
                     ),
                   ),
                   tooltip: 'Refine document',
-                  onPressed: () => setState(
+                  onPressed: isWorking
+                      ? null
+                      : () => setState(
                           () => _refineBarVisible = !_refineBarVisible),
                 ),
               IconButton(
                 icon: const Icon(Icons.ios_share_rounded),
                 tooltip: 'Export',
-                onPressed: isRefining ? null : _export,
+                onPressed: isWorking ? null : _export,
               ),
             ],
           ),
@@ -169,20 +204,22 @@ class _DocumentViewerScreenState
               Expanded(
                 child: asset.isStructural
                     ? _StructuralViewer(
-                    controller: _webCtrl!, isReady: _webReady)
+                  controller: _webCtrl!,
+                  isReady: _webReady,
+                )
                     : _GraphicalViewer(asset: asset),
               ),
               if (asset.isStructural && _refineBarVisible)
                 _RefinementBar(
                   controller: _refineCtrl,
-                  onSubmit: isRefining ? null : _submitRefinement,
-                  isLoading: isRefining,
+                  onSubmit: isWorking ? null : _submitRefinement,
+                  isLoading: isWorking,
                 ),
             ],
           ),
           bottomNavigationBar: _DocInfoBar(asset: asset),
         ),
-        if (isRefining)
+        if (isWorking)
           GenerationStateOverlay(
             phase: genState.phase,
             onCancel: () => ref
@@ -201,7 +238,7 @@ class _DocumentViewerScreenState
   }
 }
 
-// ── Refinement Bar ───────────────────────────────────────────────────────────
+// ── Refinement Bar ────────────────────────────────────────────────────────────
 
 class _RefinementBar extends StatelessWidget {
   const _RefinementBar({
@@ -234,7 +271,7 @@ class _RefinementBar extends StatelessWidget {
               style: const TextStyle(fontSize: 14),
               decoration: const InputDecoration(
                 hintText:
-                'Describe a change… e.g. "Change the due date to June 30" or "Add a 10% VAT line"',
+                'Describe a change… e.g. "Change due date to 30 June" or "Add 10% VAT line"',
                 contentPadding:
                 EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               ),
@@ -250,14 +287,15 @@ class _RefinementBar extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: onSubmit != null ? AppColors.white : AppColors.graphite,
+                color: onSubmit != null
+                    ? AppColors.white
+                    : AppColors.graphite,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 Icons.send_rounded,
                 size: 18,
-                color:
-                onSubmit != null ? AppColors.black : AppColors.muted,
+                color: onSubmit != null ? AppColors.black : AppColors.muted,
               ),
             ),
           ),
@@ -267,7 +305,7 @@ class _RefinementBar extends StatelessWidget {
   }
 }
 
-// ── Viewers ──────────────────────────────────────────────────────────────────
+// ── Viewers ───────────────────────────────────────────────────────────────────
 
 class _StructuralViewer extends StatelessWidget {
   const _StructuralViewer({required this.controller, required this.isReady});
@@ -279,8 +317,7 @@ class _StructuralViewer extends StatelessWidget {
     return Stack(
       children: [
         Container(
-            color: Colors.white,
-            child: WebViewWidget(controller: controller)),
+            color: Colors.white, child: WebViewWidget(controller: controller)),
         if (!isReady)
           Container(
             color: AppColors.surface,
@@ -307,15 +344,14 @@ class _GraphicalViewer extends ConsumerWidget {
       data: (file) {
         if (file != null) {
           return Center(
-            child: InteractiveViewer(
-                child: Image.file(file, fit: BoxFit.contain)),
-          );
+              child: InteractiveViewer(
+                  child: Image.file(file, fit: BoxFit.contain)));
         }
         if (asset.storageUrl != null) {
           return Center(
-            child: InteractiveViewer(
-                child: Image.network(asset.storageUrl!, fit: BoxFit.contain)),
-          );
+              child: InteractiveViewer(
+                  child: Image.network(asset.storageUrl!,
+                      fit: BoxFit.contain)));
         }
         return const Center(
           child: Text('No preview available.',
@@ -326,7 +362,7 @@ class _GraphicalViewer extends ConsumerWidget {
   }
 }
 
-// ── Info Bar ─────────────────────────────────────────────────────────────────
+// ── Info Bar ──────────────────────────────────────────────────────────────────
 
 class _DocInfoBar extends StatelessWidget {
   const _DocInfoBar({required this.asset});
@@ -348,22 +384,20 @@ class _DocInfoBar extends StatelessWidget {
           _Chip(asset.pipeline.name),
           if (updated != null) ...[
             const SizedBox(width: 8),
-            _Chip('edited ${_formatDate(updated)}'),
+            _Chip('edited ${_fmt(updated)}'),
           ],
           const Spacer(),
-          Text(
-            _formatDate(asset.createdAt),
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
+          Text(_fmt(asset.createdAt),
+              style: Theme.of(context).textTheme.labelSmall),
         ],
       ),
     );
   }
 
-  String _formatDate(DateTime dt) {
+  String _fmt(DateTime dt) {
     const m = [
-      'Jan','Feb','Mar','Apr','May','Jun',
-      'Jul','Aug','Sep','Oct','Nov','Dec'
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
     return '${dt.day} ${m[dt.month - 1]}';
   }
@@ -388,7 +422,7 @@ class _Chip extends StatelessWidget {
   }
 }
 
-// ── Error Banner ─────────────────────────────────────────────────────────────
+// ── Error Banner ──────────────────────────────────────────────────────────────
 
 class _ErrorBanner extends StatelessWidget {
   const _ErrorBanner({required this.error, required this.onDismiss});
@@ -415,7 +449,7 @@ class _ErrorBanner extends StatelessWidget {
                 const Icon(Icons.error_outline,
                     color: AppColors.error, size: 36),
                 const SizedBox(height: 16),
-                Text('Refinement Failed',
+                Text('Operation Failed',
                     style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
                 Text(error,

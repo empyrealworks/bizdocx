@@ -25,6 +25,7 @@ enum GenerationPhase {
   generating,
   converting,
   saving,
+  savingVersion,
   cancelled,
 }
 
@@ -77,7 +78,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     if (_isCancelled) throw Exception('Operation cancelled by user');
   }
 
-  // ── Main generation entry-point ───────────────────────────────────────────
+  // ── Initial Generation ────────────────────────────────────────────────────
   Future<DocumentAsset?> generate({
     required String prompt,
     required DocumentType type,
@@ -129,53 +130,6 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     }
   }
 
-  // ── Iterative Refinement ─────────────────────────────────────────────────
-  Future<DocumentAsset?> refineDocument({
-    required DocumentAsset existingAsset,
-    required String refinementPrompt,
-  }) async {
-    if (!existingAsset.isStructural || existingAsset.htmlContent == null) {
-      state = GenerationState(
-          error: Exception('Refinement is only supported for structural documents.'));
-      return null;
-    }
-
-    final fb = FirebaseService.instance;
-    final gemini = GeminiRagService.instance;
-    _isCancelled = false;
-
-    try {
-      state = const GenerationState(phase: GenerationPhase.fetchingContext);
-      final context = await fb.fetchContext(existingAsset.portfolioId);
-      _checkCancelled();
-
-      state = const GenerationState(phase: GenerationPhase.generating);
-      final html = await gemini.refineStructuralDocument(
-        existingHtml: existingAsset.htmlContent!,
-        refinementPrompt: refinementPrompt,
-        documentType: existingAsset.type,
-        context: context,
-      );
-      _checkCancelled();
-
-      state = const GenerationState(phase: GenerationPhase.saving);
-      final updated = existingAsset.copyWith(
-        htmlContent: html,
-        updatedAt: DateTime.now(),
-        isCached: false,
-      );
-      final saved = await fb.updateDocumentAsset(updated);
-      _checkCancelled();
-
-      state = GenerationState(phase: GenerationPhase.idle, result: saved);
-      return saved;
-    } catch (e) {
-      if (_isCancelled) return null;
-      state = GenerationState(error: e);
-      return null;
-    }
-  }
-
   Future<DocumentAsset> _generateStructural({
     required String uid,
     required String portfolioId,
@@ -211,6 +165,16 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     );
 
     final saved = await fb.saveDocumentAsset(asset);
+    _checkCancelled();
+
+    // Save initial version (v1 = original generation)
+    state = const GenerationState(phase: GenerationPhase.savingVersion);
+    await fb.saveDocumentVersion(
+      asset: saved,
+      versionNumber: 1,
+      refinementPrompt: null, // original generation has no refinement prompt
+      label: 'Original',
+    );
     _checkCancelled();
 
     await fb.appendRecentDocument(portfolioId, title);
@@ -274,6 +238,72 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
 
     state = GenerationState(phase: GenerationPhase.idle, result: saved);
     return saved;
+  }
+
+  // ── Iterative Refinement ─────────────────────────────────────────────────
+  Future<DocumentAsset?> refineDocument({
+    required DocumentAsset existingAsset,
+    required String refinementPrompt,
+  }) async {
+    if (!existingAsset.isStructural || existingAsset.htmlContent == null) {
+      state = GenerationState(
+          error: Exception(
+              'Refinement is only supported for structural documents.'));
+      return null;
+    }
+
+    final fb = FirebaseService.instance;
+    final gemini = GeminiRagService.instance;
+    _isCancelled = false;
+
+    try {
+      // 1. Fetch context
+      state = const GenerationState(phase: GenerationPhase.fetchingContext);
+      final context = await fb.fetchContext(existingAsset.portfolioId);
+      _checkCancelled();
+
+      // 2. Generate refined HTML
+      state = const GenerationState(phase: GenerationPhase.generating);
+      final newHtml = await gemini.refineStructuralDocument(
+        existingHtml: existingAsset.htmlContent!,
+        refinementPrompt: refinementPrompt,
+        documentType: existingAsset.type,
+        context: context,
+      );
+      _checkCancelled();
+
+      // 3. Save a version of the NEW result BEFORE updating the live doc.
+      //    This means versions are "what it looked like after this change".
+      state = const GenerationState(phase: GenerationPhase.savingVersion);
+      final nextVersion =
+      await fb.getNextVersionNumber(
+          existingAsset.portfolioId, existingAsset.id);
+      final updated = existingAsset.copyWith(
+        htmlContent: newHtml,
+        updatedAt: DateTime.now(),
+        isCached: false,
+      );
+
+      // 4. Persist to Firestore
+      state = const GenerationState(phase: GenerationPhase.saving);
+      final saved = await fb.updateDocumentAsset(updated);
+      _checkCancelled();
+
+      // 5. Save the version snapshot
+      await fb.saveDocumentVersion(
+        asset: saved,
+        versionNumber: nextVersion,
+        refinementPrompt: refinementPrompt,
+      );
+      _checkCancelled();
+
+      state = GenerationState(phase: GenerationPhase.idle, result: saved);
+      return saved;
+    } catch (e) {
+      if (_isCancelled) return null;
+      state = GenerationState(error: e);
+      return null;
+    }
   }
 
   void reset() => state = const GenerationState();

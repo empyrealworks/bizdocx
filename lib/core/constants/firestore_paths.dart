@@ -14,6 +14,12 @@ abstract final class FirestorePaths {
   static String document(String uid, String pid, String did) =>
       'users/$uid/portfolios/$pid/documents/$did';
 
+  /// Version snapshots for a single document.
+  static String versionsCol(String uid, String pid, String did) =>
+      'users/$uid/portfolios/$pid/documents/$did/versions';
+  static String version(String uid, String pid, String did, String vid) =>
+      'users/$uid/portfolios/$pid/documents/$did/versions/$vid';
+
   static String userContextDoc(String uid, String pid) =>
       'users/$uid/portfolios/$pid/context/profile';
 
@@ -24,9 +30,10 @@ abstract final class FirestorePaths {
       'users/$uid/portfolios/$pid/assets/$filename';
   static String uploadedAssetPath(String uid, String pid, String filename) =>
       'users/$uid/portfolios/$pid/uploads/$filename';
+  static String imagePath(String uid, String pid, String filename) =>
+      'users/$uid/portfolios/$pid/images/$filename';
 
   // ── Local Cache ──────────────────────────────────────────
-  // Resolved at runtime via LocalCacheService using path_provider
   static String localDocumentDir(String uid, String pid) =>
       '$uid/$pid/documents';
   static String localLogoDir(String uid, String pid) => '$uid/$pid/logos';

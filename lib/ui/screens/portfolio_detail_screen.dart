@@ -7,6 +7,7 @@ import '../../models/business_portfolio.dart';
 import '../../models/document_asset.dart';
 import '../../providers/document_generation_provider.dart';
 import '../../providers/portfolio_provider.dart';
+import '../sheets/asset_manager_sheet.dart';
 import '../sheets/edit_portfolio_sheet.dart';
 import '../widgets/document_tile.dart';
 
@@ -46,17 +47,31 @@ class _PortfolioDetailScreenState
     );
   }
 
+  void _showAssetSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) =>
+          AssetManagerSheet(portfolioId: widget.portfolioId),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Derive portfolio directly from the stream by ID
     final portfoliosAsync = ref.watch(portfolioListProvider);
-    final portfolio = portfoliosAsync.whenData((list) {
+    final portfolio = portfoliosAsync
+        .whenData((list) {
       try {
         return list.firstWhere((p) => p.id == widget.portfolioId);
       } catch (_) {
         return null;
       }
-    }).value;
+    })
+        .value;
 
     final documentsAsync =
     ref.watch(documentListProvider(widget.portfolioId));
@@ -66,12 +81,18 @@ class _PortfolioDetailScreenState
         title: Text(portfolio?.name ?? 'Portfolio'),
         leading: BackButton(onPressed: () => context.go('/')),
         actions: [
-          if (portfolio != null)
+          if (portfolio != null) ...[
+            IconButton(
+              icon: const Icon(Icons.photo_library_outlined, size: 20),
+              tooltip: 'Manage assets & logo',
+              onPressed: () => _showAssetSheet(context),
+            ),
             IconButton(
               icon: const Icon(Icons.edit_outlined, size: 20),
               tooltip: 'Edit business info',
               onPressed: () => _showEditSheet(context, portfolio),
             ),
+          ],
         ],
       ),
       body: Column(
@@ -106,8 +127,9 @@ class _PortfolioDetailScreenState
                   }),
                 )
                     : _DocumentList(
-                    docs: filtered,
-                    portfolioId: widget.portfolioId);
+                  docs: filtered,
+                  portfolioId: widget.portfolioId,
+                );
               },
             ),
           ),
@@ -125,7 +147,7 @@ class _PortfolioDetailScreenState
   }
 }
 
-// ── Filter Bar ───────────────────────────────────────────────────────────────
+// ── Filter Bar ────────────────────────────────────────────────────────────────
 
 class _FilterBar extends StatelessWidget {
   const _FilterBar({
@@ -148,10 +170,7 @@ class _FilterBar extends StatelessWidget {
     DocumentType.contract,
     DocumentType.other,
   ];
-  static const _graphicalTypes = [
-    DocumentType.logo,
-    DocumentType.icon,
-  ];
+  static const _graphicalTypes = [DocumentType.logo, DocumentType.icon];
 
   List<DocumentType> get _relevantTypes {
     if (pipelineFilter == AssetPipeline.structural) return _structuralTypes;
@@ -167,7 +186,6 @@ class _FilterBar extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Row 1: Pipeline
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -203,7 +221,6 @@ class _FilterBar extends StatelessWidget {
               ],
             ),
           ),
-          // Row 2: Document types
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
@@ -303,7 +320,7 @@ class _Chip extends StatelessWidget {
   }
 }
 
-// ── Context Banner ───────────────────────────────────────────────────────────
+// ── Context Banner ────────────────────────────────────────────────────────────
 
 class _ContextBanner extends StatelessWidget {
   const _ContextBanner({required this.portfolio});
@@ -312,8 +329,8 @@ class _ContextBanner extends StatelessWidget {
   static Color? _parseFirst(List<String> colors) {
     if (colors.isEmpty) return null;
     try {
-      final clean = colors.first.replaceAll('#', '').trim();
-      return Color(int.parse('FF$clean', radix: 16));
+      return Color(int.parse('FF${colors.first.replaceAll('#', '')}',
+          radix: 16));
     } catch (_) {
       return null;
     }
@@ -322,6 +339,9 @@ class _ContextBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = _parseFirst(portfolio.brandColors);
+    final hasLogo = portfolio.logoStoragePath != null &&
+        portfolio.logoStoragePath!.isNotEmpty;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       padding: const EdgeInsets.all(16),
@@ -329,21 +349,34 @@ class _ContextBanner extends StatelessWidget {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: accent?.withOpacity(0.3) ?? AppColors.border,
+          color: accent?.withValues(alpha: 0.3) ?? AppColors.border,
         ),
       ),
       child: Row(
         children: [
+          // Logo or icon
           Container(
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: accent?.withOpacity(0.15) ?? AppColors.graphite,
+              color: accent?.withValues(alpha: 0.15) ?? AppColors.graphite,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                  color: accent?.withOpacity(0.3) ?? AppColors.border),
+                  color: accent?.withValues(alpha: 0.3) ?? AppColors.border),
             ),
-            child: Icon(Icons.business_center_outlined,
+            child: hasLogo && portfolio.logoStoragePath != null
+                ? ClipRRect(
+              borderRadius: BorderRadius.circular(9),
+              child: Image.network(
+                portfolio.logoStoragePath!,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => Icon(
+                    Icons.business_center_outlined,
+                    color: accent ?? AppColors.silver,
+                    size: 22),
+              ),
+            )
+                : Icon(Icons.business_center_outlined,
                 color: accent ?? AppColors.silver, size: 22),
           ),
           const SizedBox(width: 14),
@@ -371,7 +404,7 @@ class _ContextBanner extends StatelessWidget {
   }
 }
 
-// ── Document List ────────────────────────────────────────────────────────────
+// ── Document List ─────────────────────────────────────────────────────────────
 
 class _DocumentList extends ConsumerWidget {
   const _DocumentList({required this.docs, required this.portfolioId});
@@ -398,7 +431,7 @@ class _DocumentList extends ConsumerWidget {
   }
 }
 
-// ── Empty State ──────────────────────────────────────────────────────────────
+// ── Empty State ───────────────────────────────────────────────────────────────
 
 class _EmptyDocState extends StatelessWidget {
   const _EmptyDocState({

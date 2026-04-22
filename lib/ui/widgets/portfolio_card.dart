@@ -43,15 +43,15 @@ class PortfolioCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            primary.withOpacity(0.18),
-            secondary!.withOpacity(0.06),
+            primary.withValues(alpha: 0.18),
+            secondary!.withValues(alpha: 0.06),
             AppColors.card,
           ],
           stops: const [0.0, 0.35, 1.0],
         ),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: primary.withOpacity(0.35),
+          color: primary.withValues(alpha: 0.35),
           width: 1.2,
         ),
       );
@@ -79,7 +79,7 @@ class PortfolioCard extends StatelessWidget {
                   padding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.25),
+                    color: Colors.black.withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -94,7 +94,7 @@ class PortfolioCard extends StatelessWidget {
                 Icon(Icons.arrow_forward_ios,
                     size: 14,
                     color: primary != null
-                        ? primary.withOpacity(0.7)
+                        ? primary.withValues(alpha: 0.7)
                         : AppColors.muted),
               ],
             ),
@@ -117,7 +117,7 @@ class PortfolioCard extends StatelessWidget {
                   Icon(Icons.trending_up_rounded,
                       size: 12,
                       color: primary != null
-                          ? primary.withOpacity(0.8)
+                          ? primary.withValues(alpha: 0.8)
                           : AppColors.muted),
                   const SizedBox(width: 4),
                   Expanded(
@@ -127,7 +127,7 @@ class PortfolioCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                           color: primary != null
-                              ? primary.withOpacity(0.8)
+                              ? primary.withValues(alpha: 0.8)
                               : AppColors.muted,
                           fontSize: 12,
                           letterSpacing: 0.2),
@@ -179,7 +179,7 @@ class _ColorDots extends StatelessWidget {
           decoration: BoxDecoration(
             color: _parse(hex),
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withOpacity(0.15)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
           ),
         );
       }).toList(),

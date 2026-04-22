@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
 import '../env/env.dart';
@@ -14,7 +13,7 @@ class GeminiRagService {
   static final _apiKey = Env.geminiApiKey;
 
   static const _geminiUrl =
-      'https://generativelanguage.googleapis.com/v1alpha/models/gemini-3.1-pro-preview:generateContent';
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent';
   static const _imagenUrl =
       'https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict';
 
@@ -24,32 +23,32 @@ class GeminiRagService {
     required DocumentType documentType,
     required UserContext context,
   }) async {
-    final augmented = _buildStructuralPrompt(
+    final prompt = _buildStructuralPrompt(
       userPrompt: userPrompt,
       documentType: documentType,
       context: context,
     );
-    debugPrint('[Gemini] Structural prompt length: ${augmented.length}');
-    return _callTextModel(augmented);
+    debugPrint('[Gemini] Structural prompt length: ${prompt.length}');
+    return _callTextModel(prompt);
   }
 
   // ── Iterative Refinement ─────────────────────────────────────────────────
-  /// Takes the existing HTML and a natural-language refinement request.
-  /// Returns updated HTML with the changes applied.
   Future<String> refineStructuralDocument({
     required String existingHtml,
     required String refinementPrompt,
     required DocumentType documentType,
     required UserContext context,
   }) async {
+    final logoInstruction = _logoInstruction(context, documentType);
+
     final prompt = '''
-You are an expert business document designer. A user wants to refine an existing document.
+You are an expert business document designer. A user wants to refine an existing HTML document.
 
 BUSINESS CONTEXT:
 - Company: ${context.companyName}
 - Mission: ${context.mission}
 - Brand Colors: ${context.brandColors.join(', ')}
-
+${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
 DOCUMENT TYPE: ${documentType.name}
 
 REFINEMENT REQUEST: "$refinementPrompt"
@@ -58,12 +57,12 @@ EXISTING DOCUMENT HTML:
 $existingHtml
 
 INSTRUCTIONS:
-1. Apply the refinement request to the HTML document above.
-2. Keep all unchanged sections exactly as they are — only modify what was asked.
-3. Maintain the same visual design, layout, and inline CSS style.
-4. Return ONLY the complete updated HTML starting with <!DOCTYPE html>.
-5. Do NOT wrap the output in markdown code fences.
-6. AVOID 'display: grid' — use Flexbox or tables for layout.
+1. Apply ONLY the changes described in the refinement request.
+2. Keep all unchanged sections exactly as they are.
+3. Maintain the same visual design, layout, and inline CSS.
+4. AVOID 'display: grid' — use Flexbox or HTML tables for layout.
+5. Return ONLY the complete updated HTML starting with <!DOCTYPE html>.
+6. Do NOT wrap the output in markdown code fences.
 ''';
 
     debugPrint('[Gemini] Refinement prompt length: ${prompt.length}');
@@ -77,7 +76,7 @@ INSTRUCTIONS:
   }) async {
     final instruction = '''
 Refine the following user request into a highly detailed, professional prompt for Imagen 4.0.
-Output ONLY the refined prompt.
+Output ONLY the refined prompt, no preamble.
 
 CONTEXT:
 - Business: ${context.companyName}
@@ -94,26 +93,22 @@ USER REQUEST: $userPrompt
       'instances': [
         {'prompt': refinedPrompt}
       ],
-      'parameters': {
-        'sampleCount': 1,
-        'aspectRatio': '1:1',
-      }
+      'parameters': {'sampleCount': 1, 'aspectRatio': '1:1'},
     };
 
     final response = await _post(_imagenUrl, payload);
-
     try {
       final base64String =
       response['predictions'][0]['bytesBase64Encoded'] as String;
       return base64Decode(base64String);
     } catch (e) {
       debugPrint('[Imagen] Error parsing prediction: $e');
-      throw Exception(
-          'Image generation failed: Invalid response from Imagen API');
+      throw Exception('Image generation failed: invalid Imagen response.');
     }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
   Future<String> _callTextModel(String prompt) async {
     final payload = {
       'contents': [
@@ -126,14 +121,13 @@ USER REQUEST: $userPrompt
       'generationConfig': {
         'temperature': 0.4,
         'maxOutputTokens': 8192,
-      }
+      },
     };
 
     final response = await _post(_geminiUrl, payload);
-
     try {
-      final text = response['candidates'][0]['content']['parts'][0]['text']
-      as String;
+      final text =
+      response['candidates'][0]['content']['parts'][0]['text'] as String;
       return _stripMarkdownFences(text);
     } catch (e) {
       debugPrint('[Gemini] Error parsing response: $e');
@@ -154,7 +148,7 @@ USER REQUEST: $userPrompt
       final responseBody = await response.transform(utf8.decoder).join();
 
       if (response.statusCode != 200) {
-        debugPrint('[AI Service] HTTP ${response.statusCode}: $responseBody');
+        debugPrint('[AI] HTTP ${response.statusCode}: $responseBody');
         throw Exception('AI Service Error: ${response.statusCode}');
       }
 
@@ -178,29 +172,57 @@ USER REQUEST: $userPrompt
     return response['candidates'][0]['content']['parts'][0]['text'] as String;
   }
 
+  /// Document types where embedding the logo makes sense.
+  static const _logoRelevantTypes = {
+    DocumentType.invoice,
+    DocumentType.proposal,
+    DocumentType.letterhead,
+    DocumentType.businessCard,
+    DocumentType.contract,
+    DocumentType.other,
+  };
+
+  /// Returns a non-empty instruction string if a logo is available and relevant.
+  String _logoInstruction(UserContext context, DocumentType type) {
+    if (context.logoStorageUrl == null ||
+        context.logoStorageUrl!.isEmpty ||
+        !_logoRelevantTypes.contains(type)) {
+      return '';
+    }
+    return '''
+COMPANY LOGO:
+The company logo is available at the following URL. You MUST embed it in the document.
+Use this exact img tag and place it prominently at the top (e.g. top-left of the header):
+<img src="${context.logoStorageUrl}" alt="${context.companyName} Logo" style="max-height:70px; max-width:180px; object-fit:contain; display:block;" />
+Do NOT use a placeholder — use the real URL above.''';
+  }
+
   String _buildStructuralPrompt({
     required String userPrompt,
     required DocumentType documentType,
     required UserContext context,
   }) {
+    final logoInstruction = _logoInstruction(context, documentType);
+
     return '''
 You are an expert business designer and PDF-optimized HTML engineer.
 
 BUSINESS CONTEXT:
 - Company: ${context.companyName}
 - Mission: ${context.mission}
-- Colors: ${context.brandColors.join(', ')}
+- Brand Colors: ${context.brandColors.join(', ')}
+- Target Audience: ${context.targetAudience}
 - Recent documents: ${context.recentDocumentTitles.take(3).join(', ')}
-
+${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
 DOCUMENT TYPE: ${documentType.name}
 USER REQUEST: $userPrompt
 
 TECHNICAL REQUIREMENTS:
 1. Output ONLY raw HTML with 100% inline CSS.
-2. Use Flexbox or Standard HTML Tables for layout. NEVER use 'display: grid'.
+2. Use Flexbox or HTML Tables for layout. NEVER use 'display: grid'.
 3. Design: clean, minimal, premium. Ample white space.
 4. Avoid CSS filters, blurs, or heavy box-shadows.
-5. Professional typography (serif headers, sans-serif body).
+5. Professional typography: serif headers, sans-serif body.
 6. All content within A4 bounds (max-width: 794px).
 7. Return only the HTML starting with <!DOCTYPE html>.
 8. Do NOT wrap the output in markdown code fences.

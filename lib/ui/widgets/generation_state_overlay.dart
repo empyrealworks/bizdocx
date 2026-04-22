@@ -4,14 +4,15 @@ import '../../core/constants/app_colors.dart';
 import '../../providers/document_generation_provider.dart';
 
 class GenerationStateOverlay extends StatelessWidget {
-  const GenerationStateOverlay({super.key, required this.phase, required this.onCancel});
+  const GenerationStateOverlay(
+      {super.key, required this.phase, required this.onCancel});
   final GenerationPhase phase;
   final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black.withOpacity(0.85),
+      color: Colors.black.withValues(alpha: 0.85),
       child: Center(
         child: Container(
           margin: const EdgeInsets.all(40),
@@ -70,11 +71,18 @@ class GenerationStateOverlay extends StatelessWidget {
 
   String get _title {
     switch (phase) {
-      case GenerationPhase.fetchingContext: return 'Loading Context';
-      case GenerationPhase.generating: return 'Generating Document';
-      case GenerationPhase.converting: return 'Rendering PDF';
-      case GenerationPhase.saving: return 'Saving to Cloud';
-      default: return 'Working…';
+      case GenerationPhase.fetchingContext:
+        return 'Loading Context';
+      case GenerationPhase.generating:
+        return 'Generating Document';
+      case GenerationPhase.converting:
+        return 'Rendering Asset';
+      case GenerationPhase.saving:
+        return 'Saving to Cloud';
+      case GenerationPhase.savingVersion:
+        return 'Saving Version';
+      default:
+        return 'Working…';
     }
   }
 
@@ -85,10 +93,13 @@ class GenerationStateOverlay extends StatelessWidget {
       case GenerationPhase.generating:
         return 'Gemini is crafting your document using your business profile.';
       case GenerationPhase.converting:
-        return 'Converting HTML to a print-ready PDF.';
+        return 'Processing and caching the generated asset.';
       case GenerationPhase.saving:
         return 'Saving to Firestore and caching locally.';
-      default: return '';
+      case GenerationPhase.savingVersion:
+        return 'Archiving this version in your history.';
+      default:
+        return '';
     }
   }
 }
@@ -97,11 +108,12 @@ class _PhaseIndicator extends StatelessWidget {
   const _PhaseIndicator({required this.phase});
   final GenerationPhase phase;
 
+  // These are the visible progress phases in order
   static const _phases = [
     GenerationPhase.fetchingContext,
     GenerationPhase.generating,
-    GenerationPhase.converting,
     GenerationPhase.saving,
+    GenerationPhase.savingVersion,
   ];
 
   @override
@@ -111,10 +123,7 @@ class _PhaseIndicator extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(_phases.length * 2 - 1, (i) {
         if (i.isOdd) {
-          return Container(
-            width: 20, height: 1,
-            color: AppColors.border,
-          );
+          return Container(width: 20, height: 1, color: AppColors.border);
         }
         final phaseIndex = i ~/ 2;
         final done = phaseIndex < current;

@@ -24,7 +24,7 @@ dependencies:
 
   # ── Document Pipeline ───────────────────────────────────
   pdf: ^3.10.8
-  printing: ^5.12.0
+  printing: ^5.14.3
   webview_flutter: ^4.8.0
 
   # ── Data Models ─────────────────────────────────────────
@@ -46,6 +46,7 @@ dependencies:
   google_sign_in: ^7.2.0
   firebase_app_check: ^0.4.3
   share_plus: ^12.0.2
+  htmltopdfwidgets: ^2.1.1
 
 dev_dependencies:
   flutter_test:

@@ -26,6 +26,7 @@ enum GenerationPhase {
   converting,
   saving,
   savingVersion,
+  deleting,
   cancelled,
 }
 
@@ -303,6 +304,17 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       if (_isCancelled) return null;
       state = GenerationState(error: e);
       return null;
+    }
+  }
+
+  // ── Deletion ─────────────────────────────────────────────────────────────
+  Future<void> deleteDocument(DocumentAsset asset) async {
+    try {
+      state = const GenerationState(phase: GenerationPhase.deleting);
+      await FirebaseService.instance.deleteDocumentAsset(asset);
+      state = const GenerationState(phase: GenerationPhase.idle);
+    } catch (e) {
+      state = GenerationState(error: e);
     }
   }
 

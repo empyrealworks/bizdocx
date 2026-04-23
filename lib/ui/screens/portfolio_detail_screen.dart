@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/extensions/context_extensions.dart';
 import '../../models/business_portfolio.dart';
 import '../../models/document_asset.dart';
 import '../../providers/document_generation_provider.dart';
@@ -23,58 +23,26 @@ class PortfolioDetailScreen extends ConsumerStatefulWidget {
 class _PortfolioDetailScreenState
     extends ConsumerState<PortfolioDetailScreen> {
   AssetPipeline? _pipelineFilter;
-  DocumentType? _typeFilter;
+  DocumentType?  _typeFilter;
 
-  List<DocumentAsset> _applyFilters(List<DocumentAsset> docs) {
-    return docs.where((d) {
-      if (_pipelineFilter != null && d.pipeline != _pipelineFilter) {
-        return false;
-      }
-      if (_typeFilter != null && d.type != _typeFilter) return false;
-      return true;
-    }).toList();
-  }
-
-  void _showEditSheet(BuildContext context, BusinessPortfolio portfolio) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.card,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => EditPortfolioSheet(portfolio: portfolio),
-    );
-  }
-
-  void _showAssetSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.card,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) =>
-          AssetManagerSheet(portfolioId: widget.portfolioId),
-    );
-  }
+  List<DocumentAsset> _applyFilters(List<DocumentAsset> docs) => docs
+      .where((d) =>
+  (_pipelineFilter == null || d.pipeline == _pipelineFilter) &&
+      (_typeFilter == null || d.type == _typeFilter))
+      .toList();
 
   @override
   Widget build(BuildContext context) {
-    final portfoliosAsync = ref.watch(portfolioListProvider);
-    final portfolio = portfoliosAsync
+    final c = context.colors;
+
+    final portfolio = ref.watch(portfolioListProvider)
         .whenData((list) {
-      try {
-        return list.firstWhere((p) => p.id == widget.portfolioId);
-      } catch (_) {
-        return null;
-      }
+      try { return list.firstWhere((p) => p.id == widget.portfolioId); }
+      catch (_) { return null; }
     })
         .value;
 
-    final documentsAsync =
-    ref.watch(documentListProvider(widget.portfolioId));
+    final documentsAsync = ref.watch(documentListProvider(widget.portfolioId));
 
     return Scaffold(
       appBar: AppBar(
@@ -83,20 +51,23 @@ class _PortfolioDetailScreenState
         actions: [
           if (portfolio != null) ...[
             IconButton(
-              icon: const Icon(Icons.photo_library_outlined, size: 20),
+              icon: Icon(Icons.photo_library_outlined,
+                  size: 20, color: c.iconPrimary),
               tooltip: 'Manage assets & logo',
-              onPressed: () => _showAssetSheet(context),
+              onPressed: () => _showSheet(
+                  context, AssetManagerSheet(portfolioId: widget.portfolioId)),
             ),
             IconButton(
-              icon: const Icon(Icons.edit_outlined, size: 20),
+              icon: Icon(Icons.edit_outlined,
+                  size: 20, color: c.iconPrimary),
               tooltip: 'Edit business info',
-              onPressed: () => _showEditSheet(context, portfolio),
+              onPressed: () =>
+                  _showSheet(context, EditPortfolioSheet(portfolio: portfolio)),
             ),
           ],
         ],
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (portfolio != null) _ContextBanner(portfolio: portfolio),
           _FilterBar(
@@ -108,17 +79,16 @@ class _PortfolioDetailScreenState
           ),
           Expanded(
             child: documentsAsync.when(
-              loading: () =>
-              const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(
                 child: Text('$e',
-                    style: const TextStyle(color: AppColors.error)),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.error)),
               ),
               data: (docs) {
                 final filtered = _applyFilters(docs);
                 return filtered.isEmpty
                     ? _EmptyDocState(
-                  portfolioId: widget.portfolioId,
                   hasFilters: _pipelineFilter != null ||
                       _typeFilter != null,
                   onClearFilters: () => setState(() {
@@ -138,11 +108,19 @@ class _PortfolioDetailScreenState
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () =>
             context.go('/portfolio/${widget.portfolioId}/generate'),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.black,
+        backgroundColor: context.colors.filledButtonBg,
+        foregroundColor: context.colors.filledButtonFg,
         icon: const Icon(Icons.auto_awesome, size: 18),
         label: const Text('Generate'),
       ),
+    );
+  }
+
+  void _showSheet(BuildContext context, Widget sheet) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => sheet,
     );
   }
 }
@@ -158,108 +136,89 @@ class _FilterBar extends StatelessWidget {
   });
 
   final AssetPipeline? pipelineFilter;
-  final DocumentType? typeFilter;
+  final DocumentType?  typeFilter;
   final ValueChanged<AssetPipeline?> onPipelineChanged;
-  final ValueChanged<DocumentType?> onTypeChanged;
+  final ValueChanged<DocumentType?>  onTypeChanged;
 
-  static const _structuralTypes = [
-    DocumentType.invoice,
-    DocumentType.proposal,
-    DocumentType.letterhead,
-    DocumentType.businessCard,
-    DocumentType.contract,
-    DocumentType.other,
+  static const _structural = [
+    DocumentType.invoice, DocumentType.proposal, DocumentType.letterhead,
+    DocumentType.businessCard, DocumentType.contract, DocumentType.other,
   ];
-  static const _graphicalTypes = [DocumentType.logo, DocumentType.icon];
+  static const _graphical = [DocumentType.logo, DocumentType.icon];
 
   List<DocumentType> get _relevantTypes {
-    if (pipelineFilter == AssetPipeline.structural) return _structuralTypes;
-    if (pipelineFilter == AssetPipeline.graphical) return _graphicalTypes;
-    return [..._structuralTypes, ..._graphicalTypes];
+    if (pipelineFilter == AssetPipeline.structural) return _structural;
+    if (pipelineFilter == AssetPipeline.graphical)  return _graphical;
+    return [..._structural, ..._graphical];
   }
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
+      decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: c.border))),
       child: Column(
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-            child: Row(
-              children: [
-                _Chip(
-                  label: 'All',
+            child: Row(children: [
+              _Chip(label: 'All',
                   active: pipelineFilter == null,
-                  onTap: () => onPipelineChanged(null),
-                ),
-                const SizedBox(width: 8),
-                _Chip(
+                  onTap: () => onPipelineChanged(null)),
+              const SizedBox(width: 8),
+              _Chip(
                   label: 'Structural',
                   icon: Icons.description_outlined,
                   active: pipelineFilter == AssetPipeline.structural,
                   onTap: () => onPipelineChanged(
-                    pipelineFilter == AssetPipeline.structural
-                        ? null
-                        : AssetPipeline.structural,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                _Chip(
+                      pipelineFilter == AssetPipeline.structural
+                          ? null : AssetPipeline.structural)),
+              const SizedBox(width: 8),
+              _Chip(
                   label: 'Graphical',
                   icon: Icons.auto_awesome_outlined,
                   active: pipelineFilter == AssetPipeline.graphical,
                   onTap: () => onPipelineChanged(
-                    pipelineFilter == AssetPipeline.graphical
-                        ? null
-                        : AssetPipeline.graphical,
-                  ),
-                ),
-              ],
-            ),
+                      pipelineFilter == AssetPipeline.graphical
+                          ? null : AssetPipeline.graphical)),
+            ]),
           ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-            child: Row(
-              children: [
-                _Chip(
-                  label: 'All types',
+            child: Row(children: [
+              _Chip(label: 'All types',
                   active: typeFilter == null,
                   onTap: () => onTypeChanged(null),
-                  small: true,
-                ),
-                ..._relevantTypes.map((t) => Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: _Chip(
-                    label: _typeLabel(t),
+                  small: true),
+              ..._relevantTypes.map((t) => Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: _Chip(
+                    label: _label(t),
                     active: typeFilter == t,
                     onTap: () =>
                         onTypeChanged(typeFilter == t ? null : t),
-                    small: true,
-                  ),
-                )),
-              ],
-            ),
+                    small: true),
+              )),
+            ]),
           ),
         ],
       ),
     );
   }
 
-  String _typeLabel(DocumentType t) {
+  String _label(DocumentType t) {
     switch (t) {
-      case DocumentType.invoice: return 'Invoice';
-      case DocumentType.proposal: return 'Proposal';
-      case DocumentType.letterhead: return 'Letterhead';
+      case DocumentType.invoice:      return 'Invoice';
+      case DocumentType.proposal:     return 'Proposal';
+      case DocumentType.letterhead:   return 'Letterhead';
       case DocumentType.businessCard: return 'Business Card';
-      case DocumentType.contract: return 'Contract';
-      case DocumentType.logo: return 'Logo';
-      case DocumentType.icon: return 'Icon';
-      case DocumentType.other: return 'Other';
+      case DocumentType.contract:     return 'Contract';
+      case DocumentType.logo:         return 'Logo';
+      case DocumentType.icon:         return 'Icon';
+      case DocumentType.other:        return 'Other';
     }
   }
 }
@@ -272,49 +231,37 @@ class _Chip extends StatelessWidget {
     this.icon,
     this.small = false,
   });
-
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-  final IconData? icon;
-  final bool small;
+  final String label; final bool active; final VoidCallback onTap;
+  final IconData? icon; final bool small;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: EdgeInsets.symmetric(
-          horizontal: small ? 10 : 12,
-          vertical: small ? 5 : 7,
-        ),
+            horizontal: small ? 10 : 12, vertical: small ? 5 : 7),
         decoration: BoxDecoration(
-          color: active ? AppColors.white : AppColors.graphite,
+          color: active ? c.filledButtonBg : c.chipFill,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: active ? AppColors.white : AppColors.border,
-          ),
+          border: Border.all(color: active ? c.filledButtonBg : c.border),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon,
-                  size: 12,
-                  color: active ? AppColors.black : AppColors.silver),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              label,
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          if (icon != null) ...[
+            Icon(icon,
+                size: 12,
+                color: active ? c.filledButtonFg : c.iconSecondary),
+            const SizedBox(width: 4),
+          ],
+          Text(label,
               style: TextStyle(
-                color: active ? AppColors.black : AppColors.silver,
+                color: active ? c.filledButtonFg : c.textBody,
                 fontSize: small ? 11 : 12,
                 fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
+              )),
+        ]),
       ),
     );
   }
@@ -326,80 +273,55 @@ class _ContextBanner extends StatelessWidget {
   const _ContextBanner({required this.portfolio});
   final BusinessPortfolio portfolio;
 
-  static Color? _parseFirst(List<String> colors) {
+  static Color? _primaryColor(List<String> colors) {
     if (colors.isEmpty) return null;
     try {
-      return Color(int.parse('FF${colors.first.replaceAll('#', '')}',
+      return Color(int.parse(
+          'FF${colors.first.replaceAll('#', '').trim()}',
           radix: 16));
-    } catch (_) {
-      return null;
-    }
+    } catch (_) { return null; }
   }
 
   @override
   Widget build(BuildContext context) {
-    final accent = _parseFirst(portfolio.brandColors);
-    final hasLogo = portfolio.logoStoragePath != null &&
-        portfolio.logoStoragePath!.isNotEmpty;
-
+    final c      = context.colors;
+    final accent = _primaryColor(portfolio.brandColors);
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: c.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: accent?.withValues(alpha: 0.3) ?? AppColors.border,
+            color: accent?.withValues(alpha: 0.3) ?? c.border),
+      ),
+      child: Row(children: [
+        Container(
+          width: 44, height: 44,
+          decoration: BoxDecoration(
+            color: accent?.withValues(alpha: 0.15) ?? c.chipFill,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+                color: accent?.withValues(alpha: 0.3) ?? c.border),
+          ),
+          child: Icon(Icons.business_center_outlined,
+              color: accent ?? c.iconSecondary, size: 22),
         ),
-      ),
-      child: Row(
-        children: [
-          // Logo or icon
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: accent?.withValues(alpha: 0.15) ?? AppColors.graphite,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                  color: accent?.withValues(alpha: 0.3) ?? AppColors.border),
-            ),
-            child: hasLogo && portfolio.logoStoragePath != null
-                ? ClipRRect(
-              borderRadius: BorderRadius.circular(9),
-              child: Image.network(
-                portfolio.logoStoragePath!,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => Icon(
-                    Icons.business_center_outlined,
-                    color: accent ?? AppColors.silver,
-                    size: 22),
-              ),
-            )
-                : Icon(Icons.business_center_outlined,
-                color: accent ?? AppColors.silver, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(portfolio.name,
-                    style: Theme.of(context).textTheme.titleLarge),
-                if (portfolio.description.isNotEmpty)
-                  Text(portfolio.description,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
-              ],
-            ),
-          ),
-          Text(
-            '${portfolio.documentIds.length} docs',
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
-        ],
-      ),
+        const SizedBox(width: 14),
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(portfolio.name,
+                style: Theme.of(context).textTheme.titleLarge),
+            if (portfolio.description.isNotEmpty)
+              Text(portfolio.description,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  maxLines: 1, overflow: TextOverflow.ellipsis),
+          ],
+        )),
+        Text('${portfolio.documentIds.length} docs',
+            style: Theme.of(context).textTheme.labelSmall),
+      ]),
     );
   }
 }
@@ -434,47 +356,37 @@ class _DocumentList extends ConsumerWidget {
 // ── Empty State ───────────────────────────────────────────────────────────────
 
 class _EmptyDocState extends StatelessWidget {
-  const _EmptyDocState({
-    required this.portfolioId,
-    required this.hasFilters,
-    required this.onClearFilters,
-  });
-  final String portfolioId;
+  const _EmptyDocState(
+      {required this.hasFilters, required this.onClearFilters});
   final bool hasFilters;
   final VoidCallback onClearFilters;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.description_outlined,
-                color: AppColors.muted, size: 48),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.description_outlined, color: c.textMuted, size: 48),
+          const SizedBox(height: 16),
+          Text(hasFilters ? 'No matching documents' : 'No documents yet',
+              style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Text(
+            hasFilters
+                ? 'Try clearing filters to see all documents.'
+                : 'Tap Generate to create your first AI document.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          if (hasFilters) ...[
             const SizedBox(height: 16),
-            Text(
-              hasFilters ? 'No matching documents' : 'No documents yet',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              hasFilters
-                  ? 'Try clearing the filters to see all documents.'
-                  : 'Tap Generate to create your first AI document.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            if (hasFilters) ...[
-              const SizedBox(height: 16),
-              OutlinedButton(
+            OutlinedButton(
                 onPressed: onClearFilters,
-                child: const Text('Clear Filters'),
-              ),
-            ],
+                child: const Text('Clear Filters')),
           ],
-        ),
+        ]),
       ),
     );
   }

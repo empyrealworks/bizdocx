@@ -2,26 +2,27 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:htmltopdfwidgets/htmltopdfwidgets.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 
 import '../../services/local_cache_service.dart';
 
 /// Converts Gemini-generated HTML to a PDF File.
 ///
-/// Uses [HTMLToPdf] from the printing package — the current supported
-/// approach as of printing ^5.x. This avoids the deprecated
-/// [Printing.convertHtml] that caused hangs on mobile.
+/// Uses [HTMLToPdf] from the printing / pdf packages.
 ///
-/// Required in pubspec.yaml:
-///   pdf: ^3.10.0
-///   printing: ^5.12.0
-///
-/// Required in ios/Podfile:
-///   target 'Runner' do
-///     use_frameworks!   ← add this line
+/// ⚠️  KEY DECISIONS:
+/// • `useNewEngine: false` — the new layout engine produces a single
+///   unbounded-height container widget that pw.MultiPage cannot paginate
+///   (throws "Widget height Infinity > page height"). The legacy engine
+///   returns a flat list of bounded widgets that MultiPage handles correctly.
+/// • Explicit [pw.MultiPage] margin — gives pw layout the correct available
+///   height so no widget can accidentally report infinite height.
+/// • Body CSS padding matches the MultiPage margin so content isn't doubled.
 class HtmlToPdfPipeline {
   HtmlToPdfPipeline._();
   static final HtmlToPdfPipeline instance = HtmlToPdfPipeline._();
+
+  // Page margin in PDF points (1pt ≈ 0.353mm; 40pt ≈ 14mm)
+  static const _marginPt = 40.0;
 
   final _cache = LocalCacheService.instance;
 
@@ -36,7 +37,6 @@ class HtmlToPdfPipeline {
 
     if (html.trim().isEmpty) throw Exception('Empty HTML content');
 
-    // Return cached PDF if already rendered
     final cached = await _cache.getCachedPdf(uid, pid, docId);
     if (cached != null) {
       debugPrint('[Pipeline] PDF cache hit');
@@ -46,31 +46,36 @@ class HtmlToPdfPipeline {
     final processedHtml = _prepareHtml(html);
 
     try {
-      // HTMLToPdf.convert() parses the HTML and returns a list of pw.Widget
-      // objects that can be composed into a pw.Document. This runs entirely
-      // in Dart — no WebView, no platform channel timeout risk.
-      final widgets = await HTMLToPdf().convert(processedHtml);
-
-      final pdf = pw.Document(
-        compress: true,
-        title: docId,
+      // HTMLToPdf is imported via the printing package's HTMLtoPDFWidgets:
+      //   import HTMLtoPDFWidgets
+      // Legacy engine returns one pw.Widget per top-level block element,
+      // each with a bounded height — exactly what pw.MultiPage needs.
+      final widgets = await HTMLToPdf().convert(
+        processedHtml,
+        useNewEngine: false,
       );
+
+      final pdf = pw.Document(compress: true);
 
       pdf.addPage(
         pw.MultiPage(
           pageFormat: format,
-          margin: pw.EdgeInsets.zero, // We control margins in the HTML/CSS
+          // Explicit margins so pw can compute available height correctly.
+          // The CSS body has no padding (we stripped it) to avoid doubling.
+          margin: const pw.EdgeInsets.all(_marginPt),
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          // Generous upper bound; MultiPage will never actually need 200 pages
+          // for a normal business document.
+          maxPages: 200,
           build: (context) => widgets,
         ),
       );
 
       final bytes = await pdf.save();
       final file = await _cache.cachePdfBytes(bytes, uid, pid, docId);
-
-      // Cache HTML for offline re-render
       await _cache.cacheHtml(html, uid, pid, docId);
 
-      debugPrint('[Pipeline] PDF saved (${bytes.length} bytes)');
+      debugPrint('[Pipeline] PDF saved — ${bytes.length} bytes');
       return file;
     } catch (e) {
       debugPrint('[Pipeline] Rendering error: $e');
@@ -78,8 +83,8 @@ class HtmlToPdfPipeline {
     }
   }
 
-  /// Deletes the cached PDF for a document so it is re-rendered on next export.
-  /// Call this after a refinement or restore.
+  /// Deletes the cached PDF so the next export re-renders fresh content.
+  /// Must be called after every refinement or version restore.
   Future<void> invalidate(String uid, String pid, String docId) async {
     final path = await _cache.pdfPath(uid, pid, docId);
     final file = File(path);
@@ -89,8 +94,14 @@ class HtmlToPdfPipeline {
     }
   }
 
-  /// Injects print-safe CSS into the HTML before conversion.
+  /// Injects print-safe CSS.
+  /// Note: NO body padding here — pw.MultiPage margin handles the whitespace.
   String _prepareHtml(String html) {
+    // 1. Remove HTML comments to prevent 'Unknown node type' assertions
+    // The regex matches <!-- followed by anything (including newlines) until -->
+    final commentRegex = RegExp(r'<!--[\s\S]*?-->');
+    String cleanedHtml = html.replaceAll(commentRegex, '');
+
     const injection = '''
 <style>
   * {
@@ -100,27 +111,33 @@ class HtmlToPdfPipeline {
   }
   html, body {
     margin: 0;
-    padding: 40px;
+    padding: 0;
     background: white !important;
-    font-family: -apple-system, Helvetica, Arial, sans-serif;
+    font-family: Helvetica, Arial, sans-serif;
     overflow: visible !important;
     height: auto !important;
+    max-height: none !important;
   }
-  img { max-width: 100%; height: auto; }
+  img { max-width: 100%; height: auto; display: block; }
+  table { border-collapse: collapse; width: 100%; }
   .page-break { page-break-before: always; }
-  * { visibility: visible !important; opacity: 1 !important; }
-  /* Suppress grid layout which HTMLToPdf does not support */
-  [style*="display: grid"] { display: block !important; }
-  [style*="display:grid"] { display: block !important; }
+  div, section, article, main, header, footer {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  [style*="display: grid"]  { display: block !important; }
+  [style*="display:grid"]   { display: block !important; }
 </style>
 ''';
 
-    if (html.contains('</head>')) {
-      return html.replaceFirst('</head>', '$injection</head>');
-    } else if (html.contains('<body')) {
-      return html.replaceFirst('<body', '<head>$injection</head><body');
+    // 2. Inject CSS into the cleaned HTML
+    if (cleanedHtml.contains('</head>')) {
+      return cleanedHtml.replaceFirst('</head>', '$injection</head>');
+    } else if (cleanedHtml.contains('<body')) {
+      return cleanedHtml.replaceFirst('<body', '<head>$injection</head><body');
     } else {
-      return '<html><head>$injection</head><body>$html</body></html>';
+      return '<html><head>$injection</head><body>$cleanedHtml</body></html>';
     }
   }
 }

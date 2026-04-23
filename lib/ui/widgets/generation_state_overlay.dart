@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/extensions/context_extensions.dart';
 import '../../providers/document_generation_provider.dart';
 
 class GenerationStateOverlay extends StatelessWidget {
@@ -11,33 +12,34 @@ class GenerationStateOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Container(
-      color: Colors.black.withValues(alpha: 0.85),
+      color: c.overlayBarrier,
       child: Center(
         child: Container(
           margin: const EdgeInsets.all(40),
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: c.card,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: c.border),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(
+              SizedBox(
                 width: 48,
                 height: 48,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.white,
+                  color: c.textPrimary,
                 ),
               ),
               const SizedBox(height: 24),
               Text(
                 _title,
-                style: const TextStyle(
-                  color: AppColors.white,
+                style: TextStyle(
+                  color: c.textPrimary,
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.3,
@@ -47,8 +49,7 @@ class GenerationStateOverlay extends StatelessWidget {
               Text(
                 _subtitle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: AppColors.muted, fontSize: 14, height: 1.4),
+                style: TextStyle(color: c.textMuted, fontSize: 14, height: 1.4),
               ),
               const SizedBox(height: 24),
               _PhaseIndicator(phase: phase),
@@ -56,8 +57,8 @@ class GenerationStateOverlay extends StatelessWidget {
               OutlinedButton(
                 onPressed: onCancel,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.silver,
-                  side: const BorderSide(color: AppColors.border),
+                  foregroundColor: c.textBody,
+                  side: BorderSide(color: c.border),
                   minimumSize: const Size(120, 40),
                 ),
                 child: const Text('Cancel'),
@@ -71,18 +72,12 @@ class GenerationStateOverlay extends StatelessWidget {
 
   String get _title {
     switch (phase) {
-      case GenerationPhase.fetchingContext:
-        return 'Loading Context';
-      case GenerationPhase.generating:
-        return 'Generating Document';
-      case GenerationPhase.converting:
-        return 'Rendering Asset';
-      case GenerationPhase.saving:
-        return 'Saving to Cloud';
-      case GenerationPhase.savingVersion:
-        return 'Saving Version';
-      default:
-        return 'Working…';
+      case GenerationPhase.fetchingContext: return 'Loading Context';
+      case GenerationPhase.generating:     return 'Generating Document';
+      case GenerationPhase.converting:     return 'Rendering Asset';
+      case GenerationPhase.saving:         return 'Saving to Cloud';
+      case GenerationPhase.savingVersion:  return 'Saving Version';
+      default:                             return 'Working…';
     }
   }
 
@@ -91,11 +86,11 @@ class GenerationStateOverlay extends StatelessWidget {
       case GenerationPhase.fetchingContext:
         return 'Retrieving your business context for personalisation.';
       case GenerationPhase.generating:
-        return 'Gemini is crafting your document using your business profile.';
+        return 'Crafting your document using your business profile.';
       case GenerationPhase.converting:
         return 'Processing and caching the generated asset.';
       case GenerationPhase.saving:
-        return 'Saving to Firestore and caching locally.';
+        return 'Saving to Cloud and caching locally.';
       case GenerationPhase.savingVersion:
         return 'Archiving this version in your history.';
       default:
@@ -108,7 +103,6 @@ class _PhaseIndicator extends StatelessWidget {
   const _PhaseIndicator({required this.phase});
   final GenerationPhase phase;
 
-  // These are the visible progress phases in order
   static const _phases = [
     GenerationPhase.fetchingContext,
     GenerationPhase.generating,
@@ -118,16 +112,17 @@ class _PhaseIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final current = _phases.indexOf(phase);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(_phases.length * 2 - 1, (i) {
         if (i.isOdd) {
-          return Container(width: 20, height: 1, color: AppColors.border);
+          return Container(width: 20, height: 1, color: c.border);
         }
-        final phaseIndex = i ~/ 2;
-        final done = phaseIndex < current;
-        final active = phaseIndex == current;
+        final idx = i ~/ 2;
+        final done   = idx < current;
+        final active = idx == current;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           width: 10,
@@ -137,10 +132,10 @@ class _PhaseIndicator extends StatelessWidget {
             color: done
                 ? AppColors.success
                 : active
-                ? AppColors.white
-                : AppColors.graphite,
+                ? c.textPrimary
+                : c.chipFill,
             border: Border.all(
-              color: active ? AppColors.white : AppColors.border,
+              color: active ? c.textPrimary : c.border,
             ),
           ),
         );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/extensions/context_extensions.dart';
 import '../../models/business_portfolio.dart';
 
 class PortfolioCard extends StatelessWidget {
@@ -13,28 +14,26 @@ class PortfolioCard extends StatelessWidget {
   final BusinessPortfolio portfolio;
   final VoidCallback onTap;
 
-  static Color _parseHex(String hex) {
+  static Color? _parseHex(String hex) {
     try {
       final clean = hex.replaceAll('#', '').trim();
-      if (clean.length == 6) {
-        return Color(int.parse('FF$clean', radix: 16));
-      }
-      if (clean.length == 8) {
-        return Color(int.parse(clean, radix: 16));
-      }
+      if (clean.length == 6) return Color(int.parse('FF$clean', radix: 16));
+      if (clean.length == 8) return Color(int.parse(clean, radix: 16));
     } catch (_) {}
-    return AppColors.silver;
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = portfolio.brandColors
-        .where((h) => h.isNotEmpty)
+    final c = context.colors;
+
+    final brandColors = portfolio.brandColors
         .map(_parseHex)
+        .whereType<Color>()
         .toList();
 
-    final primary = colors.isNotEmpty ? colors.first : null;
-    final secondary = colors.length > 1 ? colors[1] : primary;
+    final primary   = brandColors.isNotEmpty ? brandColors.first : null;
+    final secondary = brandColors.length > 1  ? brandColors[1]   : primary;
 
     final BoxDecoration decoration;
     if (primary != null) {
@@ -44,22 +43,19 @@ class PortfolioCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             primary.withValues(alpha: 0.18),
-            secondary!.withValues(alpha: 0.06),
-            AppColors.card,
+            secondary!.withValues(alpha: 0.07),
+            c.card,
           ],
           stops: const [0.0, 0.35, 1.0],
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: primary.withValues(alpha: 0.35),
-          width: 1.2,
-        ),
+        border: Border.all(color: primary.withValues(alpha: 0.35), width: 1.2),
       );
     } else {
       decoration = BoxDecoration(
-        color: AppColors.card,
+        color: c.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: c.border),
       );
     }
 
@@ -79,23 +75,24 @@ class PortfolioCard extends StatelessWidget {
                   padding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.25),
+                    color: Colors.black.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     '${portfolio.documentIds.length} docs',
-                    style: const TextStyle(
-                        color: AppColors.silver,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      color: c.textBody,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(Icons.arrow_forward_ios,
-                    size: 14,
-                    color: primary != null
-                        ? primary.withValues(alpha: 0.7)
-                        : AppColors.muted),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: primary?.withValues(alpha: 0.7) ?? c.textMuted,
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -116,9 +113,7 @@ class PortfolioCard extends StatelessWidget {
                 children: [
                   Icon(Icons.trending_up_rounded,
                       size: 12,
-                      color: primary != null
-                          ? primary.withValues(alpha: 0.8)
-                          : AppColors.muted),
+                      color: primary?.withValues(alpha: 0.8) ?? c.textMuted),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -126,11 +121,10 @@ class PortfolioCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          color: primary != null
-                              ? primary.withValues(alpha: 0.8)
-                              : AppColors.muted,
-                          fontSize: 12,
-                          letterSpacing: 0.2),
+                        color: primary?.withValues(alpha: 0.8) ?? c.textMuted,
+                        fontSize: 12,
+                        letterSpacing: 0.2,
+                      ),
                     ),
                   ),
                 ],
@@ -149,8 +143,7 @@ class _ColorDots extends StatelessWidget {
 
   static Color _parse(String hex) {
     try {
-      final clean = hex.replaceAll('#', '').trim();
-      return Color(int.parse('FF$clean', radix: 16));
+      return Color(int.parse('FF${hex.replaceAll('#', '').trim()}', radix: 16));
     } catch (_) {
       return AppColors.silver;
     }
@@ -158,16 +151,14 @@ class _ColorDots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     if (colors.isEmpty) {
       return Container(
         width: 32,
         height: 32,
-        decoration: const BoxDecoration(
-          color: AppColors.graphite,
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.business_center_outlined,
-            size: 16, color: AppColors.silver),
+        decoration: BoxDecoration(color: c.chipFill, shape: BoxShape.circle),
+        child: Icon(Icons.business_center_outlined,
+            size: 16, color: c.iconSecondary),
       );
     }
     return Row(
@@ -179,7 +170,7 @@ class _ColorDots extends StatelessWidget {
           decoration: BoxDecoration(
             color: _parse(hex),
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
           ),
         );
       }).toList(),

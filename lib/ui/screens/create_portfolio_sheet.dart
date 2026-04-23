@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/extensions/context_extensions.dart';
 import '../../providers/portfolio_provider.dart';
 
 class CreatePortfolioSheet extends ConsumerStatefulWidget {
@@ -12,13 +12,14 @@ class CreatePortfolioSheet extends ConsumerStatefulWidget {
       _CreatePortfolioSheetState();
 }
 
-class _CreatePortfolioSheetState extends ConsumerState<CreatePortfolioSheet> {
-  final _nameCtrl = TextEditingController();
-  final _descCtrl = TextEditingController();
-  final _missionCtrl = TextEditingController();
+class _CreatePortfolioSheetState
+    extends ConsumerState<CreatePortfolioSheet> {
+  final _nameCtrl     = TextEditingController();
+  final _descCtrl     = TextEditingController();
+  final _missionCtrl  = TextEditingController();
   final _audienceCtrl = TextEditingController();
-  final _colorCtrl = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final _colorCtrl    = TextEditingController();
+  final _formKey      = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -32,13 +33,13 @@ class _CreatePortfolioSheetState extends ConsumerState<CreatePortfolioSheet> {
 
   Future<void> _create() async {
     if (!_formKey.currentState!.validate()) return;
-    final notifier = ref.read(portfolioNotifierProvider.notifier);
     final colors = _colorCtrl.text
         .split(',')
         .map((s) => s.trim())
         .where((s) => s.isNotEmpty)
         .toList();
 
+    final notifier = ref.read(portfolioNotifierProvider.notifier);
     await notifier.create(
       name: _nameCtrl.text.trim(),
       description: _descCtrl.text.trim(),
@@ -52,8 +53,8 @@ class _CreatePortfolioSheetState extends ConsumerState<CreatePortfolioSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final c     = context.colors;
     final state = ref.watch(portfolioNotifierProvider);
-    final loading = state.isLoading;
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
     return Padding(
@@ -70,7 +71,7 @@ class _CreatePortfolioSheetState extends ConsumerState<CreatePortfolioSheet> {
                     style: Theme.of(context).textTheme.headlineMedium),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.close, color: AppColors.silver),
+                  icon: Icon(Icons.close, color: c.iconSecondary),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -88,12 +89,14 @@ class _CreatePortfolioSheetState extends ConsumerState<CreatePortfolioSheet> {
             _field(_colorCtrl, 'Brand Colors (comma-separated hex)'),
             const SizedBox(height: 24),
             FilledButton(
-              onPressed: loading ? null : _create,
-              child: loading
-                  ? const SizedBox(
-                  height: 20, width: 20,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2, color: AppColors.black))
+              onPressed: state.isLoading ? null : _create,
+              child: state.isLoading
+                  ? SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: c.filledButtonFg),
+              )
                   : const Text('Create Portfolio'),
             ),
           ],

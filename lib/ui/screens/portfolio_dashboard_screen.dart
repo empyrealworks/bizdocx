@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/extensions/context_extensions.dart';
 import '../../models/business_portfolio.dart';
 import '../../providers/portfolio_provider.dart';
 import '../../services/firebase_service.dart';
@@ -14,6 +14,7 @@ class PortfolioDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.colors;
     final portfoliosAsync = ref.watch(portfolioListProvider);
 
     return Scaffold(
@@ -21,33 +22,31 @@ class PortfolioDashboardScreen extends ConsumerWidget {
         title: const Text('BizDocx'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined, size: 20),
+            icon: Icon(Icons.settings_outlined, size: 20, color: c.iconPrimary),
             tooltip: 'Settings',
             onPressed: () => context.go('/settings'),
           ),
           IconButton(
-            icon: const Icon(Icons.logout_rounded, size: 20),
+            icon: Icon(Icons.logout_rounded, size: 20, color: c.iconPrimary),
             tooltip: 'Sign out',
-            onPressed: () async {
-              await FirebaseService.instance.signOut();
-            },
+            onPressed: FirebaseService.instance.signOut,
           ),
         ],
       ),
       body: portfoliosAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
-            child: Text('Error: $e',
-                style: const TextStyle(color: AppColors.error))),
+          child: Text('Error: $e',
+              style: TextStyle(color: Theme.of(context).colorScheme.error)),
+        ),
         data: (portfolios) => portfolios.isEmpty
-            ? _EmptyState(
-            onCreateTap: () => _showCreateSheet(context, ref))
+            ? _EmptyState(onCreateTap: () => _showCreateSheet(context, ref))
             : _PortfolioList(portfolios: portfolios),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateSheet(context, ref),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.black,
+        backgroundColor: c.filledButtonBg,
+        foregroundColor: c.filledButtonFg,
         icon: const Icon(Icons.add),
         label: const Text('New Business'),
       ),
@@ -58,10 +57,6 @@ class PortfolioDashboardScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.card,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (_) => const CreatePortfolioSheet(),
     );
   }
@@ -94,6 +89,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -104,12 +100,12 @@ class _EmptyState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: AppColors.graphite,
+                color: c.chipFill,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: c.border),
               ),
-              child: const Icon(Icons.business_center_outlined,
-                  color: AppColors.silver, size: 36),
+              child: Icon(Icons.business_center_outlined,
+                  color: c.iconSecondary, size: 36),
             ),
             const SizedBox(height: 24),
             Text('No businesses yet',

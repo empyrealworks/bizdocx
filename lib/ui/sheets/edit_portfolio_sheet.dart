@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/extensions/context_extensions.dart';
 import '../../models/business_portfolio.dart';
 import '../../providers/portfolio_provider.dart';
 
@@ -10,11 +10,12 @@ class EditPortfolioSheet extends ConsumerStatefulWidget {
   final BusinessPortfolio portfolio;
 
   @override
-  ConsumerState<EditPortfolioSheet> createState() => _EditPortfolioSheetState();
+  ConsumerState<EditPortfolioSheet> createState() =>
+      _EditPortfolioSheetState();
 }
 
 class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
-  final _formKey = GlobalKey<FormState>();
+  final _formKey      = GlobalKey<FormState>();
   late final TextEditingController _nameCtrl;
   late final TextEditingController _descCtrl;
   late final TextEditingController _missionCtrl;
@@ -25,11 +26,11 @@ class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
   void initState() {
     super.initState();
     final p = widget.portfolio;
-    _nameCtrl = TextEditingController(text: p.name);
-    _descCtrl = TextEditingController(text: p.description);
-    _missionCtrl = TextEditingController(text: p.mission);
+    _nameCtrl     = TextEditingController(text: p.name);
+    _descCtrl     = TextEditingController(text: p.description);
+    _missionCtrl  = TextEditingController(text: p.mission);
     _audienceCtrl = TextEditingController(text: p.targetAudience);
-    _colorCtrl = TextEditingController(text: p.brandColors.join(', '));
+    _colorCtrl    = TextEditingController(text: p.brandColors.join(', '));
   }
 
   @override
@@ -44,7 +45,6 @@ class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-
     final colors = _colorCtrl.text
         .split(',')
         .map((s) => s.trim())
@@ -59,16 +59,14 @@ class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
       brandColors: colors,
     );
 
-    final notifier = ref.read(portfolioNotifierProvider.notifier);
-    await notifier.updatePortfolio(updated);
-
+    await ref.read(portfolioNotifierProvider.notifier).updatePortfolio(updated);
     if (mounted) Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
+    final c     = context.colors;
     final state = ref.watch(portfolioNotifierProvider);
-    final loading = state.isLoading;
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
     return Padding(
@@ -86,68 +84,70 @@ class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
                       style: Theme.of(context).textTheme.headlineMedium),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.close, color: AppColors.silver),
+                    icon: Icon(Icons.close, color: c.iconSecondary),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
+              // Context tip
               Container(
                 padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.graphite,
+                  color: c.chipFill,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: c.border),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline,
-                        size: 14, color: AppColors.silver),
+                    Icon(Icons.info_outline, size: 14, color: c.iconSecondary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'More detail here = better AI-generated documents.',
-                        style: const TextStyle(
-                            color: AppColors.silver, fontSize: 12),
+                        style:
+                        TextStyle(color: c.textBody, fontSize: 12),
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 20),
-              _label('Business Name *'),
+              _label(context, 'Business Name *'),
               const SizedBox(height: 6),
               _field(_nameCtrl, 'e.g. Acme Ceramics Ltd',
                   validator: (v) => v!.isEmpty ? 'Required' : null),
               const SizedBox(height: 14),
-              _label('Short Description'),
+              _label(context, 'Short Description'),
               const SizedBox(height: 6),
-              _field(_descCtrl, 'e.g. Premium handcrafted ceramics for modern homes'),
+              _field(_descCtrl,
+                  'e.g. Premium handcrafted ceramics for modern homes'),
               const SizedBox(height: 14),
-              _label('Mission Statement'),
+              _label(context, 'Mission Statement'),
               const SizedBox(height: 6),
               _field(_missionCtrl,
                   'e.g. To bring artisan craftsmanship into everyday life',
                   maxLines: 3),
               const SizedBox(height: 14),
-              _label('Target Audience'),
+              _label(context, 'Target Audience'),
               const SizedBox(height: 6),
               _field(_audienceCtrl,
                   'e.g. Interior designers and home décor retailers'),
               const SizedBox(height: 14),
-              _label('Brand Colors (comma-separated hex)'),
+              _label(context, 'Brand Colors (comma-separated hex)'),
               const SizedBox(height: 6),
               _field(_colorCtrl, 'e.g. #2C3E50, #E74C3C, #ECF0F1'),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: loading ? null : _save,
-                child: loading
-                    ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.black))
+                onPressed: state.isLoading ? null : _save,
+                child: state.isLoading
+                    ? SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: c.filledButtonFg),
+                )
                     : const Text('Save Changes'),
               ),
             ],
@@ -157,13 +157,14 @@ class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
     );
   }
 
-  Widget _label(String text) => Text(
+  Widget _label(BuildContext context, String text) => Text(
     text.toUpperCase(),
-    style: const TextStyle(
-        color: AppColors.muted,
-        fontSize: 10,
-        letterSpacing: 0.8,
-        fontWeight: FontWeight.w500),
+    style: TextStyle(
+      color: context.colors.textMuted,
+      fontSize: 10,
+      letterSpacing: 0.8,
+      fontWeight: FontWeight.w500,
+    ),
   );
 
   Widget _field(TextEditingController ctrl, String hint,

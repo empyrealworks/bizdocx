@@ -32,105 +32,105 @@ class PortfolioCard extends StatelessWidget {
         .whereType<Color>()
         .toList();
 
-    final primary   = brandColors.isNotEmpty ? brandColors.first : null;
-    final secondary = brandColors.length > 1  ? brandColors[1]   : primary;
-
-    final BoxDecoration decoration;
-    if (primary != null) {
-      decoration = BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            primary.withValues(alpha: 0.18),
-            secondary!.withValues(alpha: 0.07),
-            c.card,
-          ],
-          stops: const [0.0, 0.35, 1.0],
-        ),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: primary.withValues(alpha: 0.35), width: 1.2),
-      );
-    } else {
-      decoration = BoxDecoration(
-        color: c.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: c.border),
-      );
-    }
+    final primary = brandColors.isNotEmpty ? brandColors.first : null;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: decoration,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                _ColorDots(colors: portfolio.brandColors),
-                const Spacer(),
-                Container(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    '${portfolio.documentIds.length} docs',
-                    style: TextStyle(
-                      color: c.textBody,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 14,
-                  color: primary?.withValues(alpha: 0.7) ?? c.textMuted,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(portfolio.name,
-                style: Theme.of(context).textTheme.titleLarge),
-            if (portfolio.description.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                portfolio.description,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-            if (portfolio.targetAudience.isNotEmpty) ...[
-              const SizedBox(height: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          // If we have brand colors, use them as a gradient for the "border"
+          gradient: brandColors.length > 1
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: brandColors,
+                )
+              : (primary != null
+                  ? LinearGradient(
+                      colors: [primary, primary.withValues(alpha: 0.5)])
+                  : null),
+          // Fallback to standard border color if no brand colors
+          color: primary == null ? c.border : null,
+        ),
+        child: Container(
+          // Margin creates the border effect
+          margin: const EdgeInsets.all(1.5),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: c.card, // Neutral background for readability
+            borderRadius: BorderRadius.circular(12.5),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Row(
                 children: [
-                  Icon(Icons.trending_up_rounded,
-                      size: 12,
-                      color: primary?.withValues(alpha: 0.8) ?? c.textMuted),
-                  const SizedBox(width: 4),
-                  Expanded(
+                  _ColorDots(colors: portfolio.brandColors),
+                  const Spacer(),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: context.isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.black.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     child: Text(
-                      portfolio.targetAudience,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      '${portfolio.documentIds.length} docs',
                       style: TextStyle(
-                        color: primary?.withValues(alpha: 0.8) ?? c.textMuted,
-                        fontSize: 12,
-                        letterSpacing: 0.2,
+                        color: c.textBody,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: primary?.withValues(alpha: 0.7) ?? c.textMuted,
+                  ),
                 ],
               ),
+              const SizedBox(height: 16),
+              Text(portfolio.name,
+                  style: Theme.of(context).textTheme.titleLarge),
+              if (portfolio.description.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  portfolio.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+              if (portfolio.targetAudience.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(Icons.trending_up_rounded,
+                        size: 12,
+                        color: primary?.withValues(alpha: 0.8) ?? c.textMuted),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        portfolio.targetAudience,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: primary?.withValues(alpha: 0.8) ?? c.textMuted,
+                          fontSize: 12,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

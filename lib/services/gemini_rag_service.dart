@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
 import '../env/env.dart';
@@ -61,8 +62,9 @@ INSTRUCTIONS:
 2. Keep all unchanged sections exactly as they are.
 3. Maintain the same visual design, layout, and inline CSS.
 4. AVOID 'display: grid' — use Flexbox or HTML tables for layout.
-5. Return ONLY the complete updated HTML starting with <!DOCTYPE html>.
-6. Do NOT wrap the output in markdown code fences.
+5. FIXED DIMENSIONS: Maintain the fixed A4 layout requirements (wrapping div with class "page-container" at 794px width).
+6. Return ONLY the complete updated HTML starting with <!DOCTYPE html>.
+7. Do NOT wrap the output in markdown code fences.
 ''';
 
     debugPrint('[Gemini] Refinement prompt length: ${prompt.length}');
@@ -217,15 +219,16 @@ ${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
 DOCUMENT TYPE: ${documentType.name}
 USER REQUEST: $userPrompt
 
-TECHNICAL REQUIREMENTS:
+TECHNICAL REQUIREMENTS FOR FIXED DIMENSIONS:
 1. Output ONLY raw HTML with 100% inline CSS.
-2. Use Flexbox or HTML Tables for layout. NEVER use 'display: grid'.
-3. Design: clean, minimal, premium. Ample white space.
-4. Avoid CSS filters, blurs, or heavy box-shadows.
-5. Professional typography: serif headers, sans-serif body.
-6. All content within A4 bounds (max-width: 794px).
-7. Return only the HTML starting with <!DOCTYPE html>.
-8. Do NOT wrap the output in markdown code fences.
+2. FIXED A4 DIMENSIONS: All content must be wrapped in a main container div with class "page-container" and exactly "width: 794px; min-height: 1123px; padding: 40px; margin: 0 auto; background: white; box-sizing: border-box;". This ensures the document has standard dimensions (A4 width at 96dpi) regardless of the screen size.
+3. Use Flexbox or HTML Tables for layout. NEVER use 'display: grid'.
+4. Design: clean, minimal, premium. Ample white space.
+5. Avoid CSS filters, blurs, or heavy box-shadows.
+6. Professional typography: serif headers, sans-serif body.
+7. VIEWPORT: Include <meta name="viewport" content="width=794"> in the <head> to ensure correct initial scaling on mobile devices.
+8. Return only the HTML starting with <!DOCTYPE html>.
+9. Do NOT wrap the output in markdown code fences.
 ''';
   }
 

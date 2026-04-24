@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/extensions/context_extensions.dart';
 import '../../models/document_asset.dart';
 import '../../providers/document_generation_provider.dart';
 import '../widgets/generation_state_overlay.dart';
@@ -215,24 +216,30 @@ class _ExternalEditBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    final bgColor = isDark ? const Color(0xFF1C1A00) : const Color(0xFFFFFBE6);
+    final borderColor = isDark ? const Color(0xFF4A4200) : const Color(0xFFFFE58F);
+    final iconColor = isDark ? const Color(0xFFFFD60A) : const Color(0xFFFAAD14);
+    final textColor = isDark ? const Color(0xFFFFD60A) : const Color(0xFF856404);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1A00),
+        color: bgColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF4A4200)),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.tips_and_updates_outlined,
-              size: 16, color: Color(0xFFFFD60A)),
+          Icon(Icons.tips_and_updates_outlined,
+              size: 16, color: iconColor),
           const SizedBox(width: 10),
           Expanded(
             child: Text(note,
-                style: const TextStyle(
-                    color: Color(0xFFFFD60A),
+                style: TextStyle(
+                    color: textColor,
                     fontSize: 12,
                     height: 1.5)),
           ),
@@ -321,14 +328,15 @@ class _DocumentHintsState extends State<_DocumentHints> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final hints = _hints[widget.type] ?? [];
     if (hints.isEmpty) return const SizedBox.shrink();
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.graphite,
+        color: c.chipFill,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -340,13 +348,13 @@ class _DocumentHintsState extends State<_DocumentHints> {
               padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
               child: Row(
                 children: [
-                  const Icon(Icons.checklist_rtl_rounded,
-                      size: 16, color: AppColors.silver),
+                  Icon(Icons.checklist_rtl_rounded,
+                      size: 16, color: c.textSecondary),
                   const SizedBox(width: 8),
                   Text(
                     'Suggested fields for ${_typeLabel(widget.type)}',
-                    style: const TextStyle(
-                      color: AppColors.silver,
+                    style: TextStyle(
+                      color: c.textSecondary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -357,14 +365,14 @@ class _DocumentHintsState extends State<_DocumentHints> {
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
                     size: 18,
-                    color: AppColors.muted,
+                    color: c.textMuted,
                   ),
                 ],
               ),
             ),
           ),
           if (_expanded) ...[
-            Divider(height: 1, color: AppColors.border),
+            Divider(height: 1, color: c.border),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
               child: Column(
@@ -372,15 +380,15 @@ class _DocumentHintsState extends State<_DocumentHints> {
                 children: [
                   Text(
                     'Include these in your prompt for best results:',
-                    style: const TextStyle(
-                        color: AppColors.muted, fontSize: 11),
+                    style: TextStyle(
+                        color: c.textMuted, fontSize: 11),
                   ),
                   const SizedBox(height: 10),
                   ...hints.map((h) => Padding(
                     padding: const EdgeInsets.only(bottom: 7),
                     child: Text(h,
-                        style: const TextStyle(
-                            color: AppColors.silver,
+                        style: TextStyle(
+                            color: c.textBody,
                             fontSize: 13,
                             height: 1.3)),
                   )),
@@ -445,6 +453,8 @@ class _TypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -469,7 +479,7 @@ class _TypeSelector extends StatelessWidget {
                   margin: EdgeInsets.only(
                       right: p == AssetPipeline.structural ? 6 : 0),
                   decoration: BoxDecoration(
-                    color: active ? AppColors.white : AppColors.graphite,
+                    color: active ? c.filledButtonBg : c.chipFill,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
@@ -478,7 +488,7 @@ class _TypeSelector extends StatelessWidget {
                           ? 'Structural'
                           : 'Graphical',
                       style: TextStyle(
-                        color: active ? AppColors.black : AppColors.silver,
+                        color: active ? c.filledButtonFg : c.textMuted,
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
@@ -505,16 +515,16 @@ class _TypeSelector extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: active ? AppColors.white : AppColors.graphite,
+                  color: active ? c.filledButtonBg : c.chipFill,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: active ? AppColors.white : AppColors.border,
+                    color: active ? c.filledButtonBg : c.border,
                   ),
                 ),
                 child: Text(
                   _label(t),
                   style: TextStyle(
-                    color: active ? AppColors.black : AppColors.silver,
+                    color: active ? c.filledButtonFg : c.textBody,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -548,16 +558,17 @@ class _ErrorOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return GestureDetector(
       onTap: onDismiss,
       child: Container(
-        color: Colors.black87,
+        color: c.overlayBarrier,
         child: Center(
           child: Container(
             margin: const EdgeInsets.all(32),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.card,
+              color: c.card,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -591,29 +602,30 @@ class _CancelledOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return GestureDetector(
       onTap: onDismiss,
       child: Container(
-        color: Colors.black87,
+        color: c.overlayBarrier,
         child: Center(
           child: Container(
             margin: const EdgeInsets.all(32),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.card,
+              color: c.card,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.cancel_outlined,
-                    color: AppColors.silver, size: 36),
+                Icon(Icons.cancel_outlined,
+                    color: c.textMuted, size: 36),
                 const SizedBox(height: 16),
                 Text('Generation Cancelled',
                     style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
-                const Text('The operation was cancelled by the user.',
-                    style: TextStyle(color: AppColors.muted, fontSize: 14),
+                Text('The operation was cancelled by the user.',
+                    style: TextStyle(color: c.textMuted, fontSize: 14),
                     textAlign: TextAlign.center),
                 const SizedBox(height: 20),
                 FilledButton(

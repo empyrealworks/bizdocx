@@ -13,7 +13,7 @@ class GenerationStateOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Container(
+    return Material(
       color: c.overlayBarrier,
       child: Center(
         child: Container(

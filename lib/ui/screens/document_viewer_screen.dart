@@ -44,6 +44,7 @@ class _DocumentViewerScreenState
       _webCtrl = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(Colors.white)
+        ..enableZoom(true) // Ensure zooming is enabled for fixed-width docs
         ..setNavigationDelegate(NavigationDelegate(
           onPageFinished: (_) => setState(() => _webReady = true),
         ))

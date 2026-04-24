@@ -8,7 +8,7 @@ import '../../providers/onboarding_provider.dart';
 import '../screens/auth_gate_screen.dart';
 import '../screens/document_viewer_screen.dart';
 import '../screens/ai_generation_screen.dart';
-import '../screens/onboarding_screen.dart';
+import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/portfolio_dashboard_screen.dart';
 import '../screens/portfolio_detail_screen.dart';
 import '../screens/settings_screen.dart';

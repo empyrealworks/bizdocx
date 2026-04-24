@@ -12,14 +12,54 @@ import 'create_portfolio_sheet.dart';
 class PortfolioDashboardScreen extends ConsumerWidget {
   const PortfolioDashboardScreen({super.key});
 
+  Future<void> _confirmSignOut(BuildContext context) async {
+    final c = context.colors;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign Out?'),
+        content: const Text('Are you sure you want to sign out of your account?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel', style: TextStyle(color: c.textBody)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (ok == true) {
+      await FirebaseService.instance.signOut();
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final isDark = context.isDark;
     final portfoliosAsync = ref.watch(portfolioListProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('BizDocx'),
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/logo_small.png',
+              height: 32,
+              width: 32,
+              fit: BoxFit.contain,
+              // Tint small logo to white in dark mode
+              color: isDark ? Colors.white : null,
+              colorBlendMode: isDark ? BlendMode.srcIn : null,
+            ),
+            const SizedBox(width: 12),
+            const Text('BizDocx'),
+          ],
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.settings_outlined, size: 20, color: c.iconPrimary),
@@ -29,7 +69,7 @@ class PortfolioDashboardScreen extends ConsumerWidget {
           IconButton(
             icon: Icon(Icons.logout_rounded, size: 20, color: c.iconPrimary),
             tooltip: 'Sign out',
-            onPressed: FirebaseService.instance.signOut,
+            onPressed: () => _confirmSignOut(context),
           ),
         ],
       ),

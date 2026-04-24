@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
@@ -79,6 +80,8 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final isDark = context.isDark;
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -88,12 +91,26 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
+                Center(
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    height: 80,
+                    width: 80,
+                    fit: BoxFit.contain,
+                    // Tint black logo to white in dark mode
+                    color: isDark ? Colors.white : null,
+                    colorBlendMode: isDark ? BlendMode.srcIn : null,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Text('BizDocx',
+                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.displayLarge),
                 const SizedBox(height: 8),
                 Text(
                   'Your AI document hub.',
+                  textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
                       .bodyLarge
@@ -155,6 +172,15 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                     validator: (v) => v != _passCtrl.text
                         ? 'Passwords do not match'
                         : null,
+                  ),
+                ] else ...[
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => context.push('/auth/forgot-password'),
+                      child: Text('Forgot Password?', 
+                        style: TextStyle(color: c.textMuted, fontSize: 13)),
+                    ),
                   ),
                 ],
 

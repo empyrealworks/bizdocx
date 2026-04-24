@@ -12,10 +12,11 @@ import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/portfolio_dashboard_screen.dart';
 import '../screens/portfolio_detail_screen.dart';
 import '../screens/settings_screen.dart';
+import '../screens/forgot_password_screen.dart';
+import '../screens/privacy_policy_screen.dart';
+import '../screens/contact_us_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // In Riverpod 3.x, we use ValueNotifier + ref.listen to create a 
-  // Listenable that triggers GoRouter redirects whenever state changes.
   final refreshListenable = ValueNotifier<int>(0);
   
   ref.listen(authStateProvider, (previous, next) {
@@ -38,14 +39,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final hasSeen      = onboardingValue.value ?? false;
       final loc          = state.matchedLocation;
 
-      // Ensure we don't redirect while still loading the onboarding state
       if (seenLoading) return null;
 
       // 1. Forced Onboarding
       if (!hasSeen && loc != '/onboarding') return '/onboarding';
 
       // 2. Auth Guard (only active after onboarding is seen)
-      if (hasSeen && !isLoggedIn && loc != '/auth') return '/auth';
+      // Allow forgot password even if not logged in
+      if (hasSeen && !isLoggedIn && loc != '/auth' && loc != '/auth/forgot-password') return '/auth';
       
       // 3. Prevent logged-in users from seeing Auth/Onboarding pages
       if (hasSeen && isLoggedIn && (loc == '/auth' || loc == '/onboarding')) return '/';
@@ -60,10 +61,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/auth',
         builder: (_, __) => const AuthGateScreen(),
+        routes: [
+          GoRoute(
+            path: 'forgot-password',
+            builder: (_, __) => const ForgotPasswordScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/settings',
         builder: (_, __) => const SettingsScreen(),
+        routes: [
+          GoRoute(
+            path: 'privacy',
+            builder: (_, __) => const PrivacyPolicyScreen(),
+          ),
+          GoRoute(
+            path: 'contact',
+            builder: (_, __) => const ContactUsScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/',

@@ -8,7 +8,6 @@ class WelcomeSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
     return OnboardingPageShell(
       anim: anim,
       eyebrow: 'Welcome to BizDocx',
@@ -16,14 +15,13 @@ class WelcomeSlide extends StatelessWidget {
       body:
       'Generate professional invoices, proposals, logos, and more — powered by AI and tailored to your brand.',
       accentColor: const Color(0xFF6C7FFF),
-      illustration: _WelcomeIllustration(c: c),
+      illustration: const _WelcomeIllustration(),
     );
   }
 }
 
 class _WelcomeIllustration extends StatefulWidget {
-  const _WelcomeIllustration({required this.c});
-  final dynamic c;
+  const _WelcomeIllustration({super.key});
 
   @override
   State<_WelcomeIllustration> createState() => _WelcomeIllustrationState();
@@ -51,6 +49,8 @@ class _WelcomeIllustrationState extends State<_WelcomeIllustration>
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final isDark = context.isDark;
+
     return Container(
       color: c.card,
       child: Stack(
@@ -67,7 +67,7 @@ class _WelcomeIllustrationState extends State<_WelcomeIllustration>
               ),
             ),
           ),
-          // Centre wordmark card
+          // Centre logo card
           Center(
             child: AnimatedBuilder(
               animation: _pulse,
@@ -75,10 +75,10 @@ class _WelcomeIllustrationState extends State<_WelcomeIllustration>
                 scale: 1.0 + _pulse.value * 0.015,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 32, vertical: 22),
+                      horizontal: 32, vertical: 32),
                   decoration: BoxDecoration(
                     color: c.surface,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: c.border, width: 1.5),
                     boxShadow: [
                       BoxShadow(
@@ -91,22 +91,23 @@ class _WelcomeIllustrationState extends State<_WelcomeIllustration>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Image.asset(
+                        'assets/images/logo.png',
+                        height: 100,
+                        width: 100,
+                        fit: BoxFit.contain,
+                        // Invert logo color for dark mode (tint black line-art to white)
+                        color: isDark ? Colors.white : null,
+                        colorBlendMode: isDark ? BlendMode.srcIn : null,
+                      ),
+                      const SizedBox(height: 6),
                       Text(
                         'BizDocx',
                         style: TextStyle(
                           color: c.textPrimary,
-                          fontSize: 36,
+                          fontSize: 28,
                           fontWeight: FontWeight.w800,
-                          letterSpacing: -1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Your AI document hub',
-                        style: TextStyle(
-                          color: c.textMuted,
-                          fontSize: 13,
-                          letterSpacing: 0.2,
+                          letterSpacing: -1.0,
                         ),
                       ),
                     ],

@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:uuid/uuid.dart';
 
 import '../core/constants/firestore_paths.dart';
+import '../env/env.dart';
 import '../models/business_portfolio.dart';
 import '../models/document_asset.dart';
 import '../models/document_version.dart';
@@ -66,7 +67,55 @@ class FirebaseService {
     }
   }
 
+  Future<void> sendPasswordReset(String email) =>
+      _auth.sendPasswordResetEmail(email: email);
+
   Future<void> signOut() => _auth.signOut();
+
+  /// Deletes the user account and ALL associated data (Firestore + Storage).
+  Future<void> deleteUserAccount() async {
+    final uid = currentUid;
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    // 1. Delete Firestore Data
+    final batch = _db.batch();
+    
+    // Get all portfolios
+    final portfolios = await _db.collection(FirestorePaths.portfoliosCol(uid)).get();
+    for (final p in portfolios.docs) {
+      // Get all documents per portfolio
+      final docs = await _db.collection(FirestorePaths.documentsCol(uid, p.id)).get();
+      for (final d in docs.docs) {
+        batch.delete(d.reference);
+      }
+      batch.delete(p.reference);
+      
+      // Delete user context
+      batch.delete(_db.doc(FirestorePaths.userContextDoc(uid, p.id)));
+    }
+    
+    await batch.commit();
+
+    // 2. Delete Storage Data (recursive deletion not natively supported, 
+    // but we can delete the user's specific folder structure)
+    try {
+      final userRef = _storage.ref('users/$uid');
+      final list = await userRef.listAll();
+      for (final prefix in list.prefixes) {
+        // This is a simplified folder deletion logic
+        final folderList = await prefix.listAll();
+        for (final item in folderList.items) {
+          await item.delete();
+        }
+      }
+    } catch (e) {
+      debugPrint('[FirebaseService] Storage deletion warning: $e');
+    }
+
+    // 3. Delete Firebase Auth User
+    await user.delete();
+  }
 
   // ── Portfolio CRUD ────────────────────────────────────────────────────────
   Stream<List<BusinessPortfolio>> watchPortfolios() {

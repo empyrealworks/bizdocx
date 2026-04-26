@@ -47,3 +47,7 @@ app.*.map.json
 .env
 /lib/env/env.g.dart
 
+# Node.js / Playwright Microservice
+pdf_engine/node_modules/
+pdf_engine/package-lock.json
+

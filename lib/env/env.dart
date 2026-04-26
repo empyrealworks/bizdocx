@@ -13,4 +13,7 @@ abstract class Env {
 
   @EnviedField(varName: 'GEMINI_VISION_MODEL')
   static final String geminiVisionModel = _Env.geminiVisionModel;
+
+  @EnviedField(varName: 'PDF_ENGINE_URL')
+  static final String pdfEngineUrl = _Env.pdfEngineUrl;
 }

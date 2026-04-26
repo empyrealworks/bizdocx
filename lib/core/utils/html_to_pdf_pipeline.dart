@@ -1,19 +1,18 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:htmltopdfwidgets/htmltopdfwidgets.dart';
-import 'package:pdf/widgets.dart' as pw;
+import 'package:http/http.dart' as http;
 
+import '../../env/env.dart';
 import '../../services/local_cache_service.dart';
 
-/// Converts Gemini-generated HTML to a PDF File.
-///
-/// Uses [HTMLToPdf] from the printing / pdf packages.
+/// Converts Gemini-generated HTML to a PDF File using a remote Playwright microservice.
 class HtmlToPdfPipeline {
   HtmlToPdfPipeline._();
   static final HtmlToPdfPipeline instance = HtmlToPdfPipeline._();
 
-  // Page margin in PDF points (1pt ≈ 0.353mm; 40pt ≈ 14mm)
-  static const _marginPt = 40.0;
+  // PDF Engine URL injected via envied.
+  static final _pdfEngineUrl = Env.pdfEngineUrl;
 
   final _cache = LocalCacheService.instance;
 
@@ -22,46 +21,45 @@ class HtmlToPdfPipeline {
     required String uid,
     required String pid,
     required String docId,
-    PdfPageFormat format = PdfPageFormat.a4,
   }) async {
-    debugPrint('[Pipeline] Converting HTML → PDF for doc: $docId');
+    debugPrint('[Pipeline] Converting HTML → PDF via Remote Engine for doc: $docId');
 
     if (html.trim().isEmpty) throw Exception('Empty HTML content');
 
+    // 1. Check Cache
     final cached = await _cache.getCachedPdf(uid, pid, docId);
     if (cached != null) {
       debugPrint('[Pipeline] PDF cache hit');
       return cached;
     }
 
+    // 2. Prepare HTML (Ensuring standard dimensions are respected by the browser)
     final processedHtml = _prepareHtml(html);
 
     try {
-      final widgets = await HTMLToPdf().convert(
-        processedHtml,
-        useNewEngine: false,
+      // 3. Request PDF from Microservice
+      final response = await http.post(
+        Uri.parse(_pdfEngineUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'html': processedHtml}),
       );
 
-      final pdf = pw.Document(compress: true);
+      if (response.statusCode != 200) {
+        throw Exception(
+          'Failed to generate PDF. Engine returned ${response.statusCode}: ${response.body}',
+        );
+      }
 
-      pdf.addPage(
-        pw.MultiPage(
-          pageFormat: format,
-          margin: const pw.EdgeInsets.all(_marginPt),
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          maxPages: 200,
-          build: (context) => widgets,
-        ),
-      );
+      final bytes = response.bodyBytes;
 
-      final bytes = await pdf.save();
+      // 4. Cache and Return
       final file = await _cache.cachePdfBytes(bytes, uid, pid, docId);
       await _cache.cacheHtml(html, uid, pid, docId);
 
       debugPrint('[Pipeline] PDF saved — ${bytes.length} bytes');
       return file;
     } catch (e) {
-      debugPrint('[Pipeline] Rendering error: $e');
+      debugPrint('[Pipeline] Engine error: $e');
       rethrow;
     }
   }
@@ -76,50 +74,23 @@ class HtmlToPdfPipeline {
     }
   }
 
-  /// Injects print-safe CSS and strips fixed-width containers to allow
-  /// the content to flow naturally into the PDF page width.
+  /// Injects print-safe CSS to ensure Chromium renders high-fidelity backgrounds.
   String _prepareHtml(String html) {
-    // 1. Remove HTML comments
+    // Remove HTML comments
     final commentRegex = RegExp(r'<!--[\s\S]*?-->');
     String cleanedHtml = html.replaceAll(commentRegex, '');
 
-    // 2. Remove fixed-width "page-container" class styles for PDF export
-    // This allows the MultiPage layout to use the full available width of the PDF points.
-    cleanedHtml = cleanedHtml.replaceAll(
-        RegExp(r'class="page-container"', caseSensitive: false),
-        'class="pdf-flow-container"');
-
     const injection = '''
 <style>
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    box-sizing: border-box;
+  @media print {
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
   }
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: white !important;
-    font-family: Helvetica, Arial, sans-serif;
-    overflow: visible !important;
-    height: auto !important;
-    max-height: none !important;
-  }
-  /* Strip fixed width from the wrapper for PDF generation */
-  .page-container, .pdf-flow-container {
-    width: 100% !important;
-    max-width: none !important;
-    padding: 0 !important;
+  body {
     margin: 0 !important;
-    height: auto !important;
-  }
-  img { max-width: 100%; height: auto; display: block; }
-  table { border-collapse: collapse; width: 100%; }
-  .page-break { page-break-before: always; }
-  div, section, article, main, header, footer {
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
+    padding: 0 !important;
   }
 </style>
 ''';

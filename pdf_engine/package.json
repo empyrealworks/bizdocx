@@ -1,0 +1,13 @@
+{
+  "name": "bizdocx-pdf-engine",
+  "version": "1.0.0",
+  "description": "Playwright-based PDF rendering service for BizDocx",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "playwright": "^1.50.0"
+  }
+}

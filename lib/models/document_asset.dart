@@ -36,6 +36,10 @@ abstract class DocumentAsset with _$DocumentAsset {
     @Default(false) bool isCached,
     required DateTime createdAt,
     DateTime? updatedAt,
+    // Template & Formatting
+    String? templateId,
+    String? aspectRatio,
+    String? orientation,
   }) = _DocumentAsset;
 
   const DocumentAsset._();

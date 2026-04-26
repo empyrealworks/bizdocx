@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/templates/document_templates.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../models/document_asset.dart';
+import '../../models/document_template.dart';
 import '../../providers/document_generation_provider.dart';
 import '../widgets/generation_state_overlay.dart';
+import '../widgets/template_thumbnails.dart';
 
 class AiGenerationScreen extends ConsumerStatefulWidget {
   const AiGenerationScreen({super.key, required this.portfolioId});
@@ -22,6 +25,28 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
   final _titleCtrl = TextEditingController();
   DocumentType _selectedType = DocumentType.invoice;
   AssetPipeline _selectedPipeline = AssetPipeline.structural;
+  
+  DocumentTemplate? _selectedTemplate;
+  String _selectedOrientation = 'portrait';
+  String _selectedAspectRatio = '1:1';
+
+  @override
+  void initState() {
+    super.initState();
+    _updateDefaultTemplate();
+  }
+
+  void _updateDefaultTemplate() {
+    final templates = DocumentTemplates.getByType(_selectedType);
+    if (templates.isNotEmpty) {
+      _selectedTemplate = templates.first;
+      if (_selectedTemplate!.supportedAspectRatios.isNotEmpty) {
+        _selectedAspectRatio = _selectedTemplate!.supportedAspectRatios.first;
+      }
+    } else {
+      _selectedTemplate = null;
+    }
+  }
 
   @override
   void dispose() {
@@ -49,6 +74,9 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
       type: _selectedType,
       pipeline: _selectedPipeline,
       title: _titleCtrl.text.trim(),
+      template: _selectedTemplate,
+      orientation: _selectedOrientation,
+      aspectRatio: _selectedAspectRatio,
     );
 
     if (asset != null && mounted) {
@@ -79,17 +107,59 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionLabel('Document Type'),
+                _SectionLabel('Document Category'),
                 const SizedBox(height: 12),
                 _TypeSelector(
                   selected: _selectedType,
                   pipeline: _selectedPipeline,
-                  onTypeChanged: (t) =>
-                      setState(() => _selectedType = t),
+                  onTypeChanged: (t) {
+                    setState(() {
+                      _selectedType = t;
+                      _updateDefaultTemplate();
+                    });
+                  },
                   onPipelineChanged: (p) =>
                       setState(() => _selectedPipeline = p),
                 ),
                 const SizedBox(height: 24),
+                
+                _SectionLabel('Select Template'),
+                const SizedBox(height: 12),
+                _TemplatePicker(
+                  templates: DocumentTemplates.getByType(_selectedType),
+                  selected: _selectedTemplate,
+                  onSelected: (t) {
+                    setState(() {
+                      _selectedTemplate = t;
+                      if (t.supportedAspectRatios.isNotEmpty && !t.supportedAspectRatios.contains(_selectedAspectRatio)) {
+                         _selectedAspectRatio = t.supportedAspectRatios.first;
+                      }
+                    });
+                  },
+                ),
+                const SizedBox(height: 24),
+
+                if (_selectedTemplate?.supportsOrientation ?? false) ...[
+                  _SectionLabel('Orientation'),
+                  const SizedBox(height: 12),
+                  _OrientationPicker(
+                    selected: _selectedOrientation,
+                    onChanged: (o) => setState(() => _selectedOrientation = o),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
+                if (_selectedTemplate?.supportedAspectRatios.isNotEmpty ?? false) ...[
+                   _SectionLabel('Aspect Ratio'),
+                   const SizedBox(height: 12),
+                   _AspectRatioPicker(
+                     ratios: _selectedTemplate!.supportedAspectRatios,
+                     selected: _selectedAspectRatio,
+                     onChanged: (r) => setState(() => _selectedAspectRatio = r),
+                   ),
+                   const SizedBox(height: 24),
+                ],
+
                 _SectionLabel('Document Title'),
                 const SizedBox(height: 12),
                 TextField(
@@ -102,22 +172,26 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                 _SectionLabel('Prompt'),
                 const SizedBox(height: 8),
                 Text(
-                  'Describe what you need. Your business context is automatically included.',
+                  'Describe specific details. The template and business context are applied automatically.',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _promptCtrl,
-                  maxLines: 7,
+                  maxLines: 5,
                   decoration: InputDecoration(
                     hintText: _promptHint(_selectedType),
                   ),
                 ),
                 const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: genState.isLoading ? null : _generate,
-                  icon: const Icon(Icons.auto_awesome, size: 18),
-                  label: const Text('Generate'),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: FilledButton.icon(
+                    onPressed: genState.isLoading ? null : _generate,
+                    icon: const Icon(Icons.auto_awesome, size: 18),
+                    label: const Text('Generate Document', style: TextStyle(fontWeight: FontWeight.bold),),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 // External editing note (for content-heavy types)
@@ -178,21 +252,21 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
   String _promptHint(DocumentType t) {
     switch (t) {
       case DocumentType.invoice:
-        return 'e.g. Invoice for 200 units of blue ceramic vases at \$45 each. Bill to: Luxe Home Décor Ltd. Due in 30 days. Include 7.5% VAT.';
+        return 'e.g. 200 units of ceramic vases at \$45 each. Bill to: Luxe Home Décor Ltd. Due in 30 days.';
       case DocumentType.proposal:
-        return 'e.g. Proposal for a full website redesign including UX audit, 5 pages, and CMS integration. Project timeline: 8 weeks. Budget: \$12,000.';
+        return 'e.g. Full website redesign including UX audit, 5 pages. Timeline: 8 weeks. Budget: \$12,000.';
       case DocumentType.letterhead:
-        return 'e.g. Create a formal letterhead template with our logo placeholder, contact details section, and signature line at the bottom.';
+        return 'e.g. Formal template with contact details section and signature line at the bottom.';
       case DocumentType.businessCard:
-        return 'e.g. Business card for Sarah Mitchell, Head of Sales. Include email sarah@company.com, phone +1 555 0123, and LinkedIn handle.';
+        return 'e.g. Sarah Mitchell, Head of Sales. sarah@company.com, +1 555 0123.';
       case DocumentType.contract:
-        return 'e.g. Service agreement template for freelance design services. Include scope, payment terms, IP ownership clause, and termination notice period.';
+        return 'e.g. Freelance design services. Include scope, payment terms, and IP ownership clause.';
       case DocumentType.logo:
-        return 'e.g. A modern minimalist logo for a ceramics brand. Use earth tones. Incorporate a subtle wave or vessel shape.';
+        return 'e.g. Modern minimalist for a ceramics brand. Use earth tones and vessel shapes.';
       case DocumentType.icon:
-        return 'e.g. A clean app icon for a document management app. Blue and white palette. Flat design with a subtle paper/fold motif.';
+        return 'e.g. Clean app icon for document management. Blue/white, flat design.';
       case DocumentType.other:
-        return 'e.g. A one-page company profile with our mission, key services, team size, and founding year.';
+        return 'e.g. One-page company profile with mission, services, and team size.';
     }
   }
 
@@ -205,6 +279,139 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
       default:
         return null;
     }
+  }
+}
+
+// ── Template Picker ─────────────────────────────────────────────────────────
+
+class _TemplatePicker extends StatelessWidget {
+  const _TemplatePicker({
+    required this.templates,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final List<DocumentTemplate> templates;
+  final DocumentTemplate? selected;
+  final ValueChanged<DocumentTemplate> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (templates.isEmpty) return const Text('No templates available for this category.');
+    final c = context.colors;
+
+    return SizedBox(
+      height: 180,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: templates.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        itemBuilder: (context, index) {
+          final t = templates[index];
+          final isActive = selected?.id == t.id;
+          
+          return GestureDetector(
+            onTap: () => onSelected(t),
+            child: Column(
+              children: [
+                Expanded(
+                  child: TemplateThumbnail(
+                    templateId: t.id,
+                    type: t.type,
+                    isSelected: isActive,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  t.name,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                    color: isActive ? c.filledButtonBg : c.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ── Orientation Picker ──────────────────────────────────────────────────────
+
+class _OrientationPicker extends StatelessWidget {
+  const _OrientationPicker({required this.selected, required this.onChanged});
+  final String selected;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Row(
+      children: ['portrait', 'landscape'].map((o) {
+        final active = selected == o;
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => onChanged(o),
+            child: Container(
+              margin: EdgeInsets.only(right: o == 'portrait' ? 8 : 0),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: active ? c.filledButtonBg : c.chipFill,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  o[0].toUpperCase() + o.substring(1),
+                  style: TextStyle(
+                    color: active ? c.filledButtonFg : c.textMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+// ── Aspect Ratio Picker ─────────────────────────────────────────────────────
+
+class _AspectRatioPicker extends StatelessWidget {
+  const _AspectRatioPicker({
+    required this.ratios,
+    required this.selected,
+    required this.onChanged,
+  });
+  final List<String> ratios;
+  final String selected;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Wrap(
+      spacing: 8,
+      children: ratios.map((r) {
+        final active = selected == r;
+        return GestureDetector(
+          onTap: () => onChanged(r),
+          child: Chip(
+            label: Text(r),
+            backgroundColor: active ? c.filledButtonBg : c.chipFill,
+            labelStyle: TextStyle(
+              color: active ? c.filledButtonFg : c.textBody,
+              fontSize: 12,
+            ),
+            side: BorderSide(color: active ? c.filledButtonBg : c.border),
+          ),
+        );
+      }).toList(),
+    );
   }
 }
 
@@ -260,7 +467,7 @@ class _DocumentHints extends StatefulWidget {
 }
 
 class _DocumentHintsState extends State<_DocumentHints> {
-  bool _expanded = true;
+  bool _expanded = false;
 
   static const _hints = <DocumentType, List<String>>{
     DocumentType.invoice: [
@@ -269,7 +476,6 @@ class _DocumentHintsState extends State<_DocumentHints> {
       '💰  Currency & total amount',
       '🏦  Your payment / bank account details',
       '📅  Invoice date & due date',
-      '🔢  Invoice or PO number',
       '🧾  Tax rate (e.g. VAT 7.5%)',
     ],
     DocumentType.proposal: [
@@ -278,22 +484,18 @@ class _DocumentHintsState extends State<_DocumentHints> {
       '⏱  Estimated timeline',
       '💵  Pricing breakdown or range',
       '✅  Terms & acceptance conditions',
-      '👤  Your credentials or portfolio link',
     ],
     DocumentType.letterhead: [
       '🏢  Company name & registered address',
       '📞  Phone, email & website',
       '🎨  Brand color preference',
       '🖼  Logo placement (top-left, centre, etc.)',
-      '📝  Optional tagline or slogan',
     ],
     DocumentType.businessCard: [
       '👤  Full name & job title',
       '📧  Email address',
       '📞  Phone number',
       '🌐  Website or LinkedIn URL',
-      '🏢  Company name & address (optional)',
-      '🎨  Style preference (minimal, bold, etc.)',
     ],
     DocumentType.contract: [
       '👥  Parties involved (full legal names)',
@@ -301,28 +503,17 @@ class _DocumentHintsState extends State<_DocumentHints> {
       '💰  Payment terms & schedule',
       '📅  Start date & duration',
       '⚖️  Governing law / jurisdiction',
-      '🔒  IP ownership & confidentiality clauses',
-      '🚪  Termination notice period',
     ],
     DocumentType.logo: [
       '🏢  Business name (exact spelling)',
       '🎨  Brand colors (hex codes if possible)',
       '✏️  Style: wordmark, lettermark, emblem, or combo mark',
       '💡  Mood: minimal, bold, playful, luxury, etc.',
-      '🔍  Industry & any symbol ideas',
     ],
     DocumentType.icon: [
       '🔷  Concept or metaphor (e.g. speed, security, nature)',
       '🎨  Color palette preference',
       '✏️  Style: flat, gradient, outline, 3D',
-      '📐  Platform: iOS, Android, Web favicon',
-      '📏  Background: solid, transparent',
-    ],
-    DocumentType.other: [
-      '📄  Document purpose & audience',
-      '📋  Key sections to include',
-      '🎨  Tone: formal, friendly, technical',
-      '📏  Approximate length or page count',
     ],
   };
 
@@ -378,12 +569,6 @@ class _DocumentHintsState extends State<_DocumentHints> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Include these in your prompt for best results:',
-                    style: TextStyle(
-                        color: c.textMuted, fontSize: 11),
-                  ),
-                  const SizedBox(height: 10),
                   ...hints.map((h) => Padding(
                     padding: const EdgeInsets.only(bottom: 7),
                     child: Text(h,
@@ -424,7 +609,11 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text.toUpperCase(),
-    style: Theme.of(context).textTheme.labelSmall,
+    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+      letterSpacing: 1.2,
+      fontWeight: FontWeight.bold,
+      color: context.colors.textMuted,
+    ),
   );
 }
 

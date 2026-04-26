@@ -23,6 +23,9 @@ _DocumentAsset _$DocumentAssetFromJson(Map<String, dynamic> json) =>
       updatedAt: json['updatedAt'] == null
           ? null
           : DateTime.parse(json['updatedAt'] as String),
+      templateId: json['templateId'] as String?,
+      aspectRatio: json['aspectRatio'] as String?,
+      orientation: json['orientation'] as String?,
     );
 
 Map<String, dynamic> _$DocumentAssetToJson(_DocumentAsset instance) =>
@@ -40,6 +43,9 @@ Map<String, dynamic> _$DocumentAssetToJson(_DocumentAsset instance) =>
       'isCached': instance.isCached,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
+      'templateId': instance.templateId,
+      'aspectRatio': instance.aspectRatio,
+      'orientation': instance.orientation,
     };
 
 const _$DocumentTypeEnumMap = {

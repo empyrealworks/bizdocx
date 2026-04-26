@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../env/env.dart';
 import '../models/document_asset.dart';
 import '../models/user_context.dart';
+import '../models/document_template.dart';
 
 class GeminiRagService {
   GeminiRagService._();
@@ -23,11 +24,15 @@ class GeminiRagService {
     required String userPrompt,
     required DocumentType documentType,
     required UserContext context,
+    DocumentTemplate? template,
+    String? orientation,
   }) async {
     final prompt = _buildStructuralPrompt(
       userPrompt: userPrompt,
       documentType: documentType,
       context: context,
+      template: template,
+      orientation: orientation,
     );
     debugPrint('[Gemini] Structural prompt length: ${prompt.length}');
     return _callTextModel(prompt);
@@ -62,7 +67,7 @@ INSTRUCTIONS:
 2. Keep all unchanged sections exactly as they are.
 3. Maintain the same visual design, layout, and inline CSS.
 4. AVOID 'display: grid' — use Flexbox or HTML tables for layout.
-5. FIXED DIMENSIONS: Maintain the fixed A4 layout requirements (wrapping div with class "page-container" at 794px width).
+5. FIXED DIMENSIONS: Maintain the fixed dimensions as defined in the existing document.
 6. Return ONLY the complete updated HTML starting with <!DOCTYPE html>.
 7. Do NOT wrap the output in markdown code fences.
 ''';
@@ -75,7 +80,13 @@ INSTRUCTIONS:
   Future<Uint8List> generateImage({
     required String userPrompt,
     required UserContext context,
+    DocumentTemplate? template,
+    String? aspectRatio,
   }) async {
+    final templateInstruction = template != null 
+        ? '\nTEMPLATE STYLE: ${template.name} - ${template.promptInstructions}\n' 
+        : '';
+        
     final instruction = '''
 Refine the following user request into a highly detailed, professional prompt for Imagen 4.0.
 Output ONLY the refined prompt, no preamble.
@@ -84,7 +95,7 @@ CONTEXT:
 - Business: ${context.companyName}
 - Mission: ${context.mission}
 - Brand Colors: ${context.brandColors.join(', ')}
-
+$templateInstruction
 USER REQUEST: $userPrompt
 ''';
 
@@ -95,7 +106,10 @@ USER REQUEST: $userPrompt
       'instances': [
         {'prompt': refinedPrompt}
       ],
-      'parameters': {'sampleCount': 1, 'aspectRatio': '1:1'},
+      'parameters': {
+        'sampleCount': 1, 
+        'aspectRatio': _normalizeAspectRatio(aspectRatio),
+      },
     };
 
     final response = await _post(_imagenUrl, payload);
@@ -110,6 +124,13 @@ USER REQUEST: $userPrompt
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  String _normalizeAspectRatio(String? ratio) {
+    if (ratio == null) return '1:1';
+    if (ratio == '3.5:2' || ratio == '3:2') return '3:2';
+    if (ratio == '2:3.5' || ratio == '2:3') return '2:3';
+    return ratio;
+  }
 
   Future<String> _callTextModel(String prompt) async {
     final payload = {
@@ -203,8 +224,51 @@ Do NOT use a placeholder — use the real URL above.''';
     required String userPrompt,
     required DocumentType documentType,
     required UserContext context,
+    DocumentTemplate? template,
+    String? orientation,
   }) {
     final logoInstruction = _logoInstruction(context, documentType);
+    
+    // Default to A4 Portrait (96 DPI)
+    String width = '794px';
+    String minHeight = '1123px';
+    bool isLandscape = orientation == 'landscape';
+
+    // Letterheads are ALWAYS Portrait A4
+    if (documentType == DocumentType.letterhead) {
+      isLandscape = false;
+    }
+
+    // Handle A4 Landscape
+    if (isLandscape && (
+        documentType == DocumentType.invoice || 
+        documentType == DocumentType.proposal || 
+        documentType == DocumentType.contract ||
+        documentType == DocumentType.other)) {
+      width = '1123px';
+      minHeight = '794px';
+    }
+
+    // Business Cards have special small dimensions
+    if (documentType == DocumentType.businessCard) {
+      if (isLandscape) {
+        width = '336px'; // 3.5 inches
+        minHeight = '192px'; // 2 inches
+      } else {
+        width = '192px';
+        minHeight = '336px';
+      }
+    }
+
+    // Logos & Icons (if structural)
+    if (documentType == DocumentType.logo || documentType == DocumentType.icon) {
+      width = '512px';
+      minHeight = '512px';
+    }
+
+    final templateInstruction = template != null 
+        ? '\nSELECTED TEMPLATE: ${template.name}\nSTYLE INSTRUCTIONS: ${template.promptInstructions}\n' 
+        : '';
 
     return '''
 You are an expert business designer and PDF-optimized HTML engineer.
@@ -214,19 +278,19 @@ BUSINESS CONTEXT:
 - Mission: ${context.mission}
 - Brand Colors: ${context.brandColors.join(', ')}
 - Target Audience: ${context.targetAudience}
-- Recent documents: ${context.recentDocumentTitles.take(3).join(', ')}
 ${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
 DOCUMENT TYPE: ${documentType.name}
+$templateInstruction
 USER REQUEST: $userPrompt
 
 TECHNICAL REQUIREMENTS FOR FIXED DIMENSIONS:
 1. Output ONLY raw HTML with 100% inline CSS.
-2. FIXED A4 DIMENSIONS: All content must be wrapped in a main container div with class "page-container" and exactly "width: 794px; min-height: 1123px; padding: 40px; margin: 0 auto; background: white; box-sizing: border-box;". This ensures the document has standard dimensions (A4 width at 96dpi) regardless of the screen size.
-3. Use Flexbox or HTML Tables for layout. NEVER use 'display: grid'.
-4. Design: clean, minimal, premium. Ample white space.
-5. Avoid CSS filters, blurs, or heavy box-shadows.
+2. FIXED PAGE DIMENSIONS: All content must be wrapped in a main container div with class "page-container" and exactly "width: $width; min-height: $minHeight; padding: ${documentType == DocumentType.businessCard ? '20px' : '40px'}; margin: 0 auto; background: white; box-sizing: border-box; position: relative; overflow: hidden;". 
+3. NON-RESPONSIVE DESIGN: The layout MUST be fixed at the dimensions above. Do NOT use percentage widths for main structures; use pixels or fixed ratios. This ensures a consistent look when printed or exported.
+4. Use Flexbox or HTML Tables for layout. NEVER use 'display: grid'.
+5. Design: clean, minimal, premium. Ample white space.
 6. Professional typography: serif headers, sans-serif body.
-7. VIEWPORT: Include <meta name="viewport" content="width=794"> in the <head> to ensure correct initial scaling on mobile devices.
+7. VIEWPORT: Include <meta name="viewport" content="width=${width.replaceAll('px', '')}"> in the <head> to ensure correct initial scaling on mobile devices (users will zoom in if needed).
 8. Return only the HTML starting with <!DOCTYPE html>.
 9. Do NOT wrap the output in markdown code fences.
 ''';

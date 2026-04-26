@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../models/document_asset.dart';
 import '../models/user_context.dart';
+import '../models/document_template.dart';
 import '../services/firebase_service.dart';
 import '../services/gemini_rag_service.dart';
 import '../services/local_cache_service.dart';
@@ -85,6 +86,9 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     required DocumentType type,
     required AssetPipeline pipeline,
     required String title,
+    DocumentTemplate? template,
+    String? aspectRatio,
+    String? orientation,
   }) async {
     final fb = FirebaseService.instance;
     final uid = fb.currentUid;
@@ -110,6 +114,8 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
           uuid: uuid,
           fb: fb,
           gemini: gemini,
+          template: template,
+          orientation: orientation,
         );
       } else {
         return await _generateGraphical(
@@ -122,6 +128,8 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
           uuid: uuid,
           fb: fb,
           gemini: gemini,
+          template: template,
+          aspectRatio: aspectRatio,
         );
       }
     } catch (e) {
@@ -141,11 +149,15 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     required Uuid uuid,
     required FirebaseService fb,
     required GeminiRagService gemini,
+    DocumentTemplate? template,
+    String? orientation,
   }) async {
     final html = await gemini.generateStructuralDocument(
       userPrompt: prompt,
       documentType: type,
       context: context,
+      template: template,
+      orientation: orientation,
     );
     _checkCancelled();
 
@@ -163,6 +175,8 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       prompt: prompt,
       isCached: false,
       createdAt: DateTime.now(),
+      templateId: template?.id,
+      orientation: orientation,
     );
 
     final saved = await fb.saveDocumentAsset(asset);
@@ -195,10 +209,14 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     required Uuid uuid,
     required FirebaseService fb,
     required GeminiRagService gemini,
+    DocumentTemplate? template,
+    String? aspectRatio,
   }) async {
     final bytes = await gemini.generateImage(
       userPrompt: prompt,
       context: context,
+      template: template,
+      aspectRatio: aspectRatio,
     );
     _checkCancelled();
 
@@ -232,6 +250,8 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       prompt: prompt,
       isCached: true,
       createdAt: DateTime.now(),
+      templateId: template?.id,
+      aspectRatio: aspectRatio,
     );
 
     final saved = await fb.saveDocumentAsset(asset);

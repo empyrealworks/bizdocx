@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'services/firebase_service.dart';
+import 'services/prefs_service.dart';
 import 'ui/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
@@ -26,6 +27,7 @@ Future<void> main() async {
   );
 
   await FirebaseService.initOfflinePersistence();
+  await PrefsService.instance.init();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

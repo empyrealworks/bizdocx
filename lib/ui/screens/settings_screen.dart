@@ -35,7 +35,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.brightness_auto_outlined,
                 selected: themeMode == ThemeMode.system,
                 onTap: () =>
-                    ref.read(themeModeProvider.notifier).state = ThemeMode.system,
+                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.system),
                 isFirst: true,
               ),
               Divider(height: 1, color: c.border),
@@ -46,7 +46,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.light_mode_outlined,
                 selected: themeMode == ThemeMode.light,
                 onTap: () =>
-                    ref.read(themeModeProvider.notifier).state = ThemeMode.light,
+                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.light),
               ),
               Divider(height: 1, color: c.border),
               _ThemeTile(
@@ -56,7 +56,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.dark_mode_outlined,
                 selected: themeMode == ThemeMode.dark,
                 onTap: () =>
-                    ref.read(themeModeProvider.notifier).state = ThemeMode.dark,
+                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.dark),
                 isLast: true,
               ),
             ],

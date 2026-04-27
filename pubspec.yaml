@@ -1,6 +1,6 @@
 name: bizdocx
 description: BizDocx - AI-powered business document hub.
-version: 1.0.0+1
+version: 0.1.1+2
 publish_to: none
 
 environment:
@@ -68,3 +68,4 @@ flutter:
   assets:
     - assets/images/logo.png
     - assets/images/logo_small.png
+    - assets/

@@ -34,6 +34,7 @@ abstract class LetterheadTemplates {
       type: DocumentType.letterhead,
       supportsOrientation: false,
       promptInstructions: 'Place the logo in the top right. Contact details should be subtle and right-aligned. A very clean, asymmetrical layout.',
+      isPremium: true,
     ),
   ];
 }

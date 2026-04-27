@@ -44,7 +44,7 @@ class _DocumentViewerScreenState
       _webCtrl = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(Colors.white)
-        ..enableZoom(true) // Ensure zooming is enabled for fixed-width docs
+        ..enableZoom(true)
         ..setNavigationDelegate(NavigationDelegate(
           onPageFinished: (_) => setState(() => _webReady = true),
         ))
@@ -207,11 +207,15 @@ class _DocumentViewerScreenState
               .cancel(),
         ),
       if (genState.hasError)
-        _ErrorBanner(
+        _SmartErrorBanner(
           error: genState.error.toString(),
           onDismiss: () => ref
               .read(documentGenerationProvider(_asset.portfolioId).notifier)
               .reset(),
+          onUpgrade: () {
+            ref.read(documentGenerationProvider(_asset.portfolioId).notifier).reset();
+            context.push('/settings/subscription');
+          },
         ),
     ]);
   }
@@ -394,44 +398,82 @@ class _Chip extends StatelessWidget {
   }
 }
 
-// ── Error Banner ──────────────────────────────────────────────────────────────
+// ── Smart Error Banner ────────────────────────────────────────────────────────
 
-class _ErrorBanner extends StatelessWidget {
-  const _ErrorBanner({required this.error, required this.onDismiss});
+class _SmartErrorBanner extends StatelessWidget {
+  const _SmartErrorBanner({
+    required this.error, 
+    required this.onDismiss,
+    required this.onUpgrade,
+  });
+  
   final String error;
   final VoidCallback onDismiss;
+  final VoidCallback onUpgrade;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return GestureDetector(
-      onTap: onDismiss,
-      child: Container(
-        color: c.overlayBarrier,
-        child: Center(
-          child: Container(
-            margin: const EdgeInsets.all(32),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: c.card,
-              borderRadius: BorderRadius.circular(16),
+    final isLimitError = error.contains('limit') || error.contains('credits');
+
+    return Material(
+      type: MaterialType.transparency,
+      child: GestureDetector(
+        onTap: onDismiss,
+        child: Container(
+          color: c.overlayBarrier,
+          child: Center(
+            child: Container(
+              margin: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: c.card,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Icon(
+                  isLimitError ? Icons.stars_rounded : Icons.error_outline,
+                  color: isLimitError ? const Color(0xFFFFD60A) : AppColors.error, 
+                  size: 48
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  isLimitError ? 'Limit Reached' : 'Operation Failed',
+                  style: Theme.of(context).textTheme.titleLarge
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  error.replaceAll('Exception: ', ''),
+                  style: TextStyle(
+                      color: isLimitError ? c.textSecondary : AppColors.error, 
+                      fontSize: 14,
+                      height: 1.5
+                  ),
+                  textAlign: TextAlign.center
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: onDismiss, 
+                        child: const Text('Dismiss')
+                      ),
+                    ),
+                    if (isLimitError) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: onUpgrade, 
+                          style: FilledButton.styleFrom(backgroundColor: const Color(0xFFFF6B35)),
+                          child: const Text('View Plans')
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ]),
             ),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.error_outline,
-                  color: AppColors.error, size: 36),
-              const SizedBox(height: 16),
-              Text('Operation Failed',
-                  style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 8),
-              Text(error,
-                  style: const TextStyle(
-                      color: AppColors.error, fontSize: 13),
-                  textAlign: TextAlign.center),
-              const SizedBox(height: 20),
-              FilledButton(
-                  onPressed: onDismiss,
-                  child: const Text('Dismiss')),
-            ]),
           ),
         ),
       ),

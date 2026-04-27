@@ -26,6 +26,7 @@ abstract class LogoTemplates {
       type: DocumentType.logo,
       promptInstructions: 'Enclose the brand mark and text within a shape (circle, shield, hexagon). Professional, established, and traditional feel.',
       supportedAspectRatios: ['1:1'],
+      isPremium: true,
     ),
     DocumentTemplate(
       id: 'logo-monogram',
@@ -42,6 +43,7 @@ abstract class LogoTemplates {
       type: DocumentType.logo,
       promptInstructions: 'Use geometric patterns, sharp lines, and futuristic fonts. Suggests innovation, speed, and precision.',
       supportedAspectRatios: ['1:1', '3:2'],
+      isPremium: true,
     ),
   ];
 }

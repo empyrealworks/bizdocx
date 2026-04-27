@@ -6,6 +6,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/firebase_service.dart';
+import '../widgets/confirm_dialog.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -57,6 +58,22 @@ class SettingsScreen extends ConsumerWidget {
                 selected: themeMode == ThemeMode.dark,
                 onTap: () =>
                     ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.dark),
+                isLast: true,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 32),
+          _SectionHeader(context, 'Subscription'),
+          const SizedBox(height: 8),
+          _card(
+            context,
+            children: [
+              _ActionTile(
+                label: 'Plans & Pricing',
+                icon: Icons.star_outline_rounded,
+                onTap: () => context.push('/settings/subscription'),
+                isFirst: true,
                 isLast: true,
               ),
             ],
@@ -120,42 +137,29 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmDeleteAccount(BuildContext context) async {
-    final c = context.colors;
-    final ok = await showDialog<bool>(
+  void _confirmDeleteAccount(BuildContext context) {
+    showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Account & Data?'),
-        content: const Text(
-          'This will permanently delete your account and all associated portfolios and documents. This action cannot be undone.',
-          style: TextStyle(fontSize: 14, height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: TextStyle(color: c.textBody)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete Everything', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
+      builder: (ctx) => ConfirmDialog(
+        title: 'Delete Account?',
+        message: 'This will permanently delete your account and all associated portfolios and documents. This action cannot be undone.',
+        actionLabel: 'Delete Everything',
+        isDestructive: true,
+        icon: Icons.delete_forever_outlined,
+        onConfirm: () async {
+          try {
+            await FirebaseService.instance.deleteUserAccount();
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text('Deletion failed. You may need to re-authenticate: $e'),
+                backgroundColor: AppColors.error,
+              ));
+            }
+          }
+        },
       ),
     );
-
-    if (ok == true) {
-      try {
-        await FirebaseService.instance.deleteUserAccount();
-        // The router will automatically redirect to auth because the auth state changed.
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Deletion failed. You may need to re-authenticate: $e'),
-            backgroundColor: AppColors.error,
-          ));
-        }
-      }
-    }
   }
 
   Widget _card(BuildContext context, {required List<Widget> children}) {

@@ -14,8 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DocumentTemplate {
 
- String get id; String get name; String get description; DocumentType get type; String get promptInstructions; String? get sampleImageUrl;// URL or Storage path for the sample image
- List<String> get supportedAspectRatios; bool get supportsOrientation;
+ String get id; String get name; String get description; DocumentType get type; String get promptInstructions; String? get sampleImageUrl; List<String> get supportedAspectRatios; bool get supportsOrientation; bool get isPremium;
 /// Create a copy of DocumentTemplate
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -26,16 +25,16 @@ $DocumentTemplateCopyWith<DocumentTemplate> get copyWith => _$DocumentTemplateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DocumentTemplate&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.type, type) || other.type == type)&&(identical(other.promptInstructions, promptInstructions) || other.promptInstructions == promptInstructions)&&(identical(other.sampleImageUrl, sampleImageUrl) || other.sampleImageUrl == sampleImageUrl)&&const DeepCollectionEquality().equals(other.supportedAspectRatios, supportedAspectRatios)&&(identical(other.supportsOrientation, supportsOrientation) || other.supportsOrientation == supportsOrientation));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DocumentTemplate&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.type, type) || other.type == type)&&(identical(other.promptInstructions, promptInstructions) || other.promptInstructions == promptInstructions)&&(identical(other.sampleImageUrl, sampleImageUrl) || other.sampleImageUrl == sampleImageUrl)&&const DeepCollectionEquality().equals(other.supportedAspectRatios, supportedAspectRatios)&&(identical(other.supportsOrientation, supportsOrientation) || other.supportsOrientation == supportsOrientation)&&(identical(other.isPremium, isPremium) || other.isPremium == isPremium));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description,type,promptInstructions,sampleImageUrl,const DeepCollectionEquality().hash(supportedAspectRatios),supportsOrientation);
+int get hashCode => Object.hash(runtimeType,id,name,description,type,promptInstructions,sampleImageUrl,const DeepCollectionEquality().hash(supportedAspectRatios),supportsOrientation,isPremium);
 
 @override
 String toString() {
-  return 'DocumentTemplate(id: $id, name: $name, description: $description, type: $type, promptInstructions: $promptInstructions, sampleImageUrl: $sampleImageUrl, supportedAspectRatios: $supportedAspectRatios, supportsOrientation: $supportsOrientation)';
+  return 'DocumentTemplate(id: $id, name: $name, description: $description, type: $type, promptInstructions: $promptInstructions, sampleImageUrl: $sampleImageUrl, supportedAspectRatios: $supportedAspectRatios, supportsOrientation: $supportsOrientation, isPremium: $isPremium)';
 }
 
 
@@ -46,7 +45,7 @@ abstract mixin class $DocumentTemplateCopyWith<$Res>  {
   factory $DocumentTemplateCopyWith(DocumentTemplate value, $Res Function(DocumentTemplate) _then) = _$DocumentTemplateCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String description, DocumentType type, String promptInstructions, String? sampleImageUrl, List<String> supportedAspectRatios, bool supportsOrientation
+ String id, String name, String description, DocumentType type, String promptInstructions, String? sampleImageUrl, List<String> supportedAspectRatios, bool supportsOrientation, bool isPremium
 });
 
 
@@ -63,7 +62,7 @@ class _$DocumentTemplateCopyWithImpl<$Res>
 
 /// Create a copy of DocumentTemplate
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? description = null,Object? type = null,Object? promptInstructions = null,Object? sampleImageUrl = freezed,Object? supportedAspectRatios = null,Object? supportsOrientation = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? description = null,Object? type = null,Object? promptInstructions = null,Object? sampleImageUrl = freezed,Object? supportedAspectRatios = null,Object? supportsOrientation = null,Object? isPremium = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -73,6 +72,7 @@ as DocumentType,promptInstructions: null == promptInstructions ? _self.promptIns
 as String,sampleImageUrl: freezed == sampleImageUrl ? _self.sampleImageUrl : sampleImageUrl // ignore: cast_nullable_to_non_nullable
 as String?,supportedAspectRatios: null == supportedAspectRatios ? _self.supportedAspectRatios : supportedAspectRatios // ignore: cast_nullable_to_non_nullable
 as List<String>,supportsOrientation: null == supportsOrientation ? _self.supportsOrientation : supportsOrientation // ignore: cast_nullable_to_non_nullable
+as bool,isPremium: null == isPremium ? _self.isPremium : isPremium // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -158,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String description,  DocumentType type,  String promptInstructions,  String? sampleImageUrl,  List<String> supportedAspectRatios,  bool supportsOrientation)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String description,  DocumentType type,  String promptInstructions,  String? sampleImageUrl,  List<String> supportedAspectRatios,  bool supportsOrientation,  bool isPremium)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DocumentTemplate() when $default != null:
-return $default(_that.id,_that.name,_that.description,_that.type,_that.promptInstructions,_that.sampleImageUrl,_that.supportedAspectRatios,_that.supportsOrientation);case _:
+return $default(_that.id,_that.name,_that.description,_that.type,_that.promptInstructions,_that.sampleImageUrl,_that.supportedAspectRatios,_that.supportsOrientation,_that.isPremium);case _:
   return orElse();
 
 }
@@ -179,10 +179,10 @@ return $default(_that.id,_that.name,_that.description,_that.type,_that.promptIns
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String description,  DocumentType type,  String promptInstructions,  String? sampleImageUrl,  List<String> supportedAspectRatios,  bool supportsOrientation)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String description,  DocumentType type,  String promptInstructions,  String? sampleImageUrl,  List<String> supportedAspectRatios,  bool supportsOrientation,  bool isPremium)  $default,) {final _that = this;
 switch (_that) {
 case _DocumentTemplate():
-return $default(_that.id,_that.name,_that.description,_that.type,_that.promptInstructions,_that.sampleImageUrl,_that.supportedAspectRatios,_that.supportsOrientation);case _:
+return $default(_that.id,_that.name,_that.description,_that.type,_that.promptInstructions,_that.sampleImageUrl,_that.supportedAspectRatios,_that.supportsOrientation,_that.isPremium);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +199,10 @@ return $default(_that.id,_that.name,_that.description,_that.type,_that.promptIns
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String description,  DocumentType type,  String promptInstructions,  String? sampleImageUrl,  List<String> supportedAspectRatios,  bool supportsOrientation)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String description,  DocumentType type,  String promptInstructions,  String? sampleImageUrl,  List<String> supportedAspectRatios,  bool supportsOrientation,  bool isPremium)?  $default,) {final _that = this;
 switch (_that) {
 case _DocumentTemplate() when $default != null:
-return $default(_that.id,_that.name,_that.description,_that.type,_that.promptInstructions,_that.sampleImageUrl,_that.supportedAspectRatios,_that.supportsOrientation);case _:
+return $default(_that.id,_that.name,_that.description,_that.type,_that.promptInstructions,_that.sampleImageUrl,_that.supportedAspectRatios,_that.supportsOrientation,_that.isPremium);case _:
   return null;
 
 }
@@ -214,7 +214,7 @@ return $default(_that.id,_that.name,_that.description,_that.type,_that.promptIns
 
 
 class _DocumentTemplate implements DocumentTemplate {
-  const _DocumentTemplate({required this.id, required this.name, required this.description, required this.type, required this.promptInstructions, this.sampleImageUrl, final  List<String> supportedAspectRatios = const [], this.supportsOrientation = true}): _supportedAspectRatios = supportedAspectRatios;
+  const _DocumentTemplate({required this.id, required this.name, required this.description, required this.type, required this.promptInstructions, this.sampleImageUrl, final  List<String> supportedAspectRatios = const [], this.supportsOrientation = true, this.isPremium = false}): _supportedAspectRatios = supportedAspectRatios;
   
 
 @override final  String id;
@@ -223,9 +223,7 @@ class _DocumentTemplate implements DocumentTemplate {
 @override final  DocumentType type;
 @override final  String promptInstructions;
 @override final  String? sampleImageUrl;
-// URL or Storage path for the sample image
  final  List<String> _supportedAspectRatios;
-// URL or Storage path for the sample image
 @override@JsonKey() List<String> get supportedAspectRatios {
   if (_supportedAspectRatios is EqualUnmodifiableListView) return _supportedAspectRatios;
   // ignore: implicit_dynamic_type
@@ -233,6 +231,7 @@ class _DocumentTemplate implements DocumentTemplate {
 }
 
 @override@JsonKey() final  bool supportsOrientation;
+@override@JsonKey() final  bool isPremium;
 
 /// Create a copy of DocumentTemplate
 /// with the given fields replaced by the non-null parameter values.
@@ -244,16 +243,16 @@ _$DocumentTemplateCopyWith<_DocumentTemplate> get copyWith => __$DocumentTemplat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DocumentTemplate&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.type, type) || other.type == type)&&(identical(other.promptInstructions, promptInstructions) || other.promptInstructions == promptInstructions)&&(identical(other.sampleImageUrl, sampleImageUrl) || other.sampleImageUrl == sampleImageUrl)&&const DeepCollectionEquality().equals(other._supportedAspectRatios, _supportedAspectRatios)&&(identical(other.supportsOrientation, supportsOrientation) || other.supportsOrientation == supportsOrientation));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DocumentTemplate&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.type, type) || other.type == type)&&(identical(other.promptInstructions, promptInstructions) || other.promptInstructions == promptInstructions)&&(identical(other.sampleImageUrl, sampleImageUrl) || other.sampleImageUrl == sampleImageUrl)&&const DeepCollectionEquality().equals(other._supportedAspectRatios, _supportedAspectRatios)&&(identical(other.supportsOrientation, supportsOrientation) || other.supportsOrientation == supportsOrientation)&&(identical(other.isPremium, isPremium) || other.isPremium == isPremium));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description,type,promptInstructions,sampleImageUrl,const DeepCollectionEquality().hash(_supportedAspectRatios),supportsOrientation);
+int get hashCode => Object.hash(runtimeType,id,name,description,type,promptInstructions,sampleImageUrl,const DeepCollectionEquality().hash(_supportedAspectRatios),supportsOrientation,isPremium);
 
 @override
 String toString() {
-  return 'DocumentTemplate(id: $id, name: $name, description: $description, type: $type, promptInstructions: $promptInstructions, sampleImageUrl: $sampleImageUrl, supportedAspectRatios: $supportedAspectRatios, supportsOrientation: $supportsOrientation)';
+  return 'DocumentTemplate(id: $id, name: $name, description: $description, type: $type, promptInstructions: $promptInstructions, sampleImageUrl: $sampleImageUrl, supportedAspectRatios: $supportedAspectRatios, supportsOrientation: $supportsOrientation, isPremium: $isPremium)';
 }
 
 
@@ -264,7 +263,7 @@ abstract mixin class _$DocumentTemplateCopyWith<$Res> implements $DocumentTempla
   factory _$DocumentTemplateCopyWith(_DocumentTemplate value, $Res Function(_DocumentTemplate) _then) = __$DocumentTemplateCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String description, DocumentType type, String promptInstructions, String? sampleImageUrl, List<String> supportedAspectRatios, bool supportsOrientation
+ String id, String name, String description, DocumentType type, String promptInstructions, String? sampleImageUrl, List<String> supportedAspectRatios, bool supportsOrientation, bool isPremium
 });
 
 
@@ -281,7 +280,7 @@ class __$DocumentTemplateCopyWithImpl<$Res>
 
 /// Create a copy of DocumentTemplate
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? description = null,Object? type = null,Object? promptInstructions = null,Object? sampleImageUrl = freezed,Object? supportedAspectRatios = null,Object? supportsOrientation = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? description = null,Object? type = null,Object? promptInstructions = null,Object? sampleImageUrl = freezed,Object? supportedAspectRatios = null,Object? supportsOrientation = null,Object? isPremium = null,}) {
   return _then(_DocumentTemplate(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -291,6 +290,7 @@ as DocumentType,promptInstructions: null == promptInstructions ? _self.promptIns
 as String,sampleImageUrl: freezed == sampleImageUrl ? _self.sampleImageUrl : sampleImageUrl // ignore: cast_nullable_to_non_nullable
 as String?,supportedAspectRatios: null == supportedAspectRatios ? _self._supportedAspectRatios : supportedAspectRatios // ignore: cast_nullable_to_non_nullable
 as List<String>,supportsOrientation: null == supportsOrientation ? _self.supportsOrientation : supportsOrientation // ignore: cast_nullable_to_non_nullable
+as bool,isPremium: null == isPremium ? _self.isPremium : isPremium // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

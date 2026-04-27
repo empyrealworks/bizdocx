@@ -11,8 +11,9 @@ abstract class DocumentTemplate with _$DocumentTemplate {
     required String description,
     required DocumentType type,
     required String promptInstructions,
-    String? sampleImageUrl, // URL or Storage path for the sample image
+    String? sampleImageUrl,
     @Default([]) List<String> supportedAspectRatios,
     @Default(true) bool supportsOrientation,
+    @Default(false) bool isPremium, // New field for tier restriction
   }) = _DocumentTemplate;
 }

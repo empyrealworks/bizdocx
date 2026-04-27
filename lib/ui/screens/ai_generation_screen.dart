@@ -7,7 +7,9 @@ import '../../core/constants/templates/document_templates.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../models/document_asset.dart';
 import '../../models/document_template.dart';
+import '../../models/user_profile.dart';
 import '../../providers/document_generation_provider.dart';
+import '../../services/firebase_service.dart';
 import '../widgets/generation_state_overlay.dart';
 import '../widgets/template_thumbnails.dart';
 
@@ -65,6 +67,14 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
       return;
     }
 
+    final fb = FirebaseService.instance;
+    final profile = await fb.fetchProfile();
+    
+    if (_selectedTemplate?.isPremium == true && profile.isFree) {
+      _showUpgradePrompt('Premium Template', 'This template is only available for Pro and Premium users. Upgrade now to unlock professional designs and remove watermarks.');
+      return;
+    }
+
     final notifier =
     ref.read(documentGenerationProvider(widget.portfolioId).notifier);
     await Future.delayed(const Duration(milliseconds: 300));
@@ -85,6 +95,26 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
         extra: asset,
       );
     }
+  }
+
+  void _showUpgradePrompt(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Maybe Later')),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.push('/settings/subscription');
+            },
+            child: const Text('View Plans'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -212,11 +242,15 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                 .cancel(),
           ),
         if (genState.hasError)
-          _ErrorOverlay(
+          _SmartErrorOverlay(
             error: genState.error.toString(),
             onDismiss: () => ref
                 .read(documentGenerationProvider(widget.portfolioId).notifier)
                 .reset(),
+            onUpgrade: () {
+               ref.read(documentGenerationProvider(widget.portfolioId).notifier).reset();
+               context.push('/settings/subscription');
+            },
           ),
         if (genState.isCancelled)
           _CancelledOverlay(
@@ -284,7 +318,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
 
 // ── Template Picker ─────────────────────────────────────────────────────────
 
-class _TemplatePicker extends StatelessWidget {
+class _TemplatePicker extends ConsumerWidget {
   const _TemplatePicker({
     required this.templates,
     required this.selected,
@@ -296,7 +330,7 @@ class _TemplatePicker extends StatelessWidget {
   final ValueChanged<DocumentTemplate> onSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (templates.isEmpty) return const Text('No templates available for this category.');
     final c = context.colors;
 
@@ -315,10 +349,37 @@ class _TemplatePicker extends StatelessWidget {
             child: Column(
               children: [
                 Expanded(
-                  child: TemplateThumbnail(
-                    templateId: t.id,
-                    type: t.type,
-                    isSelected: isActive,
+                  child: Stack(
+                    children: [
+                      TemplateThumbnail(
+                        templateId: t.id,
+                        type: t.type,
+                        isSelected: isActive,
+                      ),
+                      if (t.isPremium)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFD60A),
+                              borderRadius: BorderRadius.circular(4),
+                              boxShadow: [
+                                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                              ],
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.star_rounded, size: 10, color: Colors.black),
+                                SizedBox(width: 2),
+                                Text('PRO', style: TextStyle(color: Colors.black, fontSize: 8, fontWeight: FontWeight.w900)),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -740,16 +801,24 @@ class _TypeSelector extends StatelessWidget {
   }
 }
 
-class _ErrorOverlay extends StatelessWidget {
-  const _ErrorOverlay({required this.error, required this.onDismiss});
+class _SmartErrorOverlay extends StatelessWidget {
+  const _SmartErrorOverlay({
+    required this.error, 
+    required this.onDismiss, 
+    required this.onUpgrade
+  });
+  
   final String error;
   final VoidCallback onDismiss;
+  final VoidCallback onUpgrade;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return GestureDetector(
-      onTap: onDismiss,
+    final isLimitError = error.contains('limit') || error.contains('credits');
+    
+    return Material(
+      type: MaterialType.transparency,
       child: Container(
         color: c.overlayBarrier,
         child: Center(
@@ -763,19 +832,47 @@ class _ErrorOverlay extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline,
-                    color: AppColors.error, size: 36),
+                Icon(
+                  isLimitError ? Icons.stars_rounded : Icons.error_outline,
+                  color: isLimitError ? const Color(0xFFFFD60A) : AppColors.error, 
+                  size: 48
+                ),
                 const SizedBox(height: 16),
-                Text('Generation Failed',
-                    style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Text(error,
-                    style: const TextStyle(
-                        color: AppColors.error, fontSize: 13),
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 20),
-                FilledButton(
-                    onPressed: onDismiss, child: const Text('Dismiss')),
+                Text(
+                  isLimitError ? 'Limit Reached' : 'Generation Failed',
+                  style: Theme.of(context).textTheme.titleLarge
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  error.replaceAll('Exception: ', ''),
+                  style: TextStyle(
+                      color: isLimitError ? c.textSecondary : AppColors.error, 
+                      fontSize: 14,
+                      height: 1.5
+                  ),
+                  textAlign: TextAlign.center
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: onDismiss, 
+                        child: const Text('Dismiss')
+                      ),
+                    ),
+                    if (isLimitError) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: onUpgrade, 
+                          style: FilledButton.styleFrom(backgroundColor: const Color(0xFFFF6B35)),
+                          child: const Text('View Plans')
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ],
             ),
           ),
@@ -792,34 +889,37 @@ class _CancelledOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return GestureDetector(
-      onTap: onDismiss,
-      child: Container(
-        color: c.overlayBarrier,
-        child: Center(
-          child: Container(
-            margin: const EdgeInsets.all(32),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: c.card,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.cancel_outlined,
-                    color: c.textMuted, size: 36),
-                const SizedBox(height: 16),
-                Text('Generation Cancelled',
-                    style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Text('The operation was cancelled by the user.',
-                    style: TextStyle(color: c.textMuted, fontSize: 14),
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 20),
-                FilledButton(
-                    onPressed: onDismiss, child: const Text('Dismiss')),
-              ],
+    return Material(
+      type: MaterialType.transparency,
+      child: GestureDetector(
+        onTap: onDismiss,
+        child: Container(
+          color: c.overlayBarrier,
+          child: Center(
+            child: Container(
+              margin: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: c.card,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.cancel_outlined,
+                      color: c.textMuted, size: 36),
+                  const SizedBox(height: 16),
+                  Text('Generation Cancelled',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  Text('The operation was cancelled by the user.',
+                      style: TextStyle(color: c.textMuted, fontSize: 14),
+                      textAlign: TextAlign.center),
+                  const SizedBox(height: 20),
+                  FilledButton(
+                      onPressed: onDismiss, child: const Text('Dismiss')),
+                ],
+              ),
             ),
           ),
         ),

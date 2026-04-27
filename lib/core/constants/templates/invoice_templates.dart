@@ -23,6 +23,7 @@ abstract class InvoiceTemplates {
       description: 'Striking design with brand colors.',
       type: DocumentType.invoice,
       promptInstructions: 'Use bold typography and brand color backgrounds for table headers. Logo should be large and centered. Total amount should be highlighted in a colored box.',
+      isPremium: true,
     ),
     DocumentTemplate(
       id: 'inv-service',
@@ -44,6 +45,7 @@ abstract class InvoiceTemplates {
       description: 'Elegant serif fonts and gold/dark accents.',
       type: DocumentType.invoice,
       promptInstructions: 'Use premium serif fonts for headers. Incorporate subtle gold or charcoal accents. Ample white space. Small, elegant logo placement.',
+      isPremium: true,
     ),
   ];
 }

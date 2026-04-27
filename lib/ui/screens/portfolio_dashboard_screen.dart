@@ -4,44 +4,57 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/extensions/context_extensions.dart';
 import '../../models/business_portfolio.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/portfolio_provider.dart';
+import '../../providers/profile_provider.dart';
 import '../../services/firebase_service.dart';
+import '../../models/user_profile.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/portfolio_card.dart';
 import 'create_portfolio_sheet.dart';
 
-class PortfolioDashboardScreen extends ConsumerWidget {
+class PortfolioDashboardScreen extends ConsumerStatefulWidget {
   const PortfolioDashboardScreen({super.key});
 
-  Future<void> _confirmSignOut(BuildContext context) async {
-    final c = context.colors;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Sign Out?'),
-        content: const Text('Are you sure you want to sign out of your account?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: TextStyle(color: c.textBody)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+  @override
+  ConsumerState<PortfolioDashboardScreen> createState() => _PortfolioDashboardScreenState();
+}
 
-    if (ok == true) {
-      await FirebaseService.instance.signOut();
+class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureProfileExists();
+    });
+  }
+
+  Future<void> _ensureProfileExists() async {
+    final user = ref.read(currentUserProvider);
+    if (user != null) {
+      await FirebaseService.instance.ensureProfile(user);
     }
   }
 
+  void _confirmSignOut(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => ConfirmDialog(
+        title: 'Sign Out?',
+        message: 'Are you sure you want to sign out of your account?',
+        actionLabel: 'Sign Out',
+        icon: Icons.logout_rounded,
+        onConfirm: () => FirebaseService.instance.signOut(),
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final c = context.colors;
     final isDark = context.isDark;
     final portfoliosAsync = ref.watch(portfolioListProvider);
+    final profileAsync = ref.watch(userProfileProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -52,7 +65,6 @@ class PortfolioDashboardScreen extends ConsumerWidget {
               height: 32,
               width: 32,
               fit: BoxFit.contain,
-              // Tint small logo to white in dark mode
               color: isDark ? Colors.white : null,
               colorBlendMode: isDark ? BlendMode.srcIn : null,
             ),
@@ -61,6 +73,11 @@ class PortfolioDashboardScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          profileAsync.when(
+            data: (p) => p == null ? const SizedBox() : _TierBadge(tier: p.tier),
+            loading: () => const SizedBox(),
+            error: (_, __) => const SizedBox(),
+          ),
           IconButton(
             icon: Icon(Icons.settings_outlined, size: 20, color: c.iconPrimary),
             tooltip: 'Settings',
@@ -98,6 +115,36 @@ class PortfolioDashboardScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       builder: (_) => const CreatePortfolioSheet(),
+    );
+  }
+}
+
+class _TierBadge extends StatelessWidget {
+  const _TierBadge({required this.tier});
+  final UserTier tier;
+
+  @override
+  Widget build(BuildContext context) {
+    if (tier == UserTier.free) return const SizedBox();
+    
+    return GestureDetector(
+      onTap: () => context.push('/settings/subscription'),
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFD60A),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          tier.name.toUpperCase(),
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
     );
   }
 }

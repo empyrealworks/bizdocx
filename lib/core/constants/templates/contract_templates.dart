@@ -30,6 +30,7 @@ abstract class ContractTemplates {
       description: 'Focused on IP and secrets.',
       type: DocumentType.contract,
       promptInstructions: 'Strict formal layout. Clear definitions of "Confidential Information". Emphasize obligations and duration of secrecy.',
+      isPremium: true,
     ),
     DocumentTemplate(
       id: 'con-sow',
@@ -37,6 +38,7 @@ abstract class ContractTemplates {
       description: 'Detail-heavy project scope.',
       type: DocumentType.contract,
       promptInstructions: 'Focus on deliverables, milestones, and acceptance criteria. Use tables for technical specifications and project schedules.',
+      isPremium: true,
     ),
   ];
 }

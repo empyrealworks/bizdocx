@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../models/document_asset.dart';
 import '../models/user_context.dart';
 import '../models/document_template.dart';
+import '../models/user_profile.dart';
 import '../services/firebase_service.dart';
 import '../services/gemini_rag_service.dart';
 import '../services/local_cache_service.dart';
@@ -23,6 +24,7 @@ StreamProvider.family.autoDispose<List<DocumentAsset>, String>(
 enum GenerationPhase {
   idle,
   fetchingContext,
+  checkingLimits,
   generating,
   converting,
   saving,
@@ -99,6 +101,11 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     try {
       state = const GenerationState(phase: GenerationPhase.fetchingContext);
       final context = await fb.fetchContext(_portfolioId);
+      _checkCancelled();
+
+      // NEW: Tier & Usage Checking
+      state = const GenerationState(phase: GenerationPhase.checkingLimits);
+      await fb.trackUsage(pipeline);
       _checkCancelled();
 
       state = const GenerationState(phase: GenerationPhase.generating);
@@ -281,6 +288,11 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       // 1. Fetch context
       state = const GenerationState(phase: GenerationPhase.fetchingContext);
       final context = await fb.fetchContext(existingAsset.portfolioId);
+      _checkCancelled();
+
+      // NEW: Limit check for refinement (treat as structural)
+      state = const GenerationState(phase: GenerationPhase.checkingLimits);
+      await fb.trackUsage(AssetPipeline.structural);
       _checkCancelled();
 
       // 2. Generate refined HTML

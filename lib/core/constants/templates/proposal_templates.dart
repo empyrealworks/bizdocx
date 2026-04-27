@@ -16,6 +16,7 @@ abstract class ProposalTemplates {
       description: 'Visual-heavy artistic flair.',
       type: DocumentType.proposal,
       promptInstructions: 'Use an artistic and airy layout. Larger fonts for key value propositions. Use brand colors for decorative elements like sidebar borders or underline accents.',
+      isPremium: true,
     ),
     DocumentTemplate(
       id: 'prop-technical',
@@ -30,6 +31,7 @@ abstract class ProposalTemplates {
       description: 'Modern, energetic, and concise.',
       type: DocumentType.proposal,
       promptInstructions: 'Use bold typography and a modern, energetic feel. Include sections for "The Problem", "The Solution", and "Market Opportunity".',
+      isPremium: true,
     ),
     DocumentTemplate(
       id: 'prop-roadmap',

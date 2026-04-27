@@ -34,6 +34,7 @@ abstract class IconTemplates {
       type: DocumentType.icon,
       promptInstructions: 'Use translucent "frosted glass" layers with subtle shadows and bright accent colors. Very modern and premium.',
       supportedAspectRatios: ['1:1'],
+      isPremium: true,
     ),
     DocumentTemplate(
       id: 'icon-isometric',
@@ -42,6 +43,7 @@ abstract class IconTemplates {
       type: DocumentType.icon,
       promptInstructions: 'Render the icon with a 3D isometric perspective. Shows depth and physical volume.',
       supportedAspectRatios: ['1:1'],
+      isPremium: true,
     ),
   ];
 }

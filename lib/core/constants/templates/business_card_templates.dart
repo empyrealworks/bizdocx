@@ -18,6 +18,7 @@ abstract class BusinessCardTemplates {
       type: DocumentType.businessCard,
       promptInstructions: 'Incorporate geometric shapes or patterns using brand colors. Dynamic placement of text, perhaps aligned to one edge.',
       supportedAspectRatios: ['3.5:2', '2:3.5'],
+      isPremium: true,
     ),
     DocumentTemplate(
       id: 'bc-classic',
@@ -34,6 +35,7 @@ abstract class BusinessCardTemplates {
       type: DocumentType.businessCard,
       promptInstructions: 'Designed specifically for vertical orientation. Use a top-down information hierarchy. Place the logo at the top or bottom as a focal point.',
       supportedAspectRatios: ['2:3.5'],
+      isPremium: true,
     ),
     DocumentTemplate(
       id: 'bc-social',
@@ -42,6 +44,7 @@ abstract class BusinessCardTemplates {
       type: DocumentType.businessCard,
       promptInstructions: 'Include clear icons and space for social media handles. Leave a dedicated spot for a QR code. Ideal for creators and modern brands.',
       supportedAspectRatios: ['3.5:2', '2:3.5', '1:1'],
+      isPremium: true,
     ),
   ];
 }

@@ -12,6 +12,7 @@ import '../models/business_portfolio.dart';
 import '../models/document_asset.dart';
 import '../models/document_version.dart';
 import '../models/user_context.dart';
+import '../models/user_profile.dart';
 
 class FirebaseService {
   FirebaseService._();
@@ -33,11 +34,20 @@ class FirebaseService {
     debugPrint('[Firestore] Offline persistence enabled.');
   }
 
-  // ── Auth ─────────────────────────────────────────────────────────────────
+  // ── Auth & Profile ───────────────────────────────────────────────────────
   Stream<User?> get authStateChanges => _auth.authStateChanges();
-  Future<UserCredential> signInAnonymously() => _auth.signInAnonymously();
-  Future<UserCredential> signInWithEmail(String email, String password) =>
-      _auth.signInWithEmailAndPassword(email: email, password: password);
+  
+  Future<UserCredential> signInAnonymously() async {
+    final cred = await _auth.signInAnonymously();
+    await ensureProfile(cred.user!);
+    return cred;
+  }
+  
+  Future<UserCredential> signInWithEmail(String email, String password) async {
+    final cred = await _auth.signInWithEmailAndPassword(email: email, password: password);
+    await ensureProfile(cred.user!);
+    return cred;
+  }
 
   Future<UserCredential> createAccount({
     required String email,
@@ -47,6 +57,7 @@ class FirebaseService {
     final cred = await _auth.createUserWithEmailAndPassword(
         email: email, password: password);
     await cred.user?.updateDisplayName(name);
+    await ensureProfile(cred.user!, name: name);
     return cred;
   }
 
@@ -60,11 +71,104 @@ class FirebaseService {
       final credential =
       GoogleAuthProvider.credential(idToken: googleAuth.idToken);
       final cred = await _auth.signInWithCredential(credential);
+      await ensureProfile(cred.user!);
       return cred;
     } catch (e) {
       debugPrint('[FirebaseService] Google Sign-In error: $e');
       rethrow;
     }
+  }
+
+  Future<void> ensureProfile(User user, {String? name}) async {
+    final doc = _db.doc(FirestorePaths.user(user.uid));
+    final snap = await doc.get();
+    if (!snap.exists) {
+      final profile = UserProfile(
+        uid: user.uid,
+        email: user.email ?? '',
+        displayName: name ?? user.displayName,
+        createdAt: DateTime.now(),
+      );
+      await doc.set(profile.toFirestore());
+      debugPrint('[Profile] Created profile for user ${user.uid}');
+    }
+  }
+
+  Stream<UserProfile?> watchProfile() {
+    return _db
+        .doc(FirestorePaths.user(currentUid))
+        .snapshots()
+        .map((s) => s.exists ? UserProfile.fromFirestore(s) : null);
+  }
+
+  Future<UserProfile> fetchProfile() async {
+    final snap = await _db.doc(FirestorePaths.user(currentUid)).get();
+    if (!snap.exists) {
+      throw Exception('Profile not found');
+    }
+    return UserProfile.fromFirestore(snap);
+  }
+
+  Future<void> updateProfile(UserProfile profile) async {
+    await _db
+        .doc(FirestorePaths.user(profile.uid))
+        .set(profile.toFirestore(), SetOptions(merge: true));
+  }
+
+  // ── Usage Tracking & Credits ─────────────────────────────────────────────
+  
+  /// Checks if the user can perform a generation and deducts credits/increments counters.
+  /// Throws Exception if limits reached.
+  Future<void> trackUsage(AssetPipeline pipeline) async {
+    final docRef = _db.doc(FirestorePaths.user(currentUid));
+    
+    await _db.runTransaction((tx) async {
+      final snap = await tx.get(docRef);
+      if (!snap.exists) throw Exception('User profile not found. Please reload the app.');
+      
+      var profile = UserProfile.fromFirestore(snap);
+      final now = DateTime.now();
+
+      if (profile.isFree) {
+        if (pipeline == AssetPipeline.structural) {
+          // 1 per day
+          if (profile.lastDocGenDate != null && 
+              profile.lastDocGenDate!.year == now.year &&
+              profile.lastDocGenDate!.month == now.month &&
+              profile.lastDocGenDate!.day == now.day) {
+            throw Exception('Free tier limit: 1 document per day. Please upgrade to Pro for more.');
+          }
+          profile = profile.copyWith(
+            dailyDocGens: (profile.dailyDocGens) + 1,
+            lastDocGenDate: now,
+          );
+        } else {
+          // 1 per week
+          if (profile.lastImageGenDate != null && 
+              now.difference(profile.lastImageGenDate!).inDays < 7) {
+            throw Exception('Free tier limit: 1 image per week. Please upgrade to Pro for more.');
+          }
+          profile = profile.copyWith(
+            weeklyImageGens: (profile.weeklyImageGens) + 1,
+            lastImageGenDate: now,
+          );
+        }
+      } else {
+        // Pro/Premium use credits
+        final cost = pipeline == AssetPipeline.structural ? 10 : 25;
+        
+        if (profile.credits < cost) {
+          throw Exception('Insufficient AI credits. Remaining: ${profile.credits}, needed: $cost. Please upgrade or top up.');
+        }
+        
+        profile = profile.copyWith(
+          credits: profile.credits - cost,
+          updatedAt: now,
+        );
+      }
+      
+      tx.update(docRef, profile.toFirestore());
+    });
   }
 
   Future<void> sendPasswordReset(String email) =>
@@ -94,16 +198,17 @@ class FirebaseService {
       // Delete user context
       batch.delete(_db.doc(FirestorePaths.userContextDoc(uid, p.id)));
     }
+
+    // Delete profile
+    batch.delete(_db.doc(FirestorePaths.user(uid)));
     
     await batch.commit();
 
-    // 2. Delete Storage Data (recursive deletion not natively supported, 
-    // but we can delete the user's specific folder structure)
+    // 2. Delete Storage Data
     try {
       final userRef = _storage.ref('users/$uid');
       final list = await userRef.listAll();
       for (final prefix in list.prefixes) {
-        // This is a simplified folder deletion logic
         final folderList = await prefix.listAll();
         for (final item in folderList.items) {
           await item.delete();
@@ -134,6 +239,15 @@ class FirebaseService {
     String targetAudience = '',
   }) async {
     final uid = currentUid;
+    
+    // Check limits
+    final profile = await fetchProfile();
+    final limits = TierLimits.get(profile.tier);
+    final countSnap = await _db.collection(FirestorePaths.portfoliosCol(uid)).count().get();
+    if ((countSnap.count ?? 0) >= limits.maxWorkspaces) {
+      throw Exception('Workspace limit reached for your tier (${profile.tier.name.toUpperCase()}). Please upgrade to add more.');
+    }
+
     final id = _uuid.v4();
     final now = DateTime.now();
     final portfolio = BusinessPortfolio(
@@ -429,7 +543,7 @@ class FirebaseService {
     final uid = currentUid;
     try { await _storage.refFromURL(assetUrl).delete(); } catch (_) {}
     await _db
-        .doc(FirestorePaths.userContextDoc(uid, portfolioId))
+        .doc(FirestorePaths.userContextDoc(currentUid, portfolioId))
         .update({
       'uploadedAssetStoragePaths': FieldValue.arrayRemove([assetUrl]),
       'lastUpdated': Timestamp.now(),

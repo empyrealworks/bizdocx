@@ -15,6 +15,7 @@ import '../screens/settings_screen.dart';
 import '../screens/forgot_password_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../screens/contact_us_screen.dart';
+import '../screens/subscription_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshListenable = ValueNotifier<int>(0);
@@ -79,6 +80,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'contact',
             builder: (_, __) => const ContactUsScreen(),
+          ),
+          GoRoute(
+            path: 'subscription',
+            builder: (_, __) => const SubscriptionScreen(),
           ),
         ],
       ),

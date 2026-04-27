@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../providers/portfolio_provider.dart';
 
@@ -39,16 +41,50 @@ class _CreatePortfolioSheetState
         .where((s) => s.isNotEmpty)
         .toList();
 
-    final notifier = ref.read(portfolioNotifierProvider.notifier);
-    await notifier.create(
-      name: _nameCtrl.text.trim(),
-      description: _descCtrl.text.trim(),
-      mission: _missionCtrl.text.trim(),
-      brandColors: colors,
-      targetAudience: _audienceCtrl.text.trim(),
-    );
+    try {
+      final notifier = ref.read(portfolioNotifierProvider.notifier);
+      await notifier.create(
+        name: _nameCtrl.text.trim(),
+        description: _descCtrl.text.trim(),
+        mission: _missionCtrl.text.trim(),
+        brandColors: colors,
+        targetAudience: _audienceCtrl.text.trim(),
+      );
 
-    if (mounted) Navigator.pop(context);
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        final errorStr = e.toString();
+        if (errorStr.contains('limit reached')) {
+          _showUpgradePrompt(errorStr.replaceAll('Exception: ', ''));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorStr), backgroundColor: AppColors.error),
+          );
+        }
+      }
+    }
+  }
+
+  void _showUpgradePrompt(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Limit Reached'),
+        content: Text(message),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Maybe Later')),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Close dialog
+              Navigator.pop(context); // Close sheet
+              context.push('/settings/subscription');
+            },
+            child: const Text('View Plans'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -88,16 +124,20 @@ class _CreatePortfolioSheetState
             const SizedBox(height: 12),
             _field(_colorCtrl, 'Brand Colors (comma-separated hex)'),
             const SizedBox(height: 24),
-            FilledButton(
-              onPressed: state.isLoading ? null : _create,
-              child: state.isLoading
-                  ? SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: c.filledButtonFg),
-              )
-                  : const Text('Create Portfolio'),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: FilledButton(
+                onPressed: state.isLoading ? null : _create,
+                child: state.isLoading
+                    ? SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: c.filledButtonFg),
+                )
+                    : const Text('Create Portfolio', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
             ),
           ],
         ),

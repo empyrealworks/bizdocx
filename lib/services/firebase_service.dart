@@ -7,7 +7,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:uuid/uuid.dart';
 
 import '../core/constants/firestore_paths.dart';
-import '../env/env.dart';
 import '../models/business_portfolio.dart';
 import '../models/document_asset.dart';
 import '../models/document_version.dart';
@@ -88,6 +87,7 @@ class FirebaseService {
         email: user.email ?? '',
         displayName: name ?? user.displayName,
         createdAt: DateTime.now(),
+        subscriptionCredits: 50, // Initial free allowance
       );
       await doc.set(profile.toFirestore());
       debugPrint('[Profile] Created profile for user ${user.uid}');
@@ -117,57 +117,139 @@ class FirebaseService {
 
   // ── Usage Tracking & Credits ─────────────────────────────────────────────
   
-  /// Checks if the user can perform a generation and deducts credits/increments counters.
-  /// Throws Exception if limits reached.
-  Future<void> trackUsage(AssetPipeline pipeline) async {
+  /// Checks if the user can perform an operation and deducts credits.
+  /// Deduction order: Subscription Credits -> Top Up Credits.
+  Future<void> trackUsage({
+    required AssetPipeline pipeline,
+    DocumentType? type,
+    DocumentAsset? existingAsset,
+    bool isFinalImage = false,
+  }) async {
     final docRef = _db.doc(FirestorePaths.user(currentUid));
     
     await _db.runTransaction((tx) async {
       final snap = await tx.get(docRef);
-      if (!snap.exists) throw Exception('User profile not found. Please reload the app.');
+      if (!snap.exists) throw Exception('User profile not found.');
       
       var profile = UserProfile.fromFirestore(snap);
       final now = DateTime.now();
 
-      if (profile.isFree) {
-        if (pipeline == AssetPipeline.structural) {
-          // 1 per day
-          if (profile.lastDocGenDate != null && 
-              profile.lastDocGenDate!.year == now.year &&
-              profile.lastDocGenDate!.month == now.month &&
-              profile.lastDocGenDate!.day == now.day) {
-            throw Exception('Free tier limit: 1 document per day. Please upgrade to Pro for more.');
-          }
-          profile = profile.copyWith(
-            dailyDocGens: (profile.dailyDocGens) + 1,
-            lastDocGenDate: now,
-          );
+      // 1. Calculate Cost
+      int cost = 0;
+      if (pipeline == AssetPipeline.structural) {
+        if (existingAsset == null) {
+          // New generation
+          cost = CreditCosts.getDocCost(type ?? DocumentType.other);
         } else {
-          // 1 per week
-          if (profile.lastImageGenDate != null && 
-              now.difference(profile.lastImageGenDate!).inDays < 7) {
-            throw Exception('Free tier limit: 1 image per week. Please upgrade to Pro for more.');
+          // Refinement
+          if (existingAsset.isComplexType && existingAsset.revisionCount < 3) {
+            cost = 0; // 3 free revisions for Contracts/Proposals
+          } else {
+            cost = CreditCosts.minorRevision;
           }
-          profile = profile.copyWith(
-            weeklyImageGens: (profile.weeklyImageGens) + 1,
-            lastImageGenDate: now,
-          );
         }
       } else {
-        // Pro/Premium use credits
-        final cost = pipeline == AssetPipeline.structural ? 10 : 25;
-        
-        if (profile.credits < cost) {
-          throw Exception('Insufficient AI credits. Remaining: ${profile.credits}, needed: $cost. Please upgrade or top up.');
-        }
-        
-        profile = profile.copyWith(
-          credits: profile.credits - cost,
-          updatedAt: now,
-        );
+        cost = isFinalImage ? CreditCosts.imageFinal : CreditCosts.imageDraft;
       }
+
+      // 2. Check & Deduct
+      if (profile.totalCredits < cost) {
+        throw Exception('Insufficient credits. Need $cost, have ${profile.totalCredits}. Please top up.');
+      }
+
+      int subBalance = profile.subscriptionCredits;
+      int topBalance = profile.topUpCredits;
+
+      if (subBalance >= cost) {
+        subBalance -= cost;
+      } else {
+        int remainder = cost - subBalance;
+        subBalance = 0;
+        topBalance -= remainder;
+      }
+
+      profile = profile.copyWith(
+        subscriptionCredits: subBalance,
+        topUpCredits: topBalance,
+        updatedAt: now,
+      );
       
       tx.update(docRef, profile.toFirestore());
+      
+      // Update revision count if this was a structural refinement
+      if (existingAsset != null && pipeline == AssetPipeline.structural) {
+         final assetRef = _db.doc(FirestorePaths.document(currentUid, existingAsset.portfolioId, existingAsset.id));
+         tx.update(assetRef, {'revisionCount': existingAsset.revisionCount + 1});
+      }
+    });
+  }
+
+  /// Processes a subscription purchase or renewal, applying rollover caps.
+  Future<void> processSubscriptionChange({
+    required UserTier newTier,
+    required DateTime purchaseDate,
+    DateTime? expiryDate,
+  }) async {
+    final docRef = _db.doc(FirestorePaths.user(currentUid));
+    
+    await _db.runTransaction((tx) async {
+      final snap = await tx.get(docRef);
+      final profile = UserProfile.fromFirestore(snap);
+      final now = DateTime.now();
+      
+      // If we've already processed this purchase (based on date), skip
+      if (profile.lastCreditReset != null && !purchaseDate.isAfter(profile.lastCreditReset!)) {
+        // We might still need to update the tier/expiry if they changed
+        if (profile.tier != newTier || profile.subscriptionEndDate != expiryDate) {
+          tx.update(docRef, {
+            'tier': newTier.name,
+            'subscriptionEndDate': expiryDate != null ? Timestamp.fromDate(expiryDate) : null,
+            'updatedAt': Timestamp.now(),
+          });
+        }
+        return;
+      }
+
+      final limits = TierLimits.get(newTier);
+      
+      // Rollover Logic
+      int rolledOver = profile.subscriptionCredits;
+      
+      // Free tier doesn't roll over
+      if (profile.isFree) rolledOver = 0;
+      
+      // Apply rollover cap of the NEW tier
+      if (rolledOver > limits.rolloverCap) {
+        rolledOver = limits.rolloverCap;
+      }
+      
+      // Add new monthly allowance
+      int newBalance = rolledOver + limits.monthlyAllowance;
+      
+      // Final hard cap check
+      if (newBalance > limits.rolloverCap) {
+        newBalance = limits.rolloverCap;
+      }
+
+      final updated = profile.copyWith(
+        tier: newTier,
+        subscriptionCredits: newBalance,
+        lastCreditReset: purchaseDate,
+        subscriptionEndDate: expiryDate,
+        updatedAt: now,
+      );
+      
+      tx.update(docRef, updated.toFirestore());
+      debugPrint('[Subscription] Processed $newTier renewal. New balance: $newBalance');
+    });
+  }
+
+  Future<void> addTopUpCredits(int amount) async {
+    final docRef = _db.doc(FirestorePaths.user(currentUid));
+    await _db.runTransaction((tx) async {
+      final snap = await tx.get(docRef);
+      final profile = UserProfile.fromFirestore(snap);
+      tx.update(docRef, {'topUpCredits': profile.topUpCredits + amount, 'updatedAt': Timestamp.now()});
     });
   }
 
@@ -540,7 +622,6 @@ class FirebaseService {
     required String portfolioId,
     required String assetUrl,
   }) async {
-    final uid = currentUid;
     try { await _storage.refFromURL(assetUrl).delete(); } catch (_) {}
     await _db
         .doc(FirestorePaths.userContextDoc(currentUid, portfolioId))

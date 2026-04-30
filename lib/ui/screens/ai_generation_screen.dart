@@ -9,6 +9,7 @@ import '../../models/document_asset.dart';
 import '../../models/document_template.dart';
 import '../../models/user_profile.dart';
 import '../../providers/document_generation_provider.dart';
+import '../../providers/profile_provider.dart';
 import '../../services/firebase_service.dart';
 import '../widgets/generation_state_overlay.dart';
 import '../widgets/template_thumbnails.dart';
@@ -71,7 +72,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
     final profile = await fb.fetchProfile();
     
     if (_selectedTemplate?.isPremium == true && profile.isFree) {
-      _showUpgradePrompt('Premium Template', 'This template is only available for Pro and Premium users. Upgrade now to unlock professional designs and remove watermarks.');
+      _showUpgradePrompt('Premium Template', 'This template is only available for Solopreneur and Agency users. Upgrade now to unlock professional designs and remove watermarks.');
       return;
     }
 
@@ -117,16 +118,25 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
     );
   }
 
+  int get _currentCost {
+    if (_selectedPipeline == AssetPipeline.structural) {
+      return CreditCosts.getDocCost(_selectedType);
+    } else {
+      return CreditCosts.imageDraft;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final genState =
-    ref.watch(documentGenerationProvider(widget.portfolioId));
+    final genState = ref.watch(documentGenerationProvider(widget.portfolioId));
+    final profile = ref.watch(userProfileProvider).value;
+    // final c = context.colors;
 
     return Stack(
       children: [
         Scaffold(
           appBar: AppBar(
-            title: const Text('Generate Document'),
+            title: const Text('Generate Asset'),
             leading: BackButton(
               onPressed: () =>
                   context.go('/portfolio/${widget.portfolioId}'),
@@ -137,7 +147,10 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionLabel('Document Category'),
+                if (profile != null && profile.totalCredits < 150)
+                   _LowBalanceWarning(balance: profile.totalCredits),
+                
+                _SectionLabel('Category'),
                 const SizedBox(height: 12),
                 _TypeSelector(
                   selected: _selectedType,
@@ -153,7 +166,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                 ),
                 const SizedBox(height: 24),
                 
-                _SectionLabel('Select Template'),
+                _SectionLabel('Style Template'),
                 const SizedBox(height: 12),
                 _TemplatePicker(
                   templates: DocumentTemplates.getByType(_selectedType),
@@ -190,7 +203,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                    const SizedBox(height: 24),
                 ],
 
-                _SectionLabel('Document Title'),
+                _SectionLabel('Asset Title'),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _titleCtrl,
@@ -202,7 +215,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                 _SectionLabel('Prompt'),
                 const SizedBox(height: 8),
                 Text(
-                  'Describe specific details. The template and business context are applied automatically.',
+                  'Describe specific details. The style and context are applied automatically.',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 12),
@@ -220,14 +233,12 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                   child: FilledButton.icon(
                     onPressed: genState.isLoading ? null : _generate,
                     icon: const Icon(Icons.auto_awesome, size: 18),
-                    label: const Text('Generate Document', style: TextStyle(fontWeight: FontWeight.bold),),
+                    label: Text('Generate ($_currentCost Credits)', style: const TextStyle(fontWeight: FontWeight.bold),),
                   ),
                 ),
                 const SizedBox(height: 20),
-                // External editing note (for content-heavy types)
                 if (_externalEditNote(_selectedType) != null)
                   _ExternalEditBanner(note: _externalEditNote(_selectedType)!),
-                // Document field hints
                 _DocumentHints(type: _selectedType),
                 const SizedBox(height: 40),
               ],
@@ -264,55 +275,73 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
 
   String _titleHint(DocumentType t) {
     switch (t) {
-      case DocumentType.invoice:
-        return 'e.g. Invoice for Acme Corp — June 2025';
-      case DocumentType.proposal:
-        return 'e.g. Web Redesign Proposal — Luxe Retail';
-      case DocumentType.letterhead:
-        return 'e.g. Official Letterhead Template';
-      case DocumentType.businessCard:
-        return 'e.g. Business Card — John Doe';
-      case DocumentType.contract:
-        return 'e.g. Service Agreement — Q3 2025';
-      case DocumentType.logo:
-        return 'e.g. Primary Logo Concept';
-      case DocumentType.icon:
-        return 'e.g. App Icon — Blue Minimal';
-      case DocumentType.other:
-        return 'e.g. Company Profile Sheet';
+      case DocumentType.invoice: return 'e.g. Invoice for Acme Corp — June 2025';
+      case DocumentType.proposal: return 'e.g. Web Redesign Proposal — Luxe Retail';
+      case DocumentType.letterhead: return 'e.g. Official Letterhead Template';
+      case DocumentType.businessCard: return 'e.g. Business Card — John Doe';
+      case DocumentType.contract: return 'e.g. Service Agreement — Q3 2025';
+      case DocumentType.logo: return 'e.g. Primary Logo Concept';
+      case DocumentType.icon: return 'e.g. App Icon — Blue Minimal';
+      case DocumentType.other: return 'e.g. Company Profile Sheet';
     }
   }
 
   String _promptHint(DocumentType t) {
     switch (t) {
-      case DocumentType.invoice:
-        return 'e.g. 200 units of ceramic vases at \$45 each. Bill to: Luxe Home Décor Ltd. Due in 30 days.';
-      case DocumentType.proposal:
-        return 'e.g. Full website redesign including UX audit, 5 pages. Timeline: 8 weeks. Budget: \$12,000.';
-      case DocumentType.letterhead:
-        return 'e.g. Formal template with contact details section and signature line at the bottom.';
-      case DocumentType.businessCard:
-        return 'e.g. Sarah Mitchell, Head of Sales. sarah@company.com, +1 555 0123.';
-      case DocumentType.contract:
-        return 'e.g. Freelance design services. Include scope, payment terms, and IP ownership clause.';
-      case DocumentType.logo:
-        return 'e.g. Modern minimalist for a ceramics brand. Use earth tones and vessel shapes.';
-      case DocumentType.icon:
-        return 'e.g. Clean app icon for document management. Blue/white, flat design.';
-      case DocumentType.other:
-        return 'e.g. One-page company profile with mission, services, and team size.';
+      case DocumentType.invoice: return 'e.g. 200 units of ceramic vases at \$45 each. Bill to: Luxe Home Décor Ltd.';
+      case DocumentType.proposal: return 'e.g. Full website redesign including UX audit, 5 pages. Timeline: 8 weeks.';
+      case DocumentType.letterhead: return 'e.g. Formal template with contact details section and signature line.';
+      case DocumentType.businessCard: return 'e.g. Sarah Mitchell, Head of Sales. sarah@company.com, +1 555 0123.';
+      case DocumentType.contract: return 'e.g. Freelance design services. Include scope, payment terms, and IP clause.';
+      case DocumentType.logo: return 'e.g. Modern minimalist for a ceramics brand. Use earth tones and vessel shapes.';
+      case DocumentType.icon: return 'e.g. Clean app icon for document management. Blue/white, flat design.';
+      case DocumentType.other: return 'e.g. One-page company profile with mission, services, and team size.';
     }
   }
 
   String? _externalEditNote(DocumentType t) {
     switch (t) {
       case DocumentType.contract:
-        return 'Contracts require specific legal language and review. BizDocx generates the structure and standard clauses — export as HTML and complete the specifics in Word or Google Docs before signing.';
+        return 'Contracts require specific legal language. BizDocx generates the structure — export and complete specifics in Word or Google Docs.';
       case DocumentType.letterhead:
-        return 'This generates a reusable branded template. Export it and add your letter body content in Word or Google Docs each time you write.';
+        return 'This generates a reusable branded template. Export it and add your letter body content separately.';
       default:
         return null;
     }
+  }
+}
+
+class _LowBalanceWarning extends StatelessWidget {
+  const _LowBalanceWarning({required this.balance});
+  final int balance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFF6B35).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFFF6B35).withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: Color(0xFFFF6B35), size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Running low! ($balance credits remaining). Top up to avoid interruptions.',
+              style: const TextStyle(color: Color(0xFFFF6B35), fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: () => context.push('/settings/subscription'),
+            child: const Text('Top Up', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          )
+        ],
+      ),
+    );
   }
 }
 
@@ -366,7 +395,7 @@ class _TemplatePicker extends ConsumerWidget {
                               color: const Color(0xFFFFD60A),
                               borderRadius: BorderRadius.circular(4),
                               boxShadow: [
-                                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                                BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
                               ],
                             ),
                             child: const Row(

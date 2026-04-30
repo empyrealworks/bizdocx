@@ -71,13 +71,13 @@ class _GetStartedSlideState extends State<GetStartedSlide>
                       height: 100 + _pulse.value * 4,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.success.withOpacity(0.12),
+                        color: AppColors.success.withValues(alpha: 0.12),
                         border: Border.all(
-                            color: AppColors.success.withOpacity(0.4),
+                            color: AppColors.success.withValues(alpha: 0.4),
                             width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.success.withOpacity(0.2),
+                            color: AppColors.success.withValues(alpha: 0.2),
                             blurRadius: 32, spreadRadius: 4,
                           ),
                         ],
@@ -193,7 +193,7 @@ class _CircleRingPainter extends CustomPainter {
     for (int i = 0; i < 3; i++) {
       final r = 60.0 + i * 55.0 + progress * 12.0;
       final paint = Paint()
-        ..color = color.withOpacity(0.04 - i * 0.01)
+        ..color = color.withValues(alpha: 0.04 - i * 0.01)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5;
       canvas.drawCircle(center, r, paint);

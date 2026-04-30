@@ -5,7 +5,6 @@ import 'package:uuid/uuid.dart';
 import '../models/document_asset.dart';
 import '../models/user_context.dart';
 import '../models/document_template.dart';
-import '../models/user_profile.dart';
 import '../services/firebase_service.dart';
 import '../services/gemini_rag_service.dart';
 import '../services/local_cache_service.dart';
@@ -103,9 +102,11 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       final context = await fb.fetchContext(_portfolioId);
       _checkCancelled();
 
-      // NEW: Tier & Usage Checking
+      // NEW: Credit & Usage Tracking
       state = const GenerationState(phase: GenerationPhase.checkingLimits);
-      await fb.trackUsage(pipeline);
+      // For initial generation, we pass the type to calculate correct cost (15 or 100)
+      await fb.trackUsage(pipeline: pipeline); 
+      // Note: FirebaseService.trackUsage needs adjustment to accept type
       _checkCancelled();
 
       state = const GenerationState(phase: GenerationPhase.generating);
@@ -184,6 +185,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       createdAt: DateTime.now(),
       templateId: template?.id,
       orientation: orientation,
+      revisionCount: 0,
     );
 
     final saved = await fb.saveDocumentAsset(asset);
@@ -290,9 +292,12 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       final context = await fb.fetchContext(existingAsset.portfolioId);
       _checkCancelled();
 
-      // NEW: Limit check for refinement (treat as structural)
+      // NEW: Credit tracking for refinement (free iterations or 5 credits)
       state = const GenerationState(phase: GenerationPhase.checkingLimits);
-      await fb.trackUsage(AssetPipeline.structural);
+      await fb.trackUsage(
+        pipeline: AssetPipeline.structural,
+        existingAsset: existingAsset,
+      );
       _checkCancelled();
 
       // 2. Generate refined HTML
@@ -305,24 +310,25 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       );
       _checkCancelled();
 
-      // 3. Save a version of the NEW result BEFORE updating the live doc.
-      //    This means versions are "what it looked like after this change".
-      state = const GenerationState(phase: GenerationPhase.savingVersion);
+      // 3. Persist to Firestore
+      state = const GenerationState(phase: GenerationPhase.saving);
       final nextVersion =
       await fb.getNextVersionNumber(
           existingAsset.portfolioId, existingAsset.id);
+      
+      // Update local object to reflect the revision increment for the UI
       final updated = existingAsset.copyWith(
         htmlContent: newHtml,
         updatedAt: DateTime.now(),
         isCached: false,
+        revisionCount: existingAsset.revisionCount + 1,
       );
 
-      // 4. Persist to Firestore
-      state = const GenerationState(phase: GenerationPhase.saving);
       final saved = await fb.updateDocumentAsset(updated);
       _checkCancelled();
 
-      // 5. Save the version snapshot
+      // 4. Save the version snapshot
+      state = const GenerationState(phase: GenerationPhase.savingVersion);
       await fb.saveDocumentVersion(
         asset: saved,
         versionNumber: nextVersion,

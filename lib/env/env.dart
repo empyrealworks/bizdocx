@@ -16,4 +16,10 @@ abstract class Env {
 
   @EnviedField(varName: 'PDF_ENGINE_URL')
   static final String pdfEngineUrl = _Env.pdfEngineUrl;
+
+  @EnviedField(varName: 'REVENUECAT_ANDROID_KEY')
+  static final String revenueCatAndroidKey = _Env.revenueCatAndroidKey;
+
+  @EnviedField(varName: 'REVENUECAT_IOS_KEY')
+  static final String revenueCatIosKey = _Env.revenueCatIosKey;
 }

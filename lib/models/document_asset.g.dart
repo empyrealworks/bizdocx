@@ -26,6 +26,7 @@ _DocumentAsset _$DocumentAssetFromJson(Map<String, dynamic> json) =>
       templateId: json['templateId'] as String?,
       aspectRatio: json['aspectRatio'] as String?,
       orientation: json['orientation'] as String?,
+      revisionCount: (json['revisionCount'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$DocumentAssetToJson(_DocumentAsset instance) =>
@@ -46,6 +47,7 @@ Map<String, dynamic> _$DocumentAssetToJson(_DocumentAsset instance) =>
       'templateId': instance.templateId,
       'aspectRatio': instance.aspectRatio,
       'orientation': instance.orientation,
+      'revisionCount': instance.revisionCount,
     };
 
 const _$DocumentTypeEnumMap = {

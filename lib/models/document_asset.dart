@@ -40,6 +40,9 @@ abstract class DocumentAsset with _$DocumentAsset {
     String? templateId,
     String? aspectRatio,
     String? orientation,
+    
+    // Revision tracking for credit logic
+    @Default(0) int revisionCount,
   }) = _DocumentAsset;
 
   const DocumentAsset._();
@@ -72,4 +75,6 @@ abstract class DocumentAsset with _$DocumentAsset {
 
   bool get isStructural => pipeline == AssetPipeline.structural;
   bool get isGraphical => pipeline == AssetPipeline.graphical;
+  
+  bool get isComplexType => type == DocumentType.proposal || type == DocumentType.contract;
 }

@@ -34,8 +34,8 @@ class TemplateThumbnail extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: isSelected 
-                  ? const Color(0xFFFF6B35).withOpacity(0.2) 
-                  : Colors.black.withOpacity(0.03),
+                  ? const Color(0xFFFF6B35).withValues(alpha: 0.2) 
+                  : Colors.black.withValues(alpha: 0.03),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -225,7 +225,7 @@ class _BoldAccentLayout extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 4),
-                Container(width: 40, height: 5, color: primary.withOpacity(0.8)),
+                Container(width: 40, height: 5, color: primary.withValues(alpha: 0.8)),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -242,7 +242,7 @@ class _BoldAccentLayout extends StatelessWidget {
                 const Spacer(),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Container(width: 35, height: 12, decoration: BoxDecoration(color: accent.withOpacity(0.15), border: Border(left: BorderSide(color: accent, width: 2)))),
+                  child: Container(width: 35, height: 12, decoration: BoxDecoration(color: accent.withValues(alpha: 0.15), border: Border(left: BorderSide(color: accent, width: 2)))),
                 )
               ],
             ),
@@ -329,7 +329,7 @@ class _InvoiceLuxuryLayout extends StatelessWidget {
         children: [
           Container(width: 12, height: 12, decoration: BoxDecoration(border: Border.all(color: const Color(0xFFD4AF37), width: 1))),
           const SizedBox(height: 15),
-          Container(width: 40, height: 2, color: const Color(0xFFD4AF37).withOpacity(0.5)),
+          Container(width: 40, height: 2, color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
           const Spacer(),
           for (int i = 0; i < 4; i++)
              Container(width: double.infinity, height: 1, margin: const EdgeInsets.only(bottom: 6), color: Colors.white10),
@@ -390,7 +390,7 @@ class _CreativeLayout extends StatelessWidget {
         Positioned(
           top: -15,
           right: -15,
-          child: Container(width: 50, height: 50, decoration: BoxDecoration(color: accent.withOpacity(0.1), shape: BoxShape.circle)),
+          child: Container(width: 50, height: 50, decoration: BoxDecoration(color: accent.withValues(alpha: 0.1), shape: BoxShape.circle)),
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -399,7 +399,7 @@ class _CreativeLayout extends StatelessWidget {
             children: [
               Container(width: 18, height: 18, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(4))),
               const SizedBox(height: 16),
-              Container(width: 50, height: 10, color: accent.withOpacity(0.3)),
+              Container(width: 50, height: 10, color: accent.withValues(alpha: 0.3)),
               const SizedBox(height: 6),
               Container(width: 35, height: 4, color: Colors.grey.shade200),
               const Spacer(),
@@ -408,7 +408,7 @@ class _CreativeLayout extends StatelessWidget {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  Container(width: 12, height: 12, decoration: BoxDecoration(color: accent.withOpacity(0.2), shape: BoxShape.circle)),
+                  Container(width: 12, height: 12, decoration: BoxDecoration(color: accent.withValues(alpha: 0.2), shape: BoxShape.circle)),
                   const SizedBox(width: 4),
                   Container(width: 25, height: 3, color: Colors.grey.shade200),
                 ],
@@ -702,7 +702,7 @@ class _BusinessCardGeometricLayout extends StatelessWidget {
         Positioned(
           left: 5,
           top: 5,
-          child: Container(width: 14, height: 14, decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), shape: BoxShape.circle)),
+          child: Container(width: 14, height: 14, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), shape: BoxShape.circle)),
         ),
         Padding(
           padding: const EdgeInsets.all(12.0),
@@ -1068,7 +1068,7 @@ class _IconFlatLayout extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Container(width: 30, height: 30, decoration: BoxDecoration(color: Colors.white.withOpacity(0.1), borderRadius: BorderRadius.circular(8))),
+            Container(width: 30, height: 30, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8))),
             const Icon(Icons.bolt_rounded, color: Colors.white, size: 32),
           ],
         ),
@@ -1094,7 +1094,7 @@ class _IconGradientLayout extends StatelessWidget {
           width: 35,
           height: 35,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.auto_awesome, color: Colors.white, size: 24),
@@ -1122,13 +1122,13 @@ class _IconGlassLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFFF6B35).withOpacity(0.1),
+      color: const Color(0xFFFF6B35).withValues(alpha: 0.1),
       child: Center(
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Container(width: 40, height: 40, decoration: BoxDecoration(color: Colors.white.withOpacity(0.5), borderRadius: BorderRadius.circular(10))),
-            Container(width: 25, height: 25, decoration: BoxDecoration(color: const Color(0xFFFF6B35).withOpacity(0.4), borderRadius: BorderRadius.circular(6))),
+            Container(width: 40, height: 40, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(10))),
+            Container(width: 25, height: 25, decoration: BoxDecoration(color: const Color(0xFFFF6B35).withValues(alpha: 0.4), borderRadius: BorderRadius.circular(6))),
           ],
         ),
       ),

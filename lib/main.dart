@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
+import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 import 'services/firebase_service.dart';
 import 'services/prefs_service.dart';
+import 'services/iap_service.dart';
 import 'ui/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
@@ -46,6 +48,13 @@ class BizDocxApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
+
+    // Initialize IAP when user logs in
+    ref.listen(currentUserProvider, (previous, next) {
+      if (next != null && previous?.uid != next.uid) {
+        IapService.instance.init(next.uid);
+      }
+    });
 
     return MaterialApp.router(
       title: 'BizDocx',

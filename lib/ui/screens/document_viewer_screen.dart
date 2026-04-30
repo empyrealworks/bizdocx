@@ -9,9 +9,11 @@ import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/utils/html_to_pdf_pipeline.dart';
 import '../../models/document_asset.dart';
+import '../../models/user_profile.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/document_generation_provider.dart';
 import '../../providers/offline_file_provider.dart';
+import '../../providers/profile_provider.dart';
 import '../sheets/version_history_sheet.dart';
 import '../widgets/generation_state_overlay.dart';
 
@@ -31,6 +33,7 @@ class _DocumentViewerScreenState
   bool _webReady = false;
   final _refineCtrl = TextEditingController();
   bool _refineBarVisible = false;
+  bool _exporting = false;
 
   @override
   void initState() {
@@ -100,6 +103,7 @@ class _DocumentViewerScreenState
     if (user == null) return;
 
     if (_asset.isStructural && _asset.htmlContent != null) {
+      setState(() => _exporting = true);
       try {
         final file = await HtmlToPdfPipeline.instance.convert(
           html: _asset.htmlContent!,
@@ -118,6 +122,8 @@ class _DocumentViewerScreenState
             backgroundColor: AppColors.error,
           ));
         }
+      } finally {
+        if (mounted) setState(() => _exporting = false);
       }
     } else if (_asset.isGraphical) {
       ref.read(offlineFileProvider(_asset)).whenData((file) async {
@@ -131,11 +137,17 @@ class _DocumentViewerScreenState
     }
   }
 
+  int get _refinementCost {
+    if (_asset.isComplexType && _asset.revisionCount < 3) return 0;
+    return CreditCosts.minorRevision;
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final genState = ref.watch(documentGenerationProvider(_asset.portfolioId));
-    final busy = genState.isLoading;
+    final profile = ref.watch(userProfileProvider).value;
+    final busy = genState.isLoading || _exporting;
 
     return Stack(children: [
       Scaffold(
@@ -178,6 +190,8 @@ class _DocumentViewerScreenState
           ],
         ),
         body: Column(children: [
+          if (profile != null && profile.totalCredits < 150)
+             _LowBalanceBanner(balance: profile.totalCredits),
           Expanded(
             child: _asset.isStructural
                 ? _StructuralViewer(
@@ -195,17 +209,21 @@ class _DocumentViewerScreenState
               borderColor: c.border,
               btnBg: c.filledButtonBg,
               btnFg: c.filledButtonFg,
+              cost: _refinementCost,
+              revisionCount: _asset.isComplexType ? _asset.revisionCount : null,
             ),
         ]),
         bottomNavigationBar: _DocInfoBar(asset: _asset),
       ),
-      if (busy)
+      if (genState.isLoading)
         GenerationStateOverlay(
           phase: genState.phase,
           onCancel: () => ref
               .read(documentGenerationProvider(_asset.portfolioId).notifier)
               .cancel(),
         ),
+      if (_exporting)
+        const _ExportOverlay(),
       if (genState.hasError)
         _SmartErrorBanner(
           error: genState.error.toString(),
@@ -221,6 +239,82 @@ class _DocumentViewerScreenState
   }
 }
 
+class _LowBalanceBanner extends StatelessWidget {
+  const _LowBalanceBanner({required this.balance});
+  final int balance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFFFF6B35).withValues(alpha: 0.1),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: Color(0xFFFF6B35), size: 14),
+          const SizedBox(width: 8),
+          Expanded(child: Text('Low balance: $balance credits remaining.', style: const TextStyle(color: Color(0xFFFF6B35), fontSize: 11, fontWeight: FontWeight.w600))),
+          GestureDetector(
+            onTap: () => context.push('/settings/subscription'),
+            child: const Text('Top Up', style: TextStyle(color: Color(0xFFFF6B35), fontSize: 11, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+// ── Export Overlay ────────────────────────────────────────────────────────────
+
+class _ExportOverlay extends StatelessWidget {
+  const _ExportOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        color: c.overlayBarrier,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+            decoration: BoxDecoration(
+              color: c.card,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(strokeWidth: 3),
+                const SizedBox(height: 20),
+                Text(
+                  'Preparing your PDF...',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Converting high-fidelity layout',
+                  style: TextStyle(color: c.textMuted, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ── Refinement Bar ────────────────────────────────────────────────────────────
 
 class _RefinementBar extends StatelessWidget {
@@ -231,11 +325,15 @@ class _RefinementBar extends StatelessWidget {
     required this.borderColor,
     required this.btnBg,
     required this.btnFg,
+    required this.cost,
+    this.revisionCount,
   });
 
   final TextEditingController controller;
   final VoidCallback? onSubmit;
   final Color bgColor, borderColor, btnBg, btnFg;
+  final int cost;
+  final int? revisionCount;
 
   @override
   Widget build(BuildContext context) {
@@ -245,39 +343,72 @@ class _RefinementBar extends StatelessWidget {
       decoration: BoxDecoration(
           color: bgColor,
           border: Border(top: BorderSide(color: borderColor))),
-      child: Row(children: [
-        Expanded(
-          child: TextField(
-            controller: controller,
-            maxLines: 3, minLines: 1,
-            autofocus: true,
-            style: const TextStyle(fontSize: 14),
-            decoration: const InputDecoration(
-              hintText:
-              'Describe a change… e.g. "Change due date to 30 June"',
-              contentPadding:
-              EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (revisionCount != null && revisionCount! < 3)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0, left: 4),
+              child: Text(
+                'FREE REVISION ${revisionCount! + 1}/3',
+                style: const TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+              ),
             ),
-            textInputAction: TextInputAction.send,
-            onSubmitted: (_) => onSubmit?.call(),
-          ),
-        ),
-        const SizedBox(width: 10),
-        GestureDetector(
-          onTap: onSubmit,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            width: 44, height: 44,
-            decoration: BoxDecoration(
-              color: onSubmit != null ? btnBg : borderColor,
-              borderRadius: BorderRadius.circular(10),
+          Row(children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                maxLines: 3, minLines: 1,
+                autofocus: true,
+                style: const TextStyle(fontSize: 14),
+                decoration: const InputDecoration(
+                  hintText:
+                  'Describe a change…',
+                  contentPadding:
+                  EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                ),
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => onSubmit?.call(),
+              ),
             ),
-            child: Icon(Icons.send_rounded,
-                size: 18,
-                color: onSubmit != null ? btnFg : context.colors.textMuted),
-          ),
-        ),
-      ]),
+            const SizedBox(width: 10),
+            GestureDetector(
+              onTap: onSubmit,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                height: 44,
+                decoration: BoxDecoration(
+                  color: onSubmit != null ? btnBg : borderColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.auto_fix_high_rounded,
+                          size: 16,
+                          color: onSubmit != null ? btnFg : context.colors.textMuted),
+                      if (onSubmit != null) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          cost == 0 ? 'FREE' : '$cost',
+                          style: TextStyle(
+                            color: btnFg,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ]
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ]),
+        ],
+      ),
     );
   }
 }

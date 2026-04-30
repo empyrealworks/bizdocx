@@ -15,8 +15,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserProfile {
 
- String get uid; String get email; String? get displayName; UserTier get tier; int get credits; DateTime? get lastCreditReset;// Limits tracking for Free Tier
- int get dailyDocGens; DateTime? get lastDocGenDate; int get weeklyImageGens; DateTime? get lastImageGenDate;// Metadata
+ String get uid; String get email; String? get displayName; UserTier get tier;// Wallets
+ int get subscriptionCredits; int get topUpCredits;// Limits tracking
+ DateTime? get lastCreditReset; DateTime? get subscriptionEndDate; bool get autoRenew;// Metadata
  DateTime get createdAt; DateTime? get updatedAt;
 /// Create a copy of UserProfile
 /// with the given fields replaced by the non-null parameter values.
@@ -30,16 +31,16 @@ $UserProfileCopyWith<UserProfile> get copyWith => _$UserProfileCopyWithImpl<User
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfile&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.credits, credits) || other.credits == credits)&&(identical(other.lastCreditReset, lastCreditReset) || other.lastCreditReset == lastCreditReset)&&(identical(other.dailyDocGens, dailyDocGens) || other.dailyDocGens == dailyDocGens)&&(identical(other.lastDocGenDate, lastDocGenDate) || other.lastDocGenDate == lastDocGenDate)&&(identical(other.weeklyImageGens, weeklyImageGens) || other.weeklyImageGens == weeklyImageGens)&&(identical(other.lastImageGenDate, lastImageGenDate) || other.lastImageGenDate == lastImageGenDate)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfile&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.subscriptionCredits, subscriptionCredits) || other.subscriptionCredits == subscriptionCredits)&&(identical(other.topUpCredits, topUpCredits) || other.topUpCredits == topUpCredits)&&(identical(other.lastCreditReset, lastCreditReset) || other.lastCreditReset == lastCreditReset)&&(identical(other.subscriptionEndDate, subscriptionEndDate) || other.subscriptionEndDate == subscriptionEndDate)&&(identical(other.autoRenew, autoRenew) || other.autoRenew == autoRenew)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,uid,email,displayName,tier,credits,lastCreditReset,dailyDocGens,lastDocGenDate,weeklyImageGens,lastImageGenDate,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,uid,email,displayName,tier,subscriptionCredits,topUpCredits,lastCreditReset,subscriptionEndDate,autoRenew,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'UserProfile(uid: $uid, email: $email, displayName: $displayName, tier: $tier, credits: $credits, lastCreditReset: $lastCreditReset, dailyDocGens: $dailyDocGens, lastDocGenDate: $lastDocGenDate, weeklyImageGens: $weeklyImageGens, lastImageGenDate: $lastImageGenDate, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'UserProfile(uid: $uid, email: $email, displayName: $displayName, tier: $tier, subscriptionCredits: $subscriptionCredits, topUpCredits: $topUpCredits, lastCreditReset: $lastCreditReset, subscriptionEndDate: $subscriptionEndDate, autoRenew: $autoRenew, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -50,7 +51,7 @@ abstract mixin class $UserProfileCopyWith<$Res>  {
   factory $UserProfileCopyWith(UserProfile value, $Res Function(UserProfile) _then) = _$UserProfileCopyWithImpl;
 @useResult
 $Res call({
- String uid, String email, String? displayName, UserTier tier, int credits, DateTime? lastCreditReset, int dailyDocGens, DateTime? lastDocGenDate, int weeklyImageGens, DateTime? lastImageGenDate, DateTime createdAt, DateTime? updatedAt
+ String uid, String email, String? displayName, UserTier tier, int subscriptionCredits, int topUpCredits, DateTime? lastCreditReset, DateTime? subscriptionEndDate, bool autoRenew, DateTime createdAt, DateTime? updatedAt
 });
 
 
@@ -67,19 +68,18 @@ class _$UserProfileCopyWithImpl<$Res>
 
 /// Create a copy of UserProfile
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? email = null,Object? displayName = freezed,Object? tier = null,Object? credits = null,Object? lastCreditReset = freezed,Object? dailyDocGens = null,Object? lastDocGenDate = freezed,Object? weeklyImageGens = null,Object? lastImageGenDate = freezed,Object? createdAt = null,Object? updatedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? email = null,Object? displayName = freezed,Object? tier = null,Object? subscriptionCredits = null,Object? topUpCredits = null,Object? lastCreditReset = freezed,Object? subscriptionEndDate = freezed,Object? autoRenew = null,Object? createdAt = null,Object? updatedAt = freezed,}) {
   return _then(_self.copyWith(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String?,tier: null == tier ? _self.tier : tier // ignore: cast_nullable_to_non_nullable
-as UserTier,credits: null == credits ? _self.credits : credits // ignore: cast_nullable_to_non_nullable
+as UserTier,subscriptionCredits: null == subscriptionCredits ? _self.subscriptionCredits : subscriptionCredits // ignore: cast_nullable_to_non_nullable
+as int,topUpCredits: null == topUpCredits ? _self.topUpCredits : topUpCredits // ignore: cast_nullable_to_non_nullable
 as int,lastCreditReset: freezed == lastCreditReset ? _self.lastCreditReset : lastCreditReset // ignore: cast_nullable_to_non_nullable
-as DateTime?,dailyDocGens: null == dailyDocGens ? _self.dailyDocGens : dailyDocGens // ignore: cast_nullable_to_non_nullable
-as int,lastDocGenDate: freezed == lastDocGenDate ? _self.lastDocGenDate : lastDocGenDate // ignore: cast_nullable_to_non_nullable
-as DateTime?,weeklyImageGens: null == weeklyImageGens ? _self.weeklyImageGens : weeklyImageGens // ignore: cast_nullable_to_non_nullable
-as int,lastImageGenDate: freezed == lastImageGenDate ? _self.lastImageGenDate : lastImageGenDate // ignore: cast_nullable_to_non_nullable
-as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,subscriptionEndDate: freezed == subscriptionEndDate ? _self.subscriptionEndDate : subscriptionEndDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,autoRenew: null == autoRenew ? _self.autoRenew : autoRenew // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
@@ -166,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String email,  String? displayName,  UserTier tier,  int credits,  DateTime? lastCreditReset,  int dailyDocGens,  DateTime? lastDocGenDate,  int weeklyImageGens,  DateTime? lastImageGenDate,  DateTime createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String email,  String? displayName,  UserTier tier,  int subscriptionCredits,  int topUpCredits,  DateTime? lastCreditReset,  DateTime? subscriptionEndDate,  bool autoRenew,  DateTime createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserProfile() when $default != null:
-return $default(_that.uid,_that.email,_that.displayName,_that.tier,_that.credits,_that.lastCreditReset,_that.dailyDocGens,_that.lastDocGenDate,_that.weeklyImageGens,_that.lastImageGenDate,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.uid,_that.email,_that.displayName,_that.tier,_that.subscriptionCredits,_that.topUpCredits,_that.lastCreditReset,_that.subscriptionEndDate,_that.autoRenew,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -187,10 +187,10 @@ return $default(_that.uid,_that.email,_that.displayName,_that.tier,_that.credits
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String email,  String? displayName,  UserTier tier,  int credits,  DateTime? lastCreditReset,  int dailyDocGens,  DateTime? lastDocGenDate,  int weeklyImageGens,  DateTime? lastImageGenDate,  DateTime createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String email,  String? displayName,  UserTier tier,  int subscriptionCredits,  int topUpCredits,  DateTime? lastCreditReset,  DateTime? subscriptionEndDate,  bool autoRenew,  DateTime createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _UserProfile():
-return $default(_that.uid,_that.email,_that.displayName,_that.tier,_that.credits,_that.lastCreditReset,_that.dailyDocGens,_that.lastDocGenDate,_that.weeklyImageGens,_that.lastImageGenDate,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.uid,_that.email,_that.displayName,_that.tier,_that.subscriptionCredits,_that.topUpCredits,_that.lastCreditReset,_that.subscriptionEndDate,_that.autoRenew,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +207,10 @@ return $default(_that.uid,_that.email,_that.displayName,_that.tier,_that.credits
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String email,  String? displayName,  UserTier tier,  int credits,  DateTime? lastCreditReset,  int dailyDocGens,  DateTime? lastDocGenDate,  int weeklyImageGens,  DateTime? lastImageGenDate,  DateTime createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String email,  String? displayName,  UserTier tier,  int subscriptionCredits,  int topUpCredits,  DateTime? lastCreditReset,  DateTime? subscriptionEndDate,  bool autoRenew,  DateTime createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _UserProfile() when $default != null:
-return $default(_that.uid,_that.email,_that.displayName,_that.tier,_that.credits,_that.lastCreditReset,_that.dailyDocGens,_that.lastDocGenDate,_that.weeklyImageGens,_that.lastImageGenDate,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.uid,_that.email,_that.displayName,_that.tier,_that.subscriptionCredits,_that.topUpCredits,_that.lastCreditReset,_that.subscriptionEndDate,_that.autoRenew,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -222,20 +222,20 @@ return $default(_that.uid,_that.email,_that.displayName,_that.tier,_that.credits
 @JsonSerializable()
 
 class _UserProfile extends UserProfile {
-  const _UserProfile({required this.uid, required this.email, this.displayName, this.tier = UserTier.free, this.credits = 0, this.lastCreditReset, this.dailyDocGens = 0, this.lastDocGenDate, this.weeklyImageGens = 0, this.lastImageGenDate, required this.createdAt, this.updatedAt}): super._();
+  const _UserProfile({required this.uid, required this.email, this.displayName, this.tier = UserTier.free, this.subscriptionCredits = 50, this.topUpCredits = 0, this.lastCreditReset, this.subscriptionEndDate, this.autoRenew = false, required this.createdAt, this.updatedAt}): super._();
   factory _UserProfile.fromJson(Map<String, dynamic> json) => _$UserProfileFromJson(json);
 
 @override final  String uid;
 @override final  String email;
 @override final  String? displayName;
 @override@JsonKey() final  UserTier tier;
-@override@JsonKey() final  int credits;
+// Wallets
+@override@JsonKey() final  int subscriptionCredits;
+@override@JsonKey() final  int topUpCredits;
+// Limits tracking
 @override final  DateTime? lastCreditReset;
-// Limits tracking for Free Tier
-@override@JsonKey() final  int dailyDocGens;
-@override final  DateTime? lastDocGenDate;
-@override@JsonKey() final  int weeklyImageGens;
-@override final  DateTime? lastImageGenDate;
+@override final  DateTime? subscriptionEndDate;
+@override@JsonKey() final  bool autoRenew;
 // Metadata
 @override final  DateTime createdAt;
 @override final  DateTime? updatedAt;
@@ -253,16 +253,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfile&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.credits, credits) || other.credits == credits)&&(identical(other.lastCreditReset, lastCreditReset) || other.lastCreditReset == lastCreditReset)&&(identical(other.dailyDocGens, dailyDocGens) || other.dailyDocGens == dailyDocGens)&&(identical(other.lastDocGenDate, lastDocGenDate) || other.lastDocGenDate == lastDocGenDate)&&(identical(other.weeklyImageGens, weeklyImageGens) || other.weeklyImageGens == weeklyImageGens)&&(identical(other.lastImageGenDate, lastImageGenDate) || other.lastImageGenDate == lastImageGenDate)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfile&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.subscriptionCredits, subscriptionCredits) || other.subscriptionCredits == subscriptionCredits)&&(identical(other.topUpCredits, topUpCredits) || other.topUpCredits == topUpCredits)&&(identical(other.lastCreditReset, lastCreditReset) || other.lastCreditReset == lastCreditReset)&&(identical(other.subscriptionEndDate, subscriptionEndDate) || other.subscriptionEndDate == subscriptionEndDate)&&(identical(other.autoRenew, autoRenew) || other.autoRenew == autoRenew)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,uid,email,displayName,tier,credits,lastCreditReset,dailyDocGens,lastDocGenDate,weeklyImageGens,lastImageGenDate,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,uid,email,displayName,tier,subscriptionCredits,topUpCredits,lastCreditReset,subscriptionEndDate,autoRenew,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'UserProfile(uid: $uid, email: $email, displayName: $displayName, tier: $tier, credits: $credits, lastCreditReset: $lastCreditReset, dailyDocGens: $dailyDocGens, lastDocGenDate: $lastDocGenDate, weeklyImageGens: $weeklyImageGens, lastImageGenDate: $lastImageGenDate, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'UserProfile(uid: $uid, email: $email, displayName: $displayName, tier: $tier, subscriptionCredits: $subscriptionCredits, topUpCredits: $topUpCredits, lastCreditReset: $lastCreditReset, subscriptionEndDate: $subscriptionEndDate, autoRenew: $autoRenew, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -273,7 +273,7 @@ abstract mixin class _$UserProfileCopyWith<$Res> implements $UserProfileCopyWith
   factory _$UserProfileCopyWith(_UserProfile value, $Res Function(_UserProfile) _then) = __$UserProfileCopyWithImpl;
 @override @useResult
 $Res call({
- String uid, String email, String? displayName, UserTier tier, int credits, DateTime? lastCreditReset, int dailyDocGens, DateTime? lastDocGenDate, int weeklyImageGens, DateTime? lastImageGenDate, DateTime createdAt, DateTime? updatedAt
+ String uid, String email, String? displayName, UserTier tier, int subscriptionCredits, int topUpCredits, DateTime? lastCreditReset, DateTime? subscriptionEndDate, bool autoRenew, DateTime createdAt, DateTime? updatedAt
 });
 
 
@@ -290,19 +290,18 @@ class __$UserProfileCopyWithImpl<$Res>
 
 /// Create a copy of UserProfile
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? email = null,Object? displayName = freezed,Object? tier = null,Object? credits = null,Object? lastCreditReset = freezed,Object? dailyDocGens = null,Object? lastDocGenDate = freezed,Object? weeklyImageGens = null,Object? lastImageGenDate = freezed,Object? createdAt = null,Object? updatedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? email = null,Object? displayName = freezed,Object? tier = null,Object? subscriptionCredits = null,Object? topUpCredits = null,Object? lastCreditReset = freezed,Object? subscriptionEndDate = freezed,Object? autoRenew = null,Object? createdAt = null,Object? updatedAt = freezed,}) {
   return _then(_UserProfile(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String?,tier: null == tier ? _self.tier : tier // ignore: cast_nullable_to_non_nullable
-as UserTier,credits: null == credits ? _self.credits : credits // ignore: cast_nullable_to_non_nullable
+as UserTier,subscriptionCredits: null == subscriptionCredits ? _self.subscriptionCredits : subscriptionCredits // ignore: cast_nullable_to_non_nullable
+as int,topUpCredits: null == topUpCredits ? _self.topUpCredits : topUpCredits // ignore: cast_nullable_to_non_nullable
 as int,lastCreditReset: freezed == lastCreditReset ? _self.lastCreditReset : lastCreditReset // ignore: cast_nullable_to_non_nullable
-as DateTime?,dailyDocGens: null == dailyDocGens ? _self.dailyDocGens : dailyDocGens // ignore: cast_nullable_to_non_nullable
-as int,lastDocGenDate: freezed == lastDocGenDate ? _self.lastDocGenDate : lastDocGenDate // ignore: cast_nullable_to_non_nullable
-as DateTime?,weeklyImageGens: null == weeklyImageGens ? _self.weeklyImageGens : weeklyImageGens // ignore: cast_nullable_to_non_nullable
-as int,lastImageGenDate: freezed == lastImageGenDate ? _self.lastImageGenDate : lastImageGenDate // ignore: cast_nullable_to_non_nullable
-as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,subscriptionEndDate: freezed == subscriptionEndDate ? _self.subscriptionEndDate : subscriptionEndDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,autoRenew: null == autoRenew ? _self.autoRenew : autoRenew // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));

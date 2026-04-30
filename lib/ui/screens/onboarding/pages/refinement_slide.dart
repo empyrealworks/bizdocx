@@ -79,10 +79,10 @@ class _RefinementIllustrationState extends State<_RefinementIllustration>
             decoration: BoxDecoration(
               color: c.card,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: accent.withOpacity(0.4)),
+              border: Border.all(color: accent.withValues(alpha: 0.4)),
               boxShadow: [
                 BoxShadow(
-                  color: accent.withOpacity(0.1),
+                  color: accent.withValues(alpha: 0.1),
                   blurRadius: 16, offset: const Offset(0, 4),
                 ),
               ],
@@ -137,12 +137,12 @@ class _RefinementIllustrationState extends State<_RefinementIllustration>
                       horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: isActive
-                        ? accent.withOpacity(0.08)
+                        ? accent.withValues(alpha: 0.08)
                         : c.card,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isActive
-                          ? accent.withOpacity(0.4)
+                          ? accent.withValues(alpha: 0.4)
                           : c.border,
                     ),
                   ),
@@ -182,7 +182,7 @@ class _RefinementIllustrationState extends State<_RefinementIllustration>
                                       horizontal: 6, vertical: 1),
                                   decoration: BoxDecoration(
                                     color: AppColors.success
-                                        .withOpacity(0.15),
+                                        .withValues(alpha: 0.15),
                                     borderRadius:
                                     BorderRadius.circular(4),
                                   ),

@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:uuid/uuid.dart';
 
 import '../core/constants/firestore_paths.dart';
+import '../env/env.dart';
 import '../models/business_portfolio.dart';
 import '../models/document_asset.dart';
 import '../models/document_version.dart';
@@ -117,8 +118,6 @@ class FirebaseService {
 
   // ── Usage Tracking & Credits ─────────────────────────────────────────────
   
-  /// Checks if the user can perform an operation and deducts credits.
-  /// Deduction order: Subscription Credits -> Top Up Credits.
   Future<void> trackUsage({
     required AssetPipeline pipeline,
     DocumentType? type,
@@ -134,16 +133,13 @@ class FirebaseService {
       var profile = UserProfile.fromFirestore(snap);
       final now = DateTime.now();
 
-      // 1. Calculate Cost
       int cost = 0;
       if (pipeline == AssetPipeline.structural) {
         if (existingAsset == null) {
-          // New generation
           cost = CreditCosts.getDocCost(type ?? DocumentType.other);
         } else {
-          // Refinement
           if (existingAsset.isComplexType && existingAsset.revisionCount < 3) {
-            cost = 0; // 3 free revisions for Contracts/Proposals
+            cost = 0;
           } else {
             cost = CreditCosts.minorRevision;
           }
@@ -152,7 +148,6 @@ class FirebaseService {
         cost = isFinalImage ? CreditCosts.imageFinal : CreditCosts.imageDraft;
       }
 
-      // 2. Check & Deduct
       if (profile.totalCredits < cost) {
         throw Exception('Insufficient credits. Need $cost, have ${profile.totalCredits}. Please top up.');
       }
@@ -176,7 +171,6 @@ class FirebaseService {
       
       tx.update(docRef, profile.toFirestore());
       
-      // Update revision count if this was a structural refinement
       if (existingAsset != null && pipeline == AssetPipeline.structural) {
          final assetRef = _db.doc(FirestorePaths.document(currentUid, existingAsset.portfolioId, existingAsset.id));
          tx.update(assetRef, {'revisionCount': existingAsset.revisionCount + 1});
@@ -184,7 +178,6 @@ class FirebaseService {
     });
   }
 
-  /// Processes a subscription purchase or renewal, applying rollover caps.
   Future<void> processSubscriptionChange({
     required UserTier newTier,
     required DateTime purchaseDate,
@@ -194,12 +187,16 @@ class FirebaseService {
     
     await _db.runTransaction((tx) async {
       final snap = await tx.get(docRef);
+      if (!snap.exists) return;
+      
       final profile = UserProfile.fromFirestore(snap);
       final now = DateTime.now();
       
-      // If we've already processed this purchase (based on date), skip
-      if (profile.lastCreditReset != null && !purchaseDate.isAfter(profile.lastCreditReset!)) {
-        // We might still need to update the tier/expiry if they changed
+      // If we've already processed this specific reset date, skip credit grant but update tier/expiry
+      bool shouldGrantCredits = profile.lastCreditReset == null || 
+                                purchaseDate.isAfter(profile.lastCreditReset!);
+
+      if (!shouldGrantCredits) {
         if (profile.tier != newTier || profile.subscriptionEndDate != expiryDate) {
           tx.update(docRef, {
             'tier': newTier.name,
@@ -214,19 +211,13 @@ class FirebaseService {
       
       // Rollover Logic
       int rolledOver = profile.subscriptionCredits;
-      
-      // Free tier doesn't roll over
       if (profile.isFree) rolledOver = 0;
       
-      // Apply rollover cap of the NEW tier
       if (rolledOver > limits.rolloverCap) {
         rolledOver = limits.rolloverCap;
       }
       
-      // Add new monthly allowance
       int newBalance = rolledOver + limits.monthlyAllowance;
-      
-      // Final hard cap check
       if (newBalance > limits.rolloverCap) {
         newBalance = limits.rolloverCap;
       }
@@ -240,7 +231,6 @@ class FirebaseService {
       );
       
       tx.update(docRef, updated.toFirestore());
-      debugPrint('[Subscription] Processed $newTier renewal. New balance: $newBalance');
     });
   }
 
@@ -258,35 +248,24 @@ class FirebaseService {
 
   Future<void> signOut() => _auth.signOut();
 
-  /// Deletes the user account and ALL associated data (Firestore + Storage).
   Future<void> deleteUserAccount() async {
     final uid = currentUid;
     final user = _auth.currentUser;
     if (user == null) return;
 
-    // 1. Delete Firestore Data
     final batch = _db.batch();
-    
-    // Get all portfolios
     final portfolios = await _db.collection(FirestorePaths.portfoliosCol(uid)).get();
     for (final p in portfolios.docs) {
-      // Get all documents per portfolio
       final docs = await _db.collection(FirestorePaths.documentsCol(uid, p.id)).get();
       for (final d in docs.docs) {
         batch.delete(d.reference);
       }
       batch.delete(p.reference);
-      
-      // Delete user context
       batch.delete(_db.doc(FirestorePaths.userContextDoc(uid, p.id)));
     }
-
-    // Delete profile
     batch.delete(_db.doc(FirestorePaths.user(uid)));
-    
     await batch.commit();
 
-    // 2. Delete Storage Data
     try {
       final userRef = _storage.ref('users/$uid');
       final list = await userRef.listAll();
@@ -300,7 +279,6 @@ class FirebaseService {
       debugPrint('[FirebaseService] Storage deletion warning: $e');
     }
 
-    // 3. Delete Firebase Auth User
     await user.delete();
   }
 
@@ -321,8 +299,6 @@ class FirebaseService {
     String targetAudience = '',
   }) async {
     final uid = currentUid;
-    
-    // Check limits
     final profile = await fetchProfile();
     final limits = TierLimits.get(profile.tier);
     final countSnap = await _db.collection(FirestorePaths.portfoliosCol(uid)).count().get();
@@ -362,7 +338,6 @@ class FirebaseService {
     return portfolio;
   }
 
-  /// Updates portfolio and UserContext atomically (RAG context stays in sync).
   Future<void> updatePortfolio(BusinessPortfolio portfolio) async {
     final uid = currentUid;
     final batch = _db.batch();
@@ -419,12 +394,10 @@ class FirebaseService {
     return doc;
   }
 
-  /// In-place update after refinement. Returns the updated asset.
   Future<DocumentAsset> updateDocumentAsset(DocumentAsset asset) async {
-    final uid = currentUid;
     final updated = asset.copyWith(updatedAt: DateTime.now());
     await _db
-        .doc(FirestorePaths.document(uid, asset.portfolioId, asset.id))
+        .doc(FirestorePaths.document(currentUid, asset.portfolioId, asset.id))
         .update({...updated.toFirestore(), 'updatedAt': Timestamp.now()});
     return updated;
   }
@@ -445,7 +418,6 @@ class FirebaseService {
 
   // ── Version History ───────────────────────────────────────────────────────
 
-  /// Streams all versions, newest first.
   Stream<List<DocumentVersion>> watchVersions({
     required String portfolioId,
     required String documentId,
@@ -461,7 +433,6 @@ class FirebaseService {
         .toList());
   }
 
-  /// Returns how many versions exist + 1 (for the next version number).
   Future<int> getNextVersionNumber(
       String portfolioId, String documentId) async {
     final snap = await _db
@@ -472,7 +443,6 @@ class FirebaseService {
     return (snap.count ?? 0) + 1;
   }
 
-  /// Snapshots the current HTML as an immutable version record.
   Future<DocumentVersion> saveDocumentVersion({
     required DocumentAsset asset,
     required int versionNumber,
@@ -500,8 +470,6 @@ class FirebaseService {
     return version;
   }
 
-  /// Restores the document to a previous version's HTML.
-  /// Intentionally does NOT save a new version entry — history stays factual.
   Future<DocumentAsset> restoreDocumentVersion({
     required DocumentAsset currentAsset,
     required DocumentVersion version,
@@ -545,9 +513,6 @@ class FirebaseService {
 
   // ── Logo Upload ───────────────────────────────────────────────────────────
 
-  /// Uploads a logo and atomically updates the portfolio + UserContext.
-  /// The download URL (Firebase CDN, auth-free) is stored in UserContext
-  /// so Gemini can embed it directly in generated HTML.
   Future<String> uploadLogo({
     required File file,
     required String portfolioId,
@@ -574,7 +539,6 @@ class FirebaseService {
     return downloadUrl;
   }
 
-  /// Removes logo from Storage and clears references.
   Future<void> deleteLogo(String portfolioId) async {
     final uid = currentUid;
     try {
@@ -595,7 +559,6 @@ class FirebaseService {
     await batch.commit();
   }
 
-  /// Uploads a supporting context asset (PDF, image, text).
   Future<String> uploadContextAsset({
     required File file,
     required String portfolioId,

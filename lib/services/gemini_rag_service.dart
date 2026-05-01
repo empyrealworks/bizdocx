@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
 import '../env/env.dart';
 import '../models/document_asset.dart';
 import '../models/user_context.dart';
 import '../models/document_template.dart';
+import '../models/user_profile.dart';
 
 class GeminiRagService {
   GeminiRagService._();
@@ -13,19 +15,42 @@ class GeminiRagService {
 
   static final _apiKey = Env.geminiApiKey;
 
-  static const _geminiUrl =
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent';
-  static const _imagenUrl =
-      'https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict';
+  // Model ID Constants - From Official Suite Guide Section 6
+  static const _modelPro = 'gemini-3.1-pro-preview';
+  static const _modelFlash = 'gemini-3-flash-preview';
+  static const _modelFlashLite = 'gemini-3.1-flash-lite-preview';
+  static const _modelImagePro = 'gemini-3-pro-image-preview';
+  
+  // Base URLs
+  static const _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+  String _getTextModel(UserTier tier) {
+    switch (tier) {
+      case UserTier.agency:
+        return _modelPro;
+      case UserTier.solopreneur:
+        return _modelFlash;
+      case UserTier.free:
+      default:
+        return _modelFlashLite;
+    }
+  }
+
+  String _getImageModel(UserTier tier) {
+    // Note: Section 6 specifically lists gemini-3-pro-image-preview.
+    return _modelImagePro;
+  }
 
   // ── Structural Document Generation ────────────────────────────────────────
   Future<String> generateStructuralDocument({
     required String userPrompt,
     required DocumentType documentType,
     required UserContext context,
+    required UserTier tier,
     DocumentTemplate? template,
     String? orientation,
   }) async {
+    final model = _getTextModel(tier);
     final prompt = _buildStructuralPrompt(
       userPrompt: userPrompt,
       documentType: documentType,
@@ -33,8 +58,8 @@ class GeminiRagService {
       template: template,
       orientation: orientation,
     );
-    debugPrint('[Gemini] Structural prompt length: ${prompt.length}');
-    return _callTextModel(prompt);
+    debugPrint('[Gemini] Structural prompt length: ${prompt.length} using $model');
+    return _callGenerateContent(model, prompt);
   }
 
   // ── Iterative Refinement ─────────────────────────────────────────────────
@@ -43,7 +68,9 @@ class GeminiRagService {
     required String refinementPrompt,
     required DocumentType documentType,
     required UserContext context,
+    required UserTier tier,
   }) async {
+    final model = _getTextModel(tier);
     final logoInstruction = _logoInstruction(context, documentType);
 
     final prompt = '''
@@ -71,23 +98,26 @@ INSTRUCTIONS:
 7. Do NOT wrap the output in markdown code fences.
 ''';
 
-    debugPrint('[Gemini] Refinement prompt length: ${prompt.length}');
-    return _callTextModel(prompt);
+    debugPrint('[Gemini] Refinement prompt length: ${prompt.length} using $model');
+    return _callGenerateContent(model, prompt);
   }
 
-  // ── Graphical Asset Generation (Imagen 4.0) ───────────────────────────────
+  // ── Graphical Asset Generation ───────────────────────────────
   Future<Uint8List> generateImage({
     required String userPrompt,
     required UserContext context,
+    required UserTier tier,
     DocumentTemplate? template,
     String? aspectRatio,
   }) async {
+    final model = _getImageModel(tier);
     final templateInstruction = template != null 
         ? '\nTEMPLATE STYLE: ${template.name} - ${template.promptInstructions}\n' 
         : '';
         
     final instruction = '''
-Refine the following user request into a highly detailed, professional prompt for Imagen 4.0.
+Refine the following user request into a highly detailed, professional prompt for image generation.
+The final image should be a professional business asset (logo or icon).
 Output ONLY the refined prompt, no preamble.
 
 CONTEXT:
@@ -95,43 +125,55 @@ CONTEXT:
 - Mission: ${context.mission}
 - Brand Colors: ${context.brandColors.join(', ')}
 $templateInstruction
+DESIRED ASPECT RATIO: ${aspectRatio ?? '1:1'}
 USER REQUEST: $userPrompt
+
+INSTRUCTION FOR REFINEMENT:
+- Incorporate the DESIRED ASPECT RATIO into the visual description (e.g., describe the composition as being wide, tall, or square).
+- Do not mention the text "aspect ratio" in the final prompt, but describe the framing and layout accordingly.
 ''';
 
-    final refinedPrompt = await _refinePromptWithGemini(instruction);
-    debugPrint('[Imagen] Refined Prompt: $refinedPrompt');
-
+    final refinedPrompt = await _refinePromptWithGemini(instruction, tier);
+    debugPrint('[Gemini Image] Refined Prompt: $refinedPrompt using $model');
+    
     final payload = {
-      'instances': [
-        {'prompt': refinedPrompt}
+      'contents': [
+        {
+          'parts': [
+            {'text': refinedPrompt}
+          ]
+        }
       ],
-      'parameters': {
-        'sampleCount': 1, 
-        'aspectRatio': _normalizeAspectRatio(aspectRatio),
-      },
+      'generationConfig': {
+        'temperature': 0.7,
+      }
     };
 
-    final response = await _post(_imagenUrl, payload);
+    final url = '$_baseUrl/$model:generateContent?key=$_apiKey';
+    final response = await _post(url, payload);
+    
     try {
-      final base64String =
-      response['predictions'][0]['bytesBase64Encoded'] as String;
+      final candidates = response['candidates'] as List;
+      if (candidates.isEmpty) throw Exception('No image candidates returned.');
+      
+      final parts = candidates[0]['content']['parts'] as List;
+      final imagePart = parts.firstWhere((p) => p.containsKey('inlineData'), orElse: () => null);
+      
+      if (imagePart == null) {
+        throw Exception('Image model did not return image data. Check if prompt violated safety filters.');
+      }
+      
+      final base64String = imagePart['inlineData']['data'] as String;
       return base64Decode(base64String);
     } catch (e) {
-      debugPrint('[Imagen] Error parsing prediction: $e');
-      throw Exception('Image generation failed: invalid Imagen response.');
+      debugPrint('[Gemini Image] Error parsing response: $e');
+      throw Exception('Image generation failed: invalid response schema or content.');
     }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  String _normalizeAspectRatio(String? ratio) {
-    if (ratio == null) return '1:1';
-    if (ratio == '3.5:2' || ratio == '3:2') return '3:2';
-    if (ratio == '2:3.5' || ratio == '2:3') return '2:3';
-    return ratio;
-  }
-
-  Future<String> _callTextModel(String prompt) async {
+  Future<String> _callGenerateContent(String model, String prompt) async {
     final payload = {
       'contents': [
         {
@@ -146,7 +188,8 @@ USER REQUEST: $userPrompt
       },
     };
 
-    final response = await _post(_geminiUrl, payload);
+    final url = '$_baseUrl/$model:generateContent?key=$_apiKey';
+    final response = await _post(url, payload);
     try {
       final text =
       response['candidates'][0]['content']['parts'][0]['text'] as String;
@@ -161,7 +204,7 @@ USER REQUEST: $userPrompt
       String url, Map<String, dynamic> body) async {
     final client = HttpClient();
     try {
-      final uri = Uri.parse('$url?key=$_apiKey');
+      final uri = Uri.parse(url);
       final request = await client.postUrl(uri);
       request.headers.set('Content-Type', 'application/json');
       request.add(utf8.encode(jsonEncode(body)));
@@ -180,18 +223,9 @@ USER REQUEST: $userPrompt
     }
   }
 
-  Future<String> _refinePromptWithGemini(String instruction) async {
-    final payload = {
-      'contents': [
-        {
-          'parts': [
-            {'text': instruction}
-          ]
-        }
-      ]
-    };
-    final response = await _post(_geminiUrl, payload);
-    return response['candidates'][0]['content']['parts'][0]['text'] as String;
+  Future<String> _refinePromptWithGemini(String instruction, UserTier tier) async {
+    final model = _getTextModel(tier);
+    return _callGenerateContent(model, instruction);
   }
 
   /// Document types where embedding the logo makes sense.

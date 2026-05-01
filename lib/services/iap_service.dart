@@ -11,8 +11,9 @@ class IapService {
   IapService._();
   static final IapService instance = IapService._();
 
-  static const _solopreneurEntitlement = 'solopreneur'; // Updated to match architecture
-  static const _agencyEntitlement = 'agency';           // Updated to match architecture
+  // Entitlement IDs - MUST match exactly what is in RevenueCat dashboard
+  static const _solopreneurEntitlement = 'solopreneur'; 
+  static const _agencyEntitlement = 'agency';           
 
   Future<void> init(String uid) async {
     await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.error);
@@ -29,6 +30,8 @@ class IapService {
     configuration.appUserID = uid;
     await Purchases.configure(configuration);
     
+    debugPrint('[IAP] Configured for user: $uid');
+    
     // Sync entitlement with Firestore immediately
     await syncEntitlements();
   }
@@ -44,6 +47,7 @@ class IapService {
 
   Future<bool> purchasePackage(Package package) async {
     try {
+      debugPrint('[IAP] Purchasing package: ${package.identifier}');
       final result = await Purchases.purchase(
         PurchaseParams.package(package),
       );
@@ -84,6 +88,8 @@ class IapService {
     final agencyEnt = info.entitlements.all[_agencyEntitlement];
     final soloEnt = info.entitlements.all[_solopreneurEntitlement];
 
+    debugPrint('[IAP] Entitlements active: ${info.entitlements.active.keys.join(', ')}');
+
     if (agencyEnt != null && agencyEnt.isActive) {
       newTier = UserTier.agency;
       purchaseDate = DateTime.tryParse(agencyEnt.latestPurchaseDate);
@@ -94,18 +100,18 @@ class IapService {
       expiryDate = soloEnt.expirationDate != null ? DateTime.tryParse(soloEnt.expirationDate!) : null;
     }
 
+    final fb = FirebaseService.instance;
     if (purchaseDate != null) {
-      await FirebaseService.instance.processSubscriptionChange(
+      await fb.processSubscriptionChange(
         newTier: newTier,
         purchaseDate: purchaseDate,
         expiryDate: expiryDate,
       );
-    } else if (newTier == UserTier.free) {
-       // If no active entitlements, ensure we are on free tier
-       final fb = FirebaseService.instance;
+    } else {
+       // If no active entitlements, check if we need to revert
        final profile = await fb.fetchProfile();
        if (profile.tier != UserTier.free) {
-          debugPrint('[IAP] No active entitlements. Reverting to free tier.');
+          debugPrint('[IAP] No active entitlements found. Reverting to free tier.');
           await fb.updateProfile(profile.copyWith(
             tier: UserTier.free,
             subscriptionEndDate: null,

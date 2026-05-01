@@ -129,7 +129,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 _TopUpSection(onSelect: (amount) => _handleTopUp(context, amount)),
                 const SizedBox(height: 40),
                 
-                // Debug / Info note
                 if (packages.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 20),
@@ -168,7 +167,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       highlight: highlight,
       onSelect: package != null 
           ? () => _handlePurchase(package) 
-          : () => _simulateUpgrade(tier), // Fallback to simulation if package not found
+          : () => _simulateUpgrade(tier),
     );
   }
 
@@ -367,15 +366,15 @@ class _PlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final borderColor = highlight ? const Color(0xFFFF6B35) : c.border;
+    final borderColor = isCurrent ? const Color(0xFFFFD60A) : (highlight ? const Color(0xFFFF6B35) : c.border);
 
     return Container(
       decoration: BoxDecoration(
-        color: c.card,
+        color: isCurrent ? const Color(0xFFFFD60A).withValues(alpha: 0.05) : c.card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor, width: highlight ? 2 : 1),
-        boxShadow: highlight ? [
-          BoxShadow(color: const Color(0xFFFF6B35).withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 8))
+        border: Border.all(color: borderColor, width: (highlight || isCurrent) ? 2 : 1),
+        boxShadow: (highlight || isCurrent) ? [
+          BoxShadow(color: borderColor.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 8))
         ] : null,
       ),
       padding: const EdgeInsets.all(24),
@@ -388,7 +387,19 @@ class _PlanCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tier.name.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                  Row(
+                    children: [
+                      Text(tier.name.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                      if (isCurrent) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(color: const Color(0xFFFFD60A), borderRadius: BorderRadius.circular(4)),
+                          child: const Text('ACTIVE', style: TextStyle(color: Colors.black, fontSize: 8, fontWeight: FontWeight.w900)),
+                        ),
+                      ]
+                    ],
+                  ),
                   Text(subtitle, style: TextStyle(color: c.textMuted, fontSize: 12)),
                 ],
               ),
@@ -419,7 +430,9 @@ class _PlanCard extends StatelessWidget {
             height: 48,
             child: FilledButton(
               onPressed: isCurrent ? null : onSelect,
-              style: highlight ? FilledButton.styleFrom(backgroundColor: const Color(0xFFFF6B35)) : null,
+              style: isCurrent 
+                  ? FilledButton.styleFrom(backgroundColor: c.chipFill, foregroundColor: c.textMuted)
+                  : (highlight ? FilledButton.styleFrom(backgroundColor: const Color(0xFFFF6B35)) : null),
               child: Text(isCurrent ? 'Active Plan' : 'Select Plan'),
             ),
           ),

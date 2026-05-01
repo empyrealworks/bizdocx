@@ -5,9 +5,11 @@ import 'package:uuid/uuid.dart';
 import '../models/document_asset.dart';
 import '../models/user_context.dart';
 import '../models/document_template.dart';
+import '../models/user_profile.dart';
 import '../services/firebase_service.dart';
 import '../services/gemini_rag_service.dart';
 import '../services/local_cache_service.dart';
+import 'profile_provider.dart';
 
 // ── Documents per Portfolio ───────────────────────────────────────────────────
 final documentListProvider =
@@ -92,7 +94,6 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     String? orientation,
   }) async {
     final fb = FirebaseService.instance;
-    final uid = fb.currentUid;
     final gemini = GeminiRagService.instance;
     const uuid = Uuid();
     _isCancelled = false;
@@ -104,16 +105,19 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
 
       // NEW: Credit & Usage Tracking
       state = const GenerationState(phase: GenerationPhase.checkingLimits);
-      // For initial generation, we pass the type to calculate correct cost (15 or 100)
-      await fb.trackUsage(pipeline: pipeline); 
-      // Note: FirebaseService.trackUsage needs adjustment to accept type
+      
+      // Fixed: Pass type to correctly calculate cost (15 or 100)
+      await fb.trackUsage(pipeline: pipeline, type: type); 
       _checkCancelled();
 
       state = const GenerationState(phase: GenerationPhase.generating);
+      
+      // Fetch fresh profile for tier-based model selection
+      final profile = await fb.fetchProfile();
 
       if (pipeline == AssetPipeline.structural) {
         return await _generateStructural(
-          uid: uid,
+          uid: profile.uid,
           portfolioId: _portfolioId,
           prompt: prompt,
           type: type,
@@ -122,12 +126,13 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
           uuid: uuid,
           fb: fb,
           gemini: gemini,
+          tier: profile.tier,
           template: template,
           orientation: orientation,
         );
       } else {
         return await _generateGraphical(
-          uid: uid,
+          uid: profile.uid,
           portfolioId: _portfolioId,
           prompt: prompt,
           type: type,
@@ -136,6 +141,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
           uuid: uuid,
           fb: fb,
           gemini: gemini,
+          tier: profile.tier,
           template: template,
           aspectRatio: aspectRatio,
         );
@@ -157,6 +163,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     required Uuid uuid,
     required FirebaseService fb,
     required GeminiRagService gemini,
+    required UserTier tier,
     DocumentTemplate? template,
     String? orientation,
   }) async {
@@ -166,6 +173,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       context: context,
       template: template,
       orientation: orientation,
+      tier: tier,
     );
     _checkCancelled();
 
@@ -218,6 +226,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     required Uuid uuid,
     required FirebaseService fb,
     required GeminiRagService gemini,
+    required UserTier tier,
     DocumentTemplate? template,
     String? aspectRatio,
   }) async {
@@ -226,6 +235,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       context: context,
       template: template,
       aspectRatio: aspectRatio,
+      tier: tier,
     );
     _checkCancelled();
 
@@ -300,17 +310,21 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       );
       _checkCancelled();
 
-      // 2. Generate refined HTML
+      // 2. Fetch tier for model selection
+      final profile = await fb.fetchProfile();
+
+      // 3. Generate refined HTML
       state = const GenerationState(phase: GenerationPhase.generating);
       final newHtml = await gemini.refineStructuralDocument(
         existingHtml: existingAsset.htmlContent!,
         refinementPrompt: refinementPrompt,
         documentType: existingAsset.type,
         context: context,
+        tier: profile.tier,
       );
       _checkCancelled();
 
-      // 3. Persist to Firestore
+      // 4. Persist to Firestore
       state = const GenerationState(phase: GenerationPhase.saving);
       final nextVersion =
       await fb.getNextVersionNumber(
@@ -327,7 +341,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       final saved = await fb.updateDocumentAsset(updated);
       _checkCancelled();
 
-      // 4. Save the version snapshot
+      // 5. Save the version snapshot
       state = const GenerationState(phase: GenerationPhase.savingVersion);
       await fb.saveDocumentVersion(
         asset: saved,

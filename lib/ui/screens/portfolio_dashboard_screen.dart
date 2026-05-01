@@ -90,15 +90,26 @@ class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScr
           ),
         ],
       ),
-      body: portfoliosAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text('Error: $e',
-              style: TextStyle(color: Theme.of(context).colorScheme.error)),
-        ),
-        data: (portfolios) => portfolios.isEmpty
-            ? _EmptyState(onCreateTap: () => _showCreateSheet(context, ref))
-            : _PortfolioList(portfolios: portfolios),
+      body: Column(
+        children: [
+          profileAsync.when(
+            data: (p) => p != null && !p.isFree ? _PlanBanner(profile: p) : const SizedBox(),
+            loading: () => const SizedBox(),
+            error: (_, __) => const SizedBox(),
+          ),
+          Expanded(
+            child: portfoliosAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(
+                child: Text('Error: $e',
+                    style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              ),
+              data: (portfolios) => portfolios.isEmpty
+                  ? _EmptyState(onCreateTap: () => _showCreateSheet(context, ref))
+                  : _PortfolioList(portfolios: portfolios),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateSheet(context, ref),
@@ -115,6 +126,36 @@ class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScr
       context: context,
       isScrollControlled: true,
       builder: (_) => const CreatePortfolioSheet(),
+    );
+  }
+}
+
+class _PlanBanner extends StatelessWidget {
+  const _PlanBanner({required this.profile});
+  final UserProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFFFFD60A).withValues(alpha: 0.1),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Row(
+        children: [
+          const Icon(Icons.stars_rounded, color: Color(0xFFC69C00), size: 16),
+          const SizedBox(width: 8),
+          Text(
+            'ACTIVE PLAN: ${profile.tier.name.toUpperCase()}',
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFFC69C00)),
+          ),
+          const Spacer(),
+          Text(
+            '${profile.totalCredits} Credits Available',
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: c.textSecondary),
+          ),
+        ],
+      ),
     );
   }
 }

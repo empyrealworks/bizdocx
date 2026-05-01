@@ -130,7 +130,6 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
   Widget build(BuildContext context) {
     final genState = ref.watch(documentGenerationProvider(widget.portfolioId));
     final profile = ref.watch(userProfileProvider).value;
-    // final c = context.colors;
 
     return Stack(
       children: [
@@ -401,9 +400,9 @@ class _TemplatePicker extends ConsumerWidget {
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.star_rounded, size: 10, color: Colors.black),
+                                Icon(Icons.workspace_premium_rounded, size: 10, color: Colors.black),
                                 SizedBox(width: 2),
-                                Text('PRO', style: TextStyle(color: Colors.black, fontSize: 8, fontWeight: FontWeight.w900)),
+                                Text('PREMIUM', style: TextStyle(color: Colors.black, fontSize: 8, fontWeight: FontWeight.w900)),
                               ],
                             ),
                           ),

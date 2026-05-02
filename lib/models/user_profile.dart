@@ -6,7 +6,11 @@ import 'document_asset.dart';
 part 'user_profile.freezed.dart';
 part 'user_profile.g.dart';
 
-enum UserTier { free, solopreneur, agency }
+enum UserTier { 
+  @JsonValue('free') free, 
+  @JsonValue('solopreneur') solopreneur, 
+  @JsonValue('agency') agency 
+}
 
 @freezed
 abstract class UserProfile with _$UserProfile {

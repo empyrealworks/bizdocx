@@ -7,6 +7,7 @@ import '../../core/extensions/context_extensions.dart';
 import '../../models/user_profile.dart';
 import '../../services/firebase_service.dart';
 import '../../services/iap_service.dart';
+import '../widgets/confirm_dialog.dart';
 
 class SubscriptionScreen extends ConsumerStatefulWidget {
   const SubscriptionScreen({super.key});
@@ -18,6 +19,7 @@ class SubscriptionScreen extends ConsumerStatefulWidget {
 class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   Offerings? _offerings;
   bool _loading = true;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -28,6 +30,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   Future<void> _fetchOfferings() async {
     final offerings = await IapService.instance.getOfferings();
     if (mounted) {
+      final pkgs = offerings?.current?.availablePackages ?? [];
+      debugPrint('[IAP] Available Packages in Store: ${pkgs.map((p) => p.identifier).join(', ')}');
+      
       setState(() {
         _offerings = offerings;
         _loading = false;
@@ -38,109 +43,135 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) {
     final profileStream = FirebaseService.instance.watchProfile();
-    
+    final c = context.colors;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Plans & Credits'),
         leading: const BackButton(),
         actions: [
           TextButton(
-            onPressed: () => IapService.instance.restorePurchases(),
+            onPressed: _isProcessing ? null : () => IapService.instance.restorePurchases(),
             child: const Text('Restore'),
           ),
         ],
       ),
-      body: StreamBuilder<UserProfile?>(
-        stream: profileStream,
-        builder: (context, snapshot) {
-          final profile = snapshot.data;
-          if (profile == null || _loading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Stack(
+        children: [
+          StreamBuilder<UserProfile?>(
+            stream: profileStream,
+            builder: (context, snapshot) {
+              final profile = snapshot.data;
+              if (profile == null || _loading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          final packages = _offerings?.current?.availablePackages ?? [];
-          final solopreneurPackage = packages
-              .where((p) => p.identifier.toLowerCase().contains('solopreneur'))
-              .firstOrNull ?? (packages.isNotEmpty ? packages.first : null);
-          
-          final agencyPackage = packages
-              .where((p) => p.identifier.toLowerCase().contains('agency'))
-              .firstOrNull ?? (packages.isNotEmpty ? packages.last : null);
+              final currentOffering = _offerings?.current;
+              final packages = currentOffering?.availablePackages ?? [];
+              
+              // Find packages using case-insensitive partial match
+              final solopreneurPackage = packages
+                  .where((p) => p.identifier.toLowerCase().contains('solopreneur'))
+                  .firstOrNull;
+              
+              final agencyPackage = packages
+                  .where((p) => p.identifier.toLowerCase().contains('agency'))
+                  .firstOrNull;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _WalletSummary(profile: profile),
-                const SizedBox(height: 32),
-                _SectionHeader(context, 'Subscription Plans'),
-                const SizedBox(height: 12),
-                _PlanCard(
-                  tier: UserTier.free,
-                  price: '\$0',
-                  subtitle: 'Draft Only',
-                  description: 'Access to single-page documents and low-res drafts.',
-                  features: const [
-                    '50 Draft Credits / Month',
-                    '1 Workspace',
-                    'Watermarked PDFs',
-                    'Standard templates only',
-                  ],
-                  isCurrent: profile.isFree,
-                  onSelect: () => _simulateUpgrade(UserTier.free),
-                ),
-                const SizedBox(height: 16),
-                _buildPackageCard(
-                  package: solopreneurPackage,
-                  tier: UserTier.solopreneur,
-                  fallbackPrice: '\$9.99',
-                  subtitle: 'The "Freelancer"',
-                  description: 'Perfect for regular proposal and invoice needs.',
-                  features: const [
-                    '1,200 Credits / Month',
-                    'Rollover up to 3,600',
-                    'NO Watermarks',
-                    'Multi-page Docs (Contracts/Proposals)',
-                    'High-Res Image unlock',
-                  ],
-                  isCurrent: profile.isSolopreneur,
-                  highlight: true,
-                ),
-                const SizedBox(height: 16),
-                _buildPackageCard(
-                  package: agencyPackage,
-                  tier: UserTier.agency,
-                  fallbackPrice: '\$24.99',
-                  subtitle: 'The "Small Business"',
-                  description: 'For power users managing multiple brands.',
-                  features: const [
-                    '3,500 Credits / Month',
-                    'Rollover up to 10,500',
-                    'Up to 3 Workspaces',
-                    'Access to Heavy AI Models (Pro)',
-                    'Priority Generation Queue',
-                  ],
-                  isCurrent: profile.isAgency,
-                ),
-                const SizedBox(height: 32),
-                _SectionHeader(context, 'Top-Up Credits (Never Expire)'),
-                const SizedBox(height: 12),
-                _TopUpSection(onSelect: (amount) => _handleTopUp(context, amount)),
-                const SizedBox(height: 40),
-                
-                if (packages.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Text(
-                      'Note: Prices are fetched directly from the Play Store/App Store and may vary by region.',
-                      style: TextStyle(color: context.colors.textMuted, fontSize: 10, fontStyle: FontStyle.italic),
+              final topUpPackages = packages
+                  .where((p) => p.identifier.toLowerCase().contains('topup') || p.identifier.toLowerCase().contains('refill'))
+                  .toList()
+                ..sort((a, b) => a.storeProduct.price.compareTo(b.storeProduct.price));
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _WalletSummary(profile: profile),
+                    const SizedBox(height: 32),
+                    _SectionHeader(context, 'Subscription Plans'),
+                    const SizedBox(height: 12),
+                    _PlanCard(
+                      tier: UserTier.free,
+                      price: '\$0',
+                      subtitle: 'Draft Only',
+                      description: 'Access to single-page documents and low-res drafts.',
+                      features: const [
+                        '50 Draft Credits / Month',
+                        '1 Workspace',
+                        'Watermarked PDFs',
+                        'Standard templates only',
+                      ],
+                      isCurrent: profile.isFree,
+                      onSelect: () => _simulateUpgrade(UserTier.free),
                     ),
-                  ),
-              ],
+                    const SizedBox(height: 16),
+                    _buildPackageCard(
+                      package: solopreneurPackage,
+                      tier: UserTier.solopreneur,
+                      fallbackPrice: '\$9.99',
+                      subtitle: 'The "Freelancer"',
+                      description: 'Perfect for regular proposal and invoice needs.',
+                      features: const [
+                        '1,200 Credits / Month',
+                        'Rollover up to 3,600',
+                        'NO Watermarks',
+                        'Multi-page Docs (Contracts/Proposals)',
+                        'High-Res Image unlock',
+                      ],
+                      isCurrent: profile.isSolopreneur,
+                      highlight: true,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildPackageCard(
+                      package: agencyPackage,
+                      tier: UserTier.agency,
+                      fallbackPrice: '\$24.99',
+                      subtitle: 'The "Small Business"',
+                      description: 'For power users managing multiple brands.',
+                      features: const [
+                        '3,500 Credits / Month',
+                        'Rollover up to 10,500',
+                        'Up to 3 Workspaces',
+                        'Access to Heavy AI Models (Pro)',
+                        'Priority Generation Queue',
+                      ],
+                      isCurrent: profile.isAgency,
+                    ),
+                    const SizedBox(height: 32),
+                    _SectionHeader(context, 'Top-Up Credits (Never Expire)'),
+                    const SizedBox(height: 12),
+                    
+                    if (topUpPackages.isNotEmpty)
+                       _TopUpSection(
+                         packages: topUpPackages,
+                         onSelect: (pkg) => _handlePurchase(pkg, isTopUp: true),
+                       )
+                    else
+                      _TopUpSectionSimulated(onSelect: (amount) => _confirmTopUpSimulated(context, amount)),
+                    
+                    const SizedBox(height: 40),
+                    
+                    if (packages.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Text(
+                          'Note: Prices are fetched directly from the Play Store/App Store. Sandbox/Testing may show placeholder names.',
+                          style: TextStyle(color: context.colors.textMuted, fontSize: 10, fontStyle: FontStyle.italic),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+          if (_isProcessing)
+            Container(
+              color: Colors.black.withOpacity(0.3),
+              child: const Center(child: CircularProgressIndicator()),
             ),
-          );
-        },
+        ],
       ),
     );
   }
@@ -171,52 +202,69 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     );
   }
 
-  Future<void> _handlePurchase(Package package) async {
-    final success = await IapService.instance.purchasePackage(package);
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Successfully upgraded!'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+  Future<void> _handlePurchase(Package package, {bool isTopUp = false}) async {
+    setState(() => _isProcessing = true);
+    try {
+      final success = await IapService.instance.purchasePackage(package);
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isTopUp ? 'Credits added successfully!' : 'Successfully upgraded!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isProcessing = false);
     }
   }
 
   Future<void> _simulateUpgrade(UserTier tier) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Simulate ${tier.name.toUpperCase()}?'),
-        content: const Text('This will simulate a successful subscription and apply rollover logic.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Simulate')),
-        ],
+      builder: (ctx) => ConfirmDialog(
+        title: 'Simulate ${tier.name.toUpperCase()}?',
+        message: 'This will simulate a successful subscription renewal and apply rollover logic.',
+        actionLabel: 'Simulate',
+        icon: Icons.refresh_rounded,
+        onConfirm: () async {
+          setState(() => _isProcessing = true);
+          await FirebaseService.instance.processSubscriptionChange(
+            newTier: tier,
+            purchaseDate: DateTime.now(),
+            expiryDate: DateTime.now().add(const Duration(days: 30)),
+          );
+          if (mounted) {
+            setState(() => _isProcessing = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Simulated ${tier.name} upgrade.'), backgroundColor: AppColors.success),
+            );
+          }
+        },
       ),
     );
-
-    if (ok == true) {
-      await FirebaseService.instance.processSubscriptionChange(
-        newTier: tier,
-        purchaseDate: DateTime.now(),
-        expiryDate: DateTime.now().add(const Duration(days: 30)),
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Simulated ${tier.name} upgrade.'), backgroundColor: AppColors.success),
-        );
-      }
-    }
   }
 
-  Future<void> _handleTopUp(BuildContext context, int amount) async {
-     await FirebaseService.instance.addTopUpCredits(amount);
-     if (context.mounted) {
-       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(content: Text('Added $amount credits to your top-up wallet!'), backgroundColor: AppColors.success),
-       );
-     }
+  Future<void> _confirmTopUpSimulated(BuildContext context, int amount) async {
+    await showDialog(
+      context: context,
+      builder: (ctx) => ConfirmDialog(
+        title: 'Add $amount Credits?',
+        message: 'This will simulate a one-time Top-Up purchase.',
+        actionLabel: 'Add Credits',
+        icon: Icons.add_card_rounded,
+        onConfirm: () async {
+           setState(() => _isProcessing = true);
+           await FirebaseService.instance.addTopUpCredits(amount);
+           if (mounted) {
+             setState(() => _isProcessing = false);
+             ScaffoldMessenger.of(context).showSnackBar(
+               SnackBar(content: Text('Added $amount credits to your top-up wallet! (Simulated)'), backgroundColor: AppColors.success),
+             );
+           }
+        },
+      ),
+    );
   }
 
   Widget _SectionHeader(BuildContext context, String text) => Text(
@@ -292,50 +340,81 @@ class _WalletCol extends StatelessWidget {
 }
 
 class _TopUpSection extends StatelessWidget {
-  const _TopUpSection({required this.onSelect});
+  const _TopUpSection({required this.packages, required this.onSelect});
+  final List<Package> packages;
+  final ValueChanged<Package> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: packages.map((pkg) {
+        final amount = _parseAmount(pkg.identifier);
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: pkg == packages.last ? 0 : 12),
+            child: _TopUpCard(
+              amount: amount,
+              price: pkg.storeProduct.priceString,
+              onTap: () => onSelect(pkg),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  int _parseAmount(String id) {
+    final lowerId = id.toLowerCase();
+    if (lowerId.contains('mini')) return 400;
+    if (lowerId.contains('standard')) return 900;
+    if (lowerId.contains('pro')) return 2000;
+    return 0;
+  }
+}
+
+class _TopUpSectionSimulated extends StatelessWidget {
+  const _TopUpSectionSimulated({required this.onSelect});
   final ValueChanged<int> onSelect;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _TopUpItem(amount: 400, price: '\$4.99', onSelect: onSelect),
+        Expanded(child: _TopUpCard(amount: 400, price: '\$4.99', onTap: () => onSelect(400))),
         const SizedBox(width: 12),
-        _TopUpItem(amount: 900, price: '\$9.99', onSelect: onSelect),
+        Expanded(child: _TopUpCard(amount: 900, price: '\$9.99', onTap: () => onSelect(900))),
         const SizedBox(width: 12),
-        _TopUpItem(amount: 2000, price: '\$19.99', onSelect: onSelect),
+        Expanded(child: _TopUpCard(amount: 2000, price: '\$19.99', onTap: () => onSelect(2000))),
       ],
     );
   }
 }
 
-class _TopUpItem extends StatelessWidget {
-  const _TopUpItem({required this.amount, required this.price, required this.onSelect});
+class _TopUpCard extends StatelessWidget {
+  const _TopUpCard({required this.amount, required this.price, required this.onTap});
   final int amount;
   final String price;
-  final ValueChanged<int> onSelect;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => onSelect(amount),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: BoxDecoration(
-            color: c.card,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: c.border),
-          ),
-          child: Column(
-            children: [
-              Text('$amount', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
-              Text('Credits', style: TextStyle(color: c.textMuted, fontSize: 10)),
-              const SizedBox(height: 8),
-              Text(price, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFFFF6B35))),
-            ],
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: c.card,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: c.border),
+        ),
+        child: Column(
+          children: [
+            Text('$amount', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+            Text('Credits', style: TextStyle(color: c.textMuted, fontSize: 10)),
+            const SizedBox(height: 8),
+            Text(price, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFFFF6B35))),
+          ],
         ),
       ),
     );
@@ -433,7 +512,7 @@ class _PlanCard extends StatelessWidget {
               style: isCurrent 
                   ? FilledButton.styleFrom(backgroundColor: c.chipFill, foregroundColor: c.textMuted)
                   : (highlight ? FilledButton.styleFrom(backgroundColor: const Color(0xFFFF6B35)) : null),
-              child: Text(isCurrent ? 'Active Plan' : 'Select Plan'),
+              child: Text(isCurrent ? 'Current Plan' : 'Select Plan'),
             ),
           ),
         ],

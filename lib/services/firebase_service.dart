@@ -184,26 +184,29 @@ class FirebaseService {
     DateTime? expiryDate,
   }) async {
     final docRef = _db.doc(FirestorePaths.user(currentUid));
-    
+    debugPrint('[Subscription] Processing change to ${newTier.name} (Purchase Date: $purchaseDate)');
+
     await _db.runTransaction((tx) async {
       final snap = await tx.get(docRef);
-      if (!snap.exists) return;
+      if (!snap.exists) {
+        debugPrint('[Subscription] ABORT: Profile not found in Firestore.');
+        return;
+      }
       
       final profile = UserProfile.fromFirestore(snap);
       final now = DateTime.now();
       
-      // If we've already processed this specific reset date, skip credit grant but update tier/expiry
+      // Credit grant rule: only if this specific purchase (period) hasn't been credited yet
       bool shouldGrantCredits = profile.lastCreditReset == null || 
                                 purchaseDate.isAfter(profile.lastCreditReset!);
 
       if (!shouldGrantCredits) {
-        if (profile.tier != newTier || profile.subscriptionEndDate != expiryDate) {
-          tx.update(docRef, {
-            'tier': newTier.name,
-            'subscriptionEndDate': expiryDate != null ? Timestamp.fromDate(expiryDate) : null,
-            'updatedAt': Timestamp.now(),
-          });
-        }
+        debugPrint('[Subscription] No credit grant needed (already processed). Updating tier/expiry only.');
+        tx.update(docRef, {
+          'tier': newTier.name, // Enum.name is used for string-indexed enums
+          'subscriptionEndDate': expiryDate != null ? Timestamp.fromDate(expiryDate) : null,
+          'updatedAt': Timestamp.now(),
+        });
         return;
       }
 
@@ -222,6 +225,8 @@ class FirebaseService {
         newBalance = limits.rolloverCap;
       }
 
+      debugPrint('[Subscription] GRANTING CREDITS: $rolledOver (rollover) + ${limits.monthlyAllowance} (allowance) = $newBalance');
+
       final updated = profile.copyWith(
         tier: newTier,
         subscriptionCredits: newBalance,
@@ -236,10 +241,15 @@ class FirebaseService {
 
   Future<void> addTopUpCredits(int amount) async {
     final docRef = _db.doc(FirestorePaths.user(currentUid));
+    debugPrint('[Top-Up] Adding $amount credits to top-up wallet.');
     await _db.runTransaction((tx) async {
       final snap = await tx.get(docRef);
+      if (!snap.exists) return;
       final profile = UserProfile.fromFirestore(snap);
-      tx.update(docRef, {'topUpCredits': profile.topUpCredits + amount, 'updatedAt': Timestamp.now()});
+      tx.update(docRef, {
+        'topUpCredits': profile.topUpCredits + amount, 
+        'updatedAt': Timestamp.now()
+      });
     });
   }
 

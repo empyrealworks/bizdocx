@@ -11,7 +11,7 @@ class IapService {
   IapService._();
   static final IapService instance = IapService._();
 
-  // Entitlement IDs - MUST match exactly what is in RevenueCat dashboard
+  // Entitlement IDs - MUST match exactly what is in your RevenueCat Dashboard -> Entitlements
   static const _solopreneurEntitlement = 'solopreneur'; 
   static const _agencyEntitlement = 'agency';           
 
@@ -30,9 +30,9 @@ class IapService {
     configuration.appUserID = uid;
     await Purchases.configure(configuration);
     
-    debugPrint('[IAP] Configured for user: $uid');
+    debugPrint('[IAP] Initialized for user: $uid');
     
-    // Sync entitlement with Firestore immediately
+    // Explicitly fetch customer info to sync state
     await syncEntitlements();
   }
 
@@ -47,11 +47,28 @@ class IapService {
 
   Future<bool> purchasePackage(Package package) async {
     try {
-      debugPrint('[IAP] Purchasing package: ${package.identifier}');
+      debugPrint('[IAP] Purchase attempt: ${package.identifier}');
       final result = await Purchases.purchase(
         PurchaseParams.package(package),
       );
+      
+      // Update Firestore based on the purchase result
       await _handleCustomerInfo(result.customerInfo);
+      
+      // Top-up check (Using exact keywords to avoid partial matches like 'solopreneur' matching 'pro')
+      final id = package.identifier.toLowerCase();
+      if (id.contains('topup') || id.contains('refill')) {
+        int amount = 0;
+        if (id.contains('mini')) amount = 400;
+        else if (id.contains('standard')) amount = 900;
+        else if (id.contains('pro_refill') || (id.contains('pro') && id.contains('topup'))) amount = 2000;
+
+        if (amount > 0) {
+          debugPrint('[IAP] Top-up confirmed: adding $amount credits.');
+          await FirebaseService.instance.addTopUpCredits(amount);
+        }
+      }
+      
       return true;
     } on PlatformException catch (e) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
@@ -85,10 +102,13 @@ class IapService {
     DateTime? purchaseDate;
     DateTime? expiryDate;
     
+    // VITAL: If 'Registered Entitlements' is empty in your logs, RevenueCat 
+    // does not see your Entitlements associated with the current API Key/App.
+    debugPrint('[IAP] Registered Entitlements in Dashboard: ${info.entitlements.all.keys.join(', ')}');
+    debugPrint('[IAP] Active Entitlements for User: ${info.entitlements.active.keys.join(', ')}');
+
     final agencyEnt = info.entitlements.all[_agencyEntitlement];
     final soloEnt = info.entitlements.all[_solopreneurEntitlement];
-
-    debugPrint('[IAP] Entitlements active: ${info.entitlements.active.keys.join(', ')}');
 
     if (agencyEnt != null && agencyEnt.isActive) {
       newTier = UserTier.agency;
@@ -102,21 +122,22 @@ class IapService {
 
     final fb = FirebaseService.instance;
     if (purchaseDate != null) {
+      debugPrint('[IAP] Found Active Entitlement: $newTier. Syncing to Firestore...');
       await fb.processSubscriptionChange(
         newTier: newTier,
         purchaseDate: purchaseDate,
         expiryDate: expiryDate,
       );
     } else {
-       // If no active entitlements, check if we need to revert
+       // Only revert if we were previously on a paid tier
+       // This prevents unnecessary network calls on every app start for free users
        final profile = await fb.fetchProfile();
        if (profile.tier != UserTier.free) {
-          debugPrint('[IAP] No active entitlements found. Reverting to free tier.');
-          await fb.updateProfile(profile.copyWith(
-            tier: UserTier.free,
-            subscriptionEndDate: null,
-            updatedAt: DateTime.now(),
-          ));
+          debugPrint('[IAP] No active paid entitlements found. Reverting Firestore profile to FREE.');
+          await fb.processSubscriptionChange(
+            newTier: UserTier.free,
+            purchaseDate: DateTime.now(), // Anchor for free tier
+          );
        }
     }
   }

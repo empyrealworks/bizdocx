@@ -9,7 +9,6 @@ import '../models/user_profile.dart';
 import '../services/firebase_service.dart';
 import '../services/gemini_rag_service.dart';
 import '../services/local_cache_service.dart';
-import 'profile_provider.dart';
 
 // ── Documents per Portfolio ───────────────────────────────────────────────────
 final documentListProvider =

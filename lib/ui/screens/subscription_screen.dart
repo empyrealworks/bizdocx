@@ -69,7 +69,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               final currentOffering = _offerings?.current;
               final packages = currentOffering?.availablePackages ?? [];
               
-              // Find packages using case-insensitive partial match
               final solopreneurPackage = packages
                   .where((p) => p.identifier.toLowerCase().contains('solopreneur'))
                   .firstOrNull;
@@ -79,7 +78,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   .firstOrNull;
 
               final topUpPackages = packages
-                  .where((p) => p.identifier.toLowerCase().contains('topup') || p.identifier.toLowerCase().contains('refill'))
+                  .where((p) => p.identifier.toLowerCase().contains('topup') || 
+                                p.identifier.toLowerCase().contains('refill') ||
+                                p.identifier.toLowerCase().contains('mini') ||
+                                p.identifier.toLowerCase().contains('standard'))
+                  .where((p) => !p.identifier.toLowerCase().contains('monthly')) // Avoid matching subs
                   .toList()
                 ..sort((a, b) => a.storeProduct.price.compareTo(b.storeProduct.price));
 
@@ -157,7 +160,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: Text(
-                          'Note: Prices are fetched directly from the Play Store/App Store. Sandbox/Testing may show placeholder names.',
+                          'Note: Prices are fetched directly from the Play Store/App Store. Product IDs: ${packages.map((p)=>p.identifier).join(", ")}',
                           style: TextStyle(color: context.colors.textMuted, fontSize: 10, fontStyle: FontStyle.italic),
                         ),
                       ),
@@ -168,7 +171,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           ),
           if (_isProcessing)
             Container(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               child: const Center(child: CircularProgressIndicator()),
             ),
         ],
@@ -187,16 +190,17 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     bool highlight = false,
   }) {
     final price = package?.storeProduct.priceString ?? fallbackPrice;
+    final isSimulated = package == null;
     
     return _PlanCard(
       tier: tier,
       price: isCurrent ? price : '$price/mo',
-      subtitle: subtitle,
+      subtitle: isSimulated ? '[SIMULATED] $subtitle' : subtitle,
       description: description,
       features: features,
       isCurrent: isCurrent,
       highlight: highlight,
-      onSelect: package != null 
+      onSelect: !isSimulated 
           ? () => _handlePurchase(package) 
           : () => _simulateUpgrade(tier),
     );
@@ -249,10 +253,10 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     await showDialog(
       context: context,
       builder: (ctx) => ConfirmDialog(
-        title: 'Add $amount Credits?',
-        message: 'This will simulate a one-time Top-Up purchase.',
-        actionLabel: 'Add Credits',
-        icon: Icons.add_card_rounded,
+        title: 'Simulate Add $amount Credits?',
+        message: 'No real transaction will occur. This is a debug fallback.',
+        actionLabel: 'Add (Debug)',
+        icon: Icons.bug_report_outlined,
         onConfirm: () async {
            setState(() => _isProcessing = true);
            await FirebaseService.instance.addTopUpCredits(amount);

@@ -5,7 +5,7 @@ part 'user_context.freezed.dart';
 part 'user_context.g.dart';
 
 /// The RAG context profile stored per portfolio.
-/// Fetched silently and appended to every Gemini prompt.
+/// Fetched silently and appended to every AI generation prompt.
 @freezed
 abstract class UserContext with _$UserContext {
   const factory UserContext({

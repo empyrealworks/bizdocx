@@ -7,7 +7,7 @@ import '../models/user_context.dart';
 import '../models/document_template.dart';
 import '../models/user_profile.dart';
 import '../services/firebase_service.dart';
-import '../services/gemini_rag_service.dart';
+import '../services/ai_generation_service.dart';
 import '../services/local_cache_service.dart';
 
 // ── Documents per Portfolio ───────────────────────────────────────────────────
@@ -93,7 +93,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     String? orientation,
   }) async {
     final fb = FirebaseService.instance;
-    final gemini = GeminiRagService.instance;
+    final ai = AiGenerationService.instance;
     const uuid = Uuid();
     _isCancelled = false;
 
@@ -124,7 +124,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
           context: context,
           uuid: uuid,
           fb: fb,
-          gemini: gemini,
+          ai: ai,
           tier: profile.tier,
           template: template,
           orientation: orientation,
@@ -139,7 +139,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
           context: context,
           uuid: uuid,
           fb: fb,
-          gemini: gemini,
+          ai: ai,
           tier: profile.tier,
           template: template,
           aspectRatio: aspectRatio,
@@ -161,12 +161,12 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     required UserContext context,
     required Uuid uuid,
     required FirebaseService fb,
-    required GeminiRagService gemini,
+    required AiGenerationService ai,
     required UserTier tier,
     DocumentTemplate? template,
     String? orientation,
   }) async {
-    final html = await gemini.generateStructuralDocument(
+    final html = await ai.generateStructuralDocument(
       userPrompt: prompt,
       documentType: type,
       context: context,
@@ -224,12 +224,12 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     required UserContext context,
     required Uuid uuid,
     required FirebaseService fb,
-    required GeminiRagService gemini,
+    required AiGenerationService ai,
     required UserTier tier,
     DocumentTemplate? template,
     String? aspectRatio,
   }) async {
-    final bytes = await gemini.generateImage(
+    final bytes = await ai.generateImage(
       userPrompt: prompt,
       context: context,
       template: template,
@@ -292,7 +292,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     }
 
     final fb = FirebaseService.instance;
-    final gemini = GeminiRagService.instance;
+    final ai = AiGenerationService.instance;
     _isCancelled = false;
 
     try {
@@ -314,7 +314,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
 
       // 3. Generate refined HTML
       state = const GenerationState(phase: GenerationPhase.generating);
-      final newHtml = await gemini.refineStructuralDocument(
+      final newHtml = await ai.refineStructuralDocument(
         existingHtml: existingAsset.htmlContent!,
         refinementPrompt: refinementPrompt,
         documentType: existingAsset.type,

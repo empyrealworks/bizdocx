@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BizDocx — Your AI Business Document Companion</title>
+
+  <meta name="description"
+    content="Generate professional invoices, proposals, contracts, logos, and more in seconds — powered by Advanced AI. BizDocx is the high-fidelity AI document hub for entrepreneurs and freelancers.">
+  <meta name="keywords"
+    content="AI Documents, Invoice Generator, Business Proposal, Logo Design, Contract Generator, Nigerian Entrepreneurs, BizDocx, AI Freelancer Tools, Neural AI, High-Fidelity PDF">
+
+  <link rel="icon" href="small_logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="logo.png">
+
+  <!-- SEO Meta Tags -->
+  <meta name="author" content="Empyreal Works">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://bizdocx.empyrealworks.com/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bizdocx.empyrealworks.com/">
+  <meta property="og:title" content="BizDocx — Your AI Business Document Companion">
+  <meta property="og:description" content="Professional invoices, proposals, and brand assets generated in seconds. High-fidelity PDF exports with modern AI.">
+  <meta property="og:image" content="https://bizdocx.app/logo.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://bizdocx.empyrealworks.com/">
+  <meta name="twitter:title" content="BizDocx — Your AI Business Document Companion">
+  <meta name="twitter:description" content="Professional invoices, proposals, and brand assets generated in seconds. High-fidelity PDF exports with modern AI.">
+  <meta name="twitter:image" content="https://bizdocx.empyrealworks.com/logo.png">
+
+  <meta name="theme-color" content="#FF6B35">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #FF6B35;
+      --secondary: #6C7FFF;
+      --gold: #FFD60A;
+      --dark: #141414;
+      --darker: #0A0A0A;
+      --card-bg: rgba(255,255,255,0.03);
+      --border: rgba(255,107,53,0.2);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(160deg, #141414 0%, #0A0A0A 100%);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ── Utilities ─────────────────────────────────────────── */
+    .gradient-text {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.9rem, 4.5vw, 3rem);
+      font-weight: 900;
+      margin-bottom: 3.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    /* ── Nav ───────────────────────────────────────────────── */
+    .top-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,107,53,0.1);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.3px;
+    }
+
+    .nav-brand .brand-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      margin-left: 2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--primary); }
+
+    @media (max-width: 640px) { .nav-links { display: none; } }
+
+    /* ── Hero ──────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 7rem 2rem 5rem;
+      overflow: hidden;
+    }
+
+    .app-logo {
+      width: 150px;
+      height: 150px;
+      border-radius: 22px;
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 30px rgba(160, 104, 255, 0.4);
+      margin-bottom: 1.5rem;
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,107,53,0.12), transparent 70%);
+      top: -200px; right: -150px;
+      animation: float 9s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(108,127,255,0.12), transparent 70%);
+      bottom: -150px; left: -120px;
+      animation: float 9s ease-in-out infinite reverse;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-28px); }
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 5;
+      max-width: 1200px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
+      .hero-cta { justify-content: center; }
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,107,53,0.1);
+      border: 1px solid rgba(255,107,53,0.25);
+      border-radius: 99px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1.4rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 1.4rem;
+    }
+
+    .hero p {
+      color: rgba(255,255,255,0.65);
+      font-size: 1.1rem;
+      line-height: 1.7;
+      max-width: 480px;
+      margin-bottom: 2.4rem;
+    }
+
+    @media (max-width: 900px) {
+      .hero p { margin-left: auto; margin-right: auto; }
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary-grad {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.85rem 1.8rem;
+      background: linear-gradient(135deg, var(--primary), #FF8C42);
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      box-shadow: 0 8px 28px rgba(255,107,53,0.35);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .btn-primary-grad:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 40px rgba(255,107,53,0.45);
+      color: #fff;
+    }
+
+    .btn-outline-grad {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.85rem 1.6rem;
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      color: rgba(255,255,255,0.8);
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-outline-grad:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* ── Hero mockup ───────────────────────────────────────── */
+    .hero-mockup {
+      position: relative;
+    }
+
+    .doc-stack {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+
+    .doc-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(8px);
+      transition: transform 0.3s ease;
+    }
+
+    .doc-card:hover { transform: translateY(-4px); }
+
+    .doc-card-back {
+      position: absolute;
+      top: -14px; left: 16px; right: 16px;
+      background: rgba(255,107,53,0.06);
+      border: 1px solid rgba(255,107,53,0.15);
+      border-radius: 16px;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .doc-card-back2 {
+      position: absolute;
+      top: -26px; left: 30px; right: 30px;
+      background: rgba(108,127,255,0.04);
+      border: 1px solid rgba(108,127,255,0.1);
+      border-radius: 16px;
+      height: 100%;
+      z-index: -2;
+    }
+
+    .doc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+
+    .doc-type-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      background: rgba(255,107,53,0.15);
+      color: var(--primary);
+      border: 1px solid rgba(255,107,53,0.25);
+    }
+
+    .doc-title-line {
+      height: 6px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 3px;
+      margin-bottom: 8px;
+    }
+
+    .doc-body-lines .line {
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      margin-bottom: 6px;
+    }
+    .doc-body-lines .line.short { width: 65%; }
+    .doc-body-lines .line.shorter { width: 40%; }
+
+    .doc-amount {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1.2rem;
+    }
+
+    .doc-amount span {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    /* floating badge */
+    .float-badge {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(20,20,20,0.92);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 0.65rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      animation: floatBadge 4s ease-in-out infinite;
+      backdrop-filter: blur(12px);
+    }
+
+    .float-badge .badge-icon { font-size: 1.1rem; }
+    .float-badge .badge-text { color: rgba(255,255,255,0.85); }
+
+    .float-badge.top-right { top: -20px; right: -24px; animation-delay: 0s; }
+    .float-badge.bottom-left { bottom: -16px; left: -20px; animation-delay: 1.5s; }
+
+    @keyframes floatBadge {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @media (max-width: 900px) { .float-badge { display: none; } }
+
+    /* ── Stats strip ───────────────────────────────────────── */
+    .stats-strip {
+      padding: 2.5rem 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.015);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      text-align: center;
+    }
+
+    @media (max-width: 640px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .stat-item h3 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      margin-bottom: 0.2rem;
+      letter-spacing: -0.5px;
+    }
+    .stat-item p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.45);
+      margin: 0;
+    }
+
+    /* ── Features ──────────────────────────────────────────── */
+    .features { padding: 100px 0; }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 2rem;
+      position: relative;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(255,107,53,0.35);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: rgba(255,255,255,0.95);
+    }
+
+    .feature-card p {
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .feature-badge {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 99px;
+    }
+
+    .badge-pro {
+      background: rgba(255,214,10,0.15);
+      color: var(--gold);
+      border: 1px solid rgba(255,214,10,0.3);
+    }
+    .badge-free {
+      background: rgba(108,127,255,0.15);
+      color: var(--secondary);
+      border: 1px solid rgba(108,127,255,0.3);
+    }
+
+    /* ── How it works ──────────────────────────────────────── */
+    .how-it-works { padding: 100px 0; background: rgba(255,255,255,0.015); }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .step-card {
+      text-align: center;
+      padding: 0.5rem 1.5rem;
+    }
+
+    .step-number {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,107,53,0.25), rgba(108,127,255,0.25));
+      border: 1px solid rgba(255,107,53,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--primary);
+      margin: 0 auto 1.2rem;
+    }
+
+    .step-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-card p {
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ── Doc types ─────────────────────────────────────────── */
+    .doc-types { padding: 100px 0; }
+
+    .doc-type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .doc-type-item {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: default;
+    }
+
+    .doc-type-item:hover {
+      border-color: rgba(255,107,53,0.4);
+      transform: translateY(-3px);
+    }
+
+    .doc-type-item .type-icon { font-size: 1.8rem; margin-bottom: 0.6rem; display: block; }
+    .doc-type-item p { font-size: 0.82rem; color: rgba(255,255,255,0.65); margin: 0; font-weight: 500; }
+
+    /* ── Pricing ───────────────────────────────────────────── */
+    .pricing { padding: 100px 0; background: rgba(255,255,255,0.015); }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 2.2rem;
+      position: relative;
+      transition: transform 0.25s;
+    }
+    .pricing-card:hover { transform: translateY(-5px); }
+
+    .pricing-card.featured {
+      border-color: var(--primary);
+      background: rgba(255,107,53,0.05);
+      box-shadow: 0 0 40px rgba(255,107,53,0.12);
+    }
+
+    .pricing-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .pricing-card.featured .pricing-label { color: var(--primary); }
+
+    .pricing-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 0.3rem;
+    }
+
+    .pricing-subtitle {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 1.4rem;
+    }
+
+    .pricing-price {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 0.3rem;
+    }
+
+    .pricing-per {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 1.6rem;
+    }
+
+    .pricing-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.8rem;
+    }
+
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 0.65rem;
+    }
+
+    .pricing-features li i { color: #30D158; font-size: 0.85rem; }
+
+    .pricing-btn {
+      display: block;
+      width: 100%;
+      padding: 0.85rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-align: center;
+      text-decoration: none;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.85);
+      transition: all 0.2s;
+    }
+
+    .pricing-card.featured .pricing-btn {
+      background: linear-gradient(135deg, var(--primary), #FF8C42);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(255,107,53,0.3);
+    }
+
+    .pricing-btn:hover { transform: translateY(-2px); color: var(--primary); border-color: var(--primary); }
+    .pricing-card.featured .pricing-btn:hover { color: #fff; }
+
+    .most-popular {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.9rem;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+
+    /* ── Privacy section ───────────────────────────────────── */
+    .privacy-section { padding: 100px 0; }
+
+    .privacy-box {
+      max-width: 860px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, rgba(255,107,53,0.06), rgba(108,127,255,0.06));
+      border: 1.5px solid rgba(255,107,53,0.25);
+      border-radius: 28px;
+      padding: 3.5rem 2.5rem;
+      text-align: center;
+    }
+
+    .privacy-box h2 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 900;
+      margin-bottom: 1.2rem;
+      letter-spacing: -0.5px;
+    }
+
+    .privacy-box > p {
+      color: rgba(255,255,255,0.65);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    .privacy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .privacy-item {
+      padding: 1.2rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .privacy-item .privacy-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .privacy-item p { font-size: 0.8rem; margin: 0; color: rgba(255,255,255,0.6); }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    footer {
+      background: rgba(0,0,0,0.55);
+      border-top: 1px solid rgba(255,107,53,0.1);
+      padding: 2.5rem 0;
+      text-align: center;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.45);
+      text-decoration: none;
+      margin: 0 0.8rem;
+      font-size: 0.875rem;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--primary); }
+
+    .footer-copy {
+      color: rgba(255,255,255,0.25);
+      font-size: 0.8rem;
+      margin-top: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ NAV ═════════════════════════ -->
+<nav class="top-nav">
+  <a href="#" class="nav-brand">
+    <div class="brand-dot">B</div>
+    BizDocx
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ HERO ════════════════════════ -->
+<section class="hero">
+<!--  Logo-->
+  <div class="hero-inner container-fluid px-4 px-md-5">
+
+    <!-- Left: Copy -->
+    <div class="hero-text">
+    <div>
+      <img src="logo.png" class="app-logo" alt="bizdocx">
+    </div>
+      <div class="eyebrow">
+        <i class="bi bi-stars"></i>
+        Powered by Advanced AI Engines
+      </div>
+      <h1>
+        Business docs,<br>
+        <span class="gradient-text">beautifully made.</span>
+      </h1>
+      <p>
+        Describe what you need. BizDocx generates professional invoices,
+        proposals, contracts, logos, and more — tailored to your brand, in seconds.
+        No design skills needed.
+      </p>
+      <div class="hero-cta">
+        <a href="https://play.google.com/store/apps/details?id=com.empyrealworks.bizdocx"
+           class="btn-primary-grad">
+          <i class="bi bi-google-play"></i>
+          Get on Google Play
+        </a>
+        <a href="#how-it-works" class="btn-outline-grad">
+          <i class="bi bi-play-circle"></i>
+          See how it works
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: Mockup -->
+    <div class="hero-mockup">
+      <div class="doc-stack">
+        <div class="doc-card-back2"></div>
+        <div class="doc-card-back"></div>
+        <div class="doc-card">
+          <div class="doc-header">
+            <span class="doc-type-pill">Invoice</span>
+            <span style="font-size:0.78rem; color:rgba(255,255,255,0.35);">June 2025</span>
+          </div>
+          <div class="doc-title-line" style="width:55%"></div>
+          <div class="doc-title-line" style="width:35%; height:4px; opacity:0.5;"></div>
+          <div style="height:1px; background:rgba(255,255,255,0.06); margin: 1rem 0;"></div>
+          <div class="doc-body-lines">
+            <div class="line"></div>
+            <div class="line short"></div>
+            <div class="line"></div>
+            <div class="line short"></div>
+            <div class="line shorter"></div>
+          </div>
+          <div class="doc-amount"><span>₦450,000</span></div>
+        </div>
+
+        <div class="float-badge top-right">
+          <span class="badge-icon">✨</span>
+          <span class="badge-text">AI Generated in 8s</span>
+        </div>
+        <div class="float-badge bottom-left">
+          <span class="badge-icon">🎨</span>
+          <span class="badge-text">Brand-matched design</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ STATS STRIP ════════════════ -->
+<div class="stats-strip">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <h3 class="gradient-text">35+</h3>
+        <p>Premium Templates</p>
+      </div>
+      <div class="stat-item">
+        <h3 class="gradient-text">Neural</h3>
+        <p>AI Generation Engine</p>
+      </div>
+      <div class="stat-item">
+        <h3 class="gradient-text">PDF</h3>
+        <p>High-Fidelity Exports</p>
+      </div>
+      <div class="stat-item">
+        <h3 class="gradient-text">No Ads</h3>
+        <p>Clean, Focused Experience</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ DOC TYPES ══════════════════ -->
+<section class="doc-type-item" id="docs">
+  <div class="container">
+    <h2 class="section-title">
+      Everything your <span class="gradient-text">business needs</span>
+    </h2>
+    <p class="text-center mb-5" style="color:rgba(255,255,255,0.5); font-size:1rem; max-width:520px; margin:0 auto 3rem;">
+      From financial documents to brand assets — one app, every document type.
+    </p>
+
+    <div class="doc-type-grid">
+      <div class="doc-type-item">
+        <span class="type-icon">🧾</span>
+        <p>Invoices</p>
+      </div>
+      <div class="doc-type-item">
+        <span class="type-icon">📋</span>
+        <p>Proposals</p>
+      </div>
+      <div class="doc-type-item">
+        <span class="type-icon">🤝</span>
+        <p>Contracts</p>
+      </div>
+      <div class="doc-type-item">
+        <span class="type-icon">📬</span>
+        <p>Letterheads</p>
+      </div>
+      <div class="doc-type-item">
+        <span class="type-icon">🪪</span>
+        <p>Business Cards</p>
+      </div>
+      <div class="doc-type-item">
+        <span class="type-icon">🎨</span>
+        <p>Logos</p>
+      </div>
+      <div class="doc-type-item">
+        <span class="type-icon">🔷</span>
+        <p>Icons</p>
+      </div>
+      <div class="doc-type-item">
+        <span class="type-icon">📄</span>
+        <p>Custom Docs</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ HOW IT WORKS ═══════════════ -->
+<section class="how-it-works" id="how-it-works">
+  <div class="container">
+    <h2 class="section-title">
+      From prompt to <span class="gradient-text">PDF in seconds</span>
+    </h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h3>Set Up Your Portfolio</h3>
+        <p>Enter your business name, mission, brand colours, and logo once. BizDocx remembers everything.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h3>Pick a Template</h3>
+        <p>Choose from our library of professionally designed templates for each document type.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h3>Describe What You Need</h3>
+        <p>Type a short prompt with the specific details. BizDocx handles layout, design, and branding automatically.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">4</div>
+        <h3>Refine &amp; Export</h3>
+        <p>Make follow-up adjustments in plain language. Export as a high-fidelity PDF or PNG asset.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FEATURES ═══════════════════ -->
+<section class="features" id="features">
+  <div class="container">
+    <h2 class="section-title">
+      Built for <span class="gradient-text">real businesses</span>
+    </h2>
+
+    <div class="feature-grid">
+
+      <div class="feature-card">
+        <span class="feature-badge badge-free">Free</span>
+        <span class="feature-icon">🤖</span>
+        <h3>Advanced AI Generation</h3>
+        <p>Describe your document and get a fully designed, brand-matched result instantly. No templates to fill in manually.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-badge badge-free">Free</span>
+        <span class="feature-icon">🧠</span>
+        <h3>Brand Context Memory</h3>
+        <p>Set up your business once — name, mission, colours, logo, target audience. Every generated document is automatically personalised.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-badge badge-free">Free</span>
+        <span class="feature-icon">🔁</span>
+        <h3>Iterative Refinement</h3>
+        <p>Not quite right? Send a follow-up prompt to adjust only what you want. 3 free revisions for multi-page documents.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-badge badge-free">Free</span>
+        <span class="feature-icon">📚</span>
+        <h3>Version History</h3>
+        <p>Every edit is saved as a version snapshot. Preview any previous state and restore it with a single tap.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-badge badge-free">Free</span>
+        <span class="feature-icon">📤</span>
+        <h3>High-Fidelity Exports</h3>
+        <p>Our remote rendering engine ensures pixel-perfect PDFs with modern CSS support. No more layout compromises.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-badge badge-pro">Pro</span>
+        <span class="feature-icon">🖼️</span>
+        <h3>Neural Image Engine</h3>
+        <p>Generate high-impact visual assets. Minimalist marks, wordmarks, emblems, and modern tech styles in seconds.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-badge badge-pro">Pro</span>
+        <span class="feature-icon">🏢</span>
+        <h3>Multiple Workspaces</h3>
+        <p>Manage separate portfolios for different brands or clients. Each workspace has its own documents and context.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-badge badge-free">Free</span>
+        <span class="feature-icon">📵</span>
+        <h3>Works Offline</h3>
+        <p>Offline persistence means your documents and portfolios load even without an internet connection. Your data is always available.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ PRICING ════════════════════ -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <h2 class="section-title">
+      Simple, credit-based <span class="gradient-text">pricing</span>
+    </h2>
+    <p class="text-center mb-5" style="color:rgba(255,255,255,0.5); font-size:1rem; max-width:500px; margin:0 auto 3.5rem;">
+      No generation anxiety. Start free and top up whenever you need more.
+    </p>
+
+    <div class="pricing-grid">
+
+      <!-- Free -->
+      <div class="pricing-card">
+        <div class="pricing-label">Free</div>
+        <div class="pricing-name">Draft Only</div>
+        <div class="pricing-subtitle">Perfect for kicking the tires</div>
+        <div class="pricing-price">$0</div>
+        <div class="pricing-per">forever free</div>
+        <ul class="pricing-features">
+          <li><i class="bi bi-check-circle-fill"></i> 50 Credits / month</li>
+          <li><i class="bi bi-check-circle-fill"></i> 1 Business Workspace</li>
+          <li><i class="bi bi-check-circle-fill"></i> Watermarked PDFs</li>
+          <li><i class="bi bi-check-circle-fill"></i> Standard templates only</li>
+          <li><i class="bi bi-check-circle-fill"></i> Version history</li>
+        </ul>
+        <a href="https://play.google.com/store/apps/details?id=com.empyrealworks.bizdocx"
+           class="pricing-btn">Get Started Free</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="pricing-card featured">
+        <div class="most-popular">Most Popular</div>
+        <div class="pricing-label">Solopreneur</div>
+        <div class="pricing-name">The Freelancer</div>
+        <div class="pricing-subtitle">For regular professional needs</div>
+        <div class="pricing-price gradient-text">$9.99</div>
+        <div class="pricing-per">per month</div>
+        <ul class="pricing-features">
+          <li><i class="bi bi-check-circle-fill"></i> 1,200 Credits / month</li>
+          <li><i class="bi bi-check-circle-fill"></i> Rollover up to 3,600</li>
+          <li><i class="bi bi-check-circle-fill"></i> NO Watermarks</li>
+          <li><i class="bi bi-check-circle-fill"></i> Multi-page Documents</li>
+          <li><i class="bi bi-check-circle-fill"></i> Neural Image Engine</li>
+        </ul>
+        <a href="https://play.google.com/store/apps/details?id=com.empyrealworks.bizdocx"
+           class="pricing-btn">Go Solopreneur</a>
+      </div>
+
+      <!-- Premium -->
+      <div class="pricing-card">
+        <div class="pricing-label">Agency</div>
+        <div class="pricing-name">The Small Business</div>
+        <div class="pricing-subtitle">For managing multiple brands</div>
+        <div class="pricing-price">$24.99</div>
+        <div class="pricing-per">per month</div>
+        <ul class="pricing-features">
+          <li><i class="bi bi-check-circle-fill"></i> 3,500 Credits / month</li>
+          <li><i class="bi bi-check-circle-fill"></i> Rollover up to 10,500</li>
+          <li><i class="bi bi-check-circle-fill"></i> Up to 3 Workspaces</li>
+          <li><i class="bi bi-check-circle-fill"></i> Advanced AI Models</li>
+          <li><i class="bi bi-check-circle-fill"></i> Priority Support</li>
+        </ul>
+        <a href="https://play.google.com/store/apps/details?id=com.empyrealworks.bizdocx"
+           class="pricing-btn">Go Agency</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ PRIVACY ════════════════════ -->
+<section class="privacy-section">
+  <div class="container">
+    <div class="privacy-box">
+      <h2>Your Business Data is <span class="gradient-text">Yours</span></h2>
+      <p>
+        BizDocx is designed with privacy as a foundation. Your business context and prompts
+        are only processed by our secure AI partners when you tap Generate. We never sell or share
+        your data with advertisers.
+      </p>
+      <div class="privacy-grid">
+        <div class="privacy-item">
+          <div class="privacy-icon">🚫</div>
+          <p>No ads, ever</p>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-icon">🔒</div>
+          <p>Enterprise-grade security</p>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-icon">📴</div>
+          <p>Works fully offline</p>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-icon">🗑️</div>
+          <p>Delete your data anytime</p>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-icon">🤖</div>
+          <p>Data not used for training</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ CONTACT ════════════════════ -->
+<section id="contact" style="padding:100px 0;">
+  <div class="container">
+    <h2 class="section-title">
+      Get in <span class="gradient-text">Touch</span>
+    </h2>
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div style="background:var(--card-bg); border:1px solid rgba(255,107,53,0.2); border-radius:24px; padding:2.5rem;">
+          <p style="color:rgba(255,255,255,0.6); text-align:center; margin-bottom:1.8rem; font-size:0.95rem;">
+            Questions, feedback, or support? We'd love to hear from you.
+          </p>
+          <div style="display:flex; flex-direction:column; gap:1rem; align-items:center;">
+            <a href="mailto:hello@empyrealworks.com"
+               style="display:inline-flex; align-items:center; gap:10px; color:var(--primary); font-weight:600; font-size:1rem; text-decoration:none; padding:1rem 2rem; border:1.5px solid rgba(255,107,53,0.3); border-radius:14px; width:100%; justify-content:center; transition:background 0.2s;">
+              <i class="bi bi-envelope-fill"></i>
+              hello@empyrealworks.com
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=com.empyrealworks.bizdocx"
+               class="btn-primary-grad" style="width:100%; justify-content:center;">
+              <i class="bi bi-google-play"></i>
+              Download on Google Play
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FOOTER ═════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-links mb-3">
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="delete-my-data.html">Delete My Data</a>
+      <a href="mailto:hello@empyrealworks.com">Contact</a>
+    </div>
+    <p class="footer-copy">&copy; 2025 Empyreal Works &nbsp;·&nbsp; BizDocx</p>
+  </div>
+</footer>
+
+</body>
+</html>

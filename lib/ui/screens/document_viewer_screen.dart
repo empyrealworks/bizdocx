@@ -158,12 +158,12 @@ class _DocumentViewerScreenState
               onPressed: () =>
                   context.go('/portfolio/${_asset.portfolioId}')),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.history_rounded, size: 22),
+              tooltip: 'Version history',
+              onPressed: busy ? null : _showHistory,
+            ),
             if (_asset.isStructural) ...[
-              IconButton(
-                icon: const Icon(Icons.history_rounded, size: 22),
-                tooltip: 'Version history',
-                onPressed: busy ? null : _showHistory,
-              ),
               IconButton(
                 icon: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),

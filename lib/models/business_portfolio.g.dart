@@ -19,22 +19,21 @@ _BusinessPortfolio _$BusinessPortfolioFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       targetAudience: json['targetAudience'] as String? ?? '',
-      logoStoragePath: json['logoStoragePath'] as String?,
-      logoLocalPath: json['logoLocalPath'] as String?,
+      businessAddress: json['businessAddress'] as String? ?? '',
+      businessEmail: json['businessEmail'] as String? ?? '',
+      businessPhone: json['businessPhone'] as String? ?? '',
+      website: json['website'] as String? ?? '',
+      country: json['country'] as String? ?? 'Nigeria',
+      defaultCurrency: json['defaultCurrency'] as String? ?? 'NGN',
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String),
       documentIds:
           (json['documentIds'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
-      uploadedAssetPaths:
-          (json['uploadedAssetPaths'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
     );
 
 Map<String, dynamic> _$BusinessPortfolioToJson(_BusinessPortfolio instance) =>
@@ -46,10 +45,13 @@ Map<String, dynamic> _$BusinessPortfolioToJson(_BusinessPortfolio instance) =>
       'mission': instance.mission,
       'brandColors': instance.brandColors,
       'targetAudience': instance.targetAudience,
-      'logoStoragePath': instance.logoStoragePath,
-      'logoLocalPath': instance.logoLocalPath,
-      'documentIds': instance.documentIds,
-      'uploadedAssetPaths': instance.uploadedAssetPaths,
+      'businessAddress': instance.businessAddress,
+      'businessEmail': instance.businessEmail,
+      'businessPhone': instance.businessPhone,
+      'website': instance.website,
+      'country': instance.country,
+      'defaultCurrency': instance.defaultCurrency,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
+      'documentIds': instance.documentIds,
     };

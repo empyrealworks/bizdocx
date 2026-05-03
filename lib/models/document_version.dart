@@ -1,62 +1,48 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-/// A point-in-time snapshot of a structural document's HTML content.
-/// Stored at: users/{uid}/portfolios/{pid}/documents/{did}/versions/{vid}
-class DocumentVersion {
-  const DocumentVersion({
-    required this.id,
-    required this.documentId,
-    required this.portfolioId,
-    required this.userId,
-    required this.htmlContent,
-    required this.versionNumber,
-    required this.createdAt,
-    this.label, // null = "Version N"; non-null = user-readable label
-    this.refinementPrompt, // null for the initial generation (v1)
-  });
+part 'document_version.freezed.dart';
+part 'document_version.g.dart';
 
-  final String id;
-  final String documentId;
-  final String portfolioId;
-  final String userId;
-  final String htmlContent;
-  final int versionNumber;
-  final DateTime createdAt;
-  final String? label;
-  final String? refinementPrompt;
+@freezed
+abstract class DocumentVersion with _$DocumentVersion {
+  const factory DocumentVersion({
+    required String id,
+    required String documentId,
+    required String portfolioId,
+    required String userId,
+    
+    // Content snapshots
+    @Default('') String htmlContent, // Used for structural
+    String? imageUrl,               // Used for graphical
+    
+    required int versionNumber,
+    String? refinementPrompt,
+    String? label,
+    required DateTime createdAt,
+  }) = _DocumentVersion;
 
-  bool get isOriginal => versionNumber == 1;
+  const DocumentVersion._();
 
-  String get displayLabel {
-    if (label != null && label!.isNotEmpty) return label!;
-    if (isOriginal) return 'Original';
-    return 'Version $versionNumber';
-  }
+  factory DocumentVersion.fromJson(Map<String, dynamic> json) =>
+      _$DocumentVersionFromJson(json);
 
-  factory DocumentVersion.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory DocumentVersion.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
-    return DocumentVersion(
-      id: doc.id,
-      documentId: data['documentId'] as String,
-      portfolioId: data['portfolioId'] as String,
-      userId: data['userId'] as String,
-      htmlContent: data['htmlContent'] as String,
-      versionNumber: (data['versionNumber'] as num).toInt(),
-      label: data['label'] as String?,
-      refinementPrompt: data['refinementPrompt'] as String?,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-    );
+    return DocumentVersion.fromJson({
+      ...data,
+      'id': doc.id,
+      'createdAt': data['createdAt'] is Timestamp 
+          ? (data['createdAt'] as Timestamp).toDate().toIso8601String()
+          : data['createdAt'],
+    });
   }
 
-  Map<String, dynamic> toFirestore() => {
-    'documentId': documentId,
-    'portfolioId': portfolioId,
-    'userId': userId,
-    'htmlContent': htmlContent,
-    'versionNumber': versionNumber,
-    'label': label,
-    'refinementPrompt': refinementPrompt,
-    'createdAt': Timestamp.fromDate(createdAt),
-  };
+  Map<String, dynamic> toFirestore() {
+    final json = toJson();
+    return {
+      ...json,
+      'createdAt': Timestamp.fromDate(createdAt),
+    }..remove('id');
+  }
 }

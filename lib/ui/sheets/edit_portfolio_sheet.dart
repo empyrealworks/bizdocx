@@ -14,13 +14,22 @@ class EditPortfolioSheet extends ConsumerStatefulWidget {
       _EditPortfolioSheetState();
 }
 
-class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
-  final _formKey      = GlobalKey<FormState>();
+class _EditPortfolioSheetState
+    extends ConsumerState<EditPortfolioSheet> {
   late final TextEditingController _nameCtrl;
   late final TextEditingController _descCtrl;
   late final TextEditingController _missionCtrl;
   late final TextEditingController _audienceCtrl;
   late final TextEditingController _colorCtrl;
+  
+  late final TextEditingController _addressCtrl;
+  late final TextEditingController _emailCtrl;
+  late final TextEditingController _phoneCtrl;
+  late final TextEditingController _webCtrl;
+  late final TextEditingController _countryCtrl;
+  late final TextEditingController _currencyCtrl;
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -31,6 +40,13 @@ class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
     _missionCtrl  = TextEditingController(text: p.mission);
     _audienceCtrl = TextEditingController(text: p.targetAudience);
     _colorCtrl    = TextEditingController(text: p.brandColors.join(', '));
+    
+    _addressCtrl  = TextEditingController(text: p.businessAddress);
+    _emailCtrl    = TextEditingController(text: p.businessEmail);
+    _phoneCtrl    = TextEditingController(text: p.businessPhone);
+    _webCtrl      = TextEditingController(text: p.website);
+    _countryCtrl  = TextEditingController(text: p.country);
+    _currencyCtrl = TextEditingController(text: p.defaultCurrency);
   }
 
   @override
@@ -40,10 +56,16 @@ class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
     _missionCtrl.dispose();
     _audienceCtrl.dispose();
     _colorCtrl.dispose();
+    _addressCtrl.dispose();
+    _emailCtrl.dispose();
+    _phoneCtrl.dispose();
+    _webCtrl.dispose();
+    _countryCtrl.dispose();
+    _currencyCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _save() async {
+  Future<void> _update() async {
     if (!_formKey.currentState!.validate()) return;
     final colors = _colorCtrl.text
         .split(',')
@@ -55,11 +77,20 @@ class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
       name: _nameCtrl.text.trim(),
       description: _descCtrl.text.trim(),
       mission: _missionCtrl.text.trim(),
-      targetAudience: _audienceCtrl.text.trim(),
       brandColors: colors,
+      targetAudience: _audienceCtrl.text.trim(),
+      businessAddress: _addressCtrl.text.trim(),
+      businessEmail: _emailCtrl.text.trim(),
+      businessPhone: _phoneCtrl.text.trim(),
+      website: _webCtrl.text.trim(),
+      country: _countryCtrl.text.trim(),
+      defaultCurrency: _currencyCtrl.text.trim(),
     );
 
-    await ref.read(portfolioNotifierProvider.notifier).updatePortfolio(updated);
+    await ref
+        .read(portfolioNotifierProvider.notifier)
+        .updatePortfolio(updated);
+
     if (mounted) Navigator.pop(context);
   }
 
@@ -69,86 +100,87 @@ class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
     final state = ref.watch(portfolioNotifierProvider);
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottom),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return DraggableScrollableSheet(
+      initialChildSize: 0.9,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) => Container(
+        decoration: BoxDecoration(
+          color: c.card,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            controller: scrollController,
+            padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottom),
             children: [
+              Row(children: [
+                Text('Edit Business',
+                    style: Theme.of(context).textTheme.headlineMedium),
+                const Spacer(),
+                IconButton(
+                  icon: Icon(Icons.close, color: c.iconSecondary),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ]),
+              const SizedBox(height: 24),
+              
+              _SectionLabel('Basic Info'),
+              const SizedBox(height: 12),
+              _field(_nameCtrl, 'Business Name *',
+                  validator: (v) => v!.isEmpty ? 'Required' : null),
+              const SizedBox(height: 12),
+              _field(_descCtrl, 'Short Description'),
+              const SizedBox(height: 12),
+              _field(_missionCtrl, 'Mission Statement', maxLines: 2),
+              
+              const SizedBox(height: 24),
+              _SectionLabel('Contact & Identity'),
+              const SizedBox(height: 12),
+              _field(_addressCtrl, 'Physical Address', maxLines: 2),
+              const SizedBox(height: 12),
               Row(
                 children: [
-                  Text('Edit Business',
-                      style: Theme.of(context).textTheme.headlineMedium),
-                  const Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.close, color: c.iconSecondary),
-                    onPressed: () => Navigator.pop(context),
-                  ),
+                  Expanded(child: _field(_emailCtrl, 'Business Email', keyboardType: TextInputType.emailAddress)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _field(_phoneCtrl, 'Phone Number', keyboardType: TextInputType.phone)),
                 ],
               ),
-              const SizedBox(height: 6),
-              // Context tip
-              Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: c.chipFill,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: c.border),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, size: 14, color: c.iconSecondary),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'More detail here = better AI-generated documents.',
-                        style:
-                        TextStyle(color: c.textBody, fontSize: 12),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              _label(context, 'Business Name *'),
-              const SizedBox(height: 6),
-              _field(_nameCtrl, 'e.g. Acme Ceramics Ltd',
-                  validator: (v) => v!.isEmpty ? 'Required' : null),
-              const SizedBox(height: 14),
-              _label(context, 'Short Description'),
-              const SizedBox(height: 6),
-              _field(_descCtrl,
-                  'e.g. Premium handcrafted ceramics for modern homes'),
-              const SizedBox(height: 14),
-              _label(context, 'Mission Statement'),
-              const SizedBox(height: 6),
-              _field(_missionCtrl,
-                  'e.g. To bring artisan craftsmanship into everyday life',
-                  maxLines: 3),
-              const SizedBox(height: 14),
-              _label(context, 'Target Audience'),
-              const SizedBox(height: 6),
-              _field(_audienceCtrl,
-                  'e.g. Interior designers and home décor retailers'),
-              const SizedBox(height: 14),
-              _label(context, 'Brand Colors (comma-separated hex)'),
-              const SizedBox(height: 6),
-              _field(_colorCtrl, 'e.g. #2C3E50, #E74C3C, #ECF0F1'),
+              const SizedBox(height: 12),
+              _field(_webCtrl, 'Website'),
+              
               const SizedBox(height: 24),
-              FilledButton(
-                onPressed: state.isLoading ? null : _save,
-                child: state.isLoading
-                    ? SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2, color: c.filledButtonFg),
-                )
-                    : const Text('Save Changes'),
+              _SectionLabel('Localization'),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(child: _field(_countryCtrl, 'Country')),
+                  const SizedBox(width: 12),
+                  Expanded(child: _field(_currencyCtrl, 'Default Currency')),
+                ],
+              ),
+              
+              const SizedBox(height: 24),
+              _SectionLabel('Branding'),
+              const SizedBox(height: 12),
+              _field(_colorCtrl, 'Brand Colors (comma-separated hex)'),
+              const SizedBox(height: 12),
+              _field(_audienceCtrl, 'Target Audience'),
+              
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: FilledButton(
+                  onPressed: state.isLoading ? null : _update,
+                  child: state.isLoading
+                      ? const SizedBox(
+                          height: 20, width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Text('Update Portfolio', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
               ),
             ],
           ),
@@ -157,23 +189,20 @@ class _EditPortfolioSheetState extends ConsumerState<EditPortfolioSheet> {
     );
   }
 
-  Widget _label(BuildContext context, String text) => Text(
+  Widget _SectionLabel(String text) => Text(
     text.toUpperCase(),
-    style: TextStyle(
-      color: context.colors.textMuted,
-      fontSize: 10,
-      letterSpacing: 0.8,
-      fontWeight: FontWeight.w500,
-    ),
+    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.1, color: Colors.grey),
   );
 
   Widget _field(TextEditingController ctrl, String hint,
-      {int maxLines = 1, String? Function(String?)? validator}) {
+      {int maxLines = 1, String? Function(String?)? validator, TextInputType? keyboardType}) {
     return TextFormField(
       controller: ctrl,
       maxLines: maxLines,
       validator: validator,
-      decoration: InputDecoration(hintText: hint),
+      keyboardType: keyboardType,
+      style: const TextStyle(fontSize: 14),
+      decoration: InputDecoration(hintText: hint, contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
     );
   }
 }

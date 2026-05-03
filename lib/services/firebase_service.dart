@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:uuid/uuid.dart';
 
 import '../core/constants/firestore_paths.dart';
+import '../env/env.dart';
 import '../models/business_portfolio.dart';
 import '../models/document_asset.dart';
 import '../models/document_version.dart';
@@ -306,6 +307,12 @@ class FirebaseService {
     String mission = '',
     List<String> brandColors = const [],
     String targetAudience = '',
+    String businessAddress = '',
+    String businessEmail = '',
+    String businessPhone = '',
+    String website = '',
+    String country = 'Nigeria',
+    String defaultCurrency = 'NGN',
   }) async {
     final uid = currentUid;
     final profile = await fetchProfile();
@@ -325,6 +332,12 @@ class FirebaseService {
       mission: mission,
       brandColors: brandColors,
       targetAudience: targetAudience,
+      businessAddress: businessAddress,
+      businessEmail: businessEmail,
+      businessPhone: businessPhone,
+      website: website,
+      country: country,
+      defaultCurrency: defaultCurrency,
       createdAt: now,
     );
     await _db
@@ -338,6 +351,12 @@ class FirebaseService {
       mission: mission,
       brandColors: brandColors,
       targetAudience: targetAudience,
+      businessAddress: businessAddress,
+      businessEmail: businessEmail,
+      businessPhone: businessPhone,
+      website: website,
+      country: country,
+      defaultCurrency: defaultCurrency,
       lastUpdated: now,
     );
     await _db
@@ -361,6 +380,12 @@ class FirebaseService {
         'mission': portfolio.mission,
         'brandColors': portfolio.brandColors,
         'targetAudience': portfolio.targetAudience,
+        'businessAddress': portfolio.businessAddress,
+        'businessEmail': portfolio.businessEmail,
+        'businessPhone': portfolio.businessPhone,
+        'website': portfolio.website,
+        'country': portfolio.country,
+        'defaultCurrency': portfolio.defaultCurrency,
         'lastUpdated': Timestamp.now(),
       },
     );
@@ -465,7 +490,8 @@ class FirebaseService {
       documentId: asset.id,
       portfolioId: asset.portfolioId,
       userId: uid,
-      htmlContent: asset.htmlContent!,
+      htmlContent: asset.isStructural ? asset.htmlContent! : '',
+      imageUrl: asset.isGraphical ? asset.storageUrl : null,
       versionNumber: versionNumber,
       refinementPrompt: refinementPrompt,
       label: label,
@@ -484,7 +510,8 @@ class FirebaseService {
     required DocumentVersion version,
   }) async {
     final restored = currentAsset.copyWith(
-      htmlContent: version.htmlContent,
+      htmlContent: currentAsset.isStructural ? version.htmlContent : currentAsset.htmlContent,
+      storageUrl: currentAsset.isGraphical ? version.imageUrl : currentAsset.storageUrl,
       updatedAt: DateTime.now(),
       isCached: false,
     );

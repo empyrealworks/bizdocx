@@ -14,12 +14,18 @@ abstract class BusinessPortfolio with _$BusinessPortfolio {
     @Default('') String mission,
     @Default([]) List<String> brandColors,
     @Default('') String targetAudience,
-    String? logoStoragePath,
-    String? logoLocalPath,
-    @Default([]) List<String> documentIds,
-    @Default([]) List<String> uploadedAssetPaths,
+    
+    // New context fields
+    @Default('') String businessAddress,
+    @Default('') String businessEmail,
+    @Default('') String businessPhone,
+    @Default('') String website,
+    @Default('Nigeria') String country,
+    @Default('NGN') String defaultCurrency,
+
     required DateTime createdAt,
     DateTime? updatedAt,
+    @Default([]) List<String> documentIds,
   }) = _BusinessPortfolio;
 
   const BusinessPortfolio._();
@@ -45,10 +51,8 @@ abstract class BusinessPortfolio with _$BusinessPortfolio {
     final json = toJson();
     return {
       ...json,
-      'id': FieldValue.delete(),
-      'logoLocalPath': FieldValue.delete(),
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
-    }..remove('id')..remove('logoLocalPath');
+    }..remove('id');
   }
 }

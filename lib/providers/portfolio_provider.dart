@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// StateProvider, StreamProvider, and Provider were moved to legacy in Riverpod 3.0
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../models/business_portfolio.dart';
@@ -46,6 +47,12 @@ class PortfolioNotifier extends AsyncNotifier<void> {
     required String mission,
     required List<String> brandColors,
     required String targetAudience,
+    required String businessAddress,
+    required String businessEmail,
+    required String businessPhone,
+    required String website,
+    required String country,
+    required String defaultCurrency,
   }) async {
     state = const AsyncLoading();
     try {
@@ -55,6 +62,12 @@ class PortfolioNotifier extends AsyncNotifier<void> {
         mission: mission,
         brandColors: brandColors,
         targetAudience: targetAudience,
+        businessAddress: businessAddress,
+        businessEmail: businessEmail,
+        businessPhone: businessPhone,
+        website: website,
+        country: country,
+        defaultCurrency: defaultCurrency,
       );
       state = const AsyncData(null);
       return portfolio;
@@ -87,6 +100,5 @@ class PortfolioNotifier extends AsyncNotifier<void> {
   }
 }
 
-// In Riverpod 3.0, the provider factory takes (ref)
 final portfolioNotifierProvider =
 AsyncNotifierProvider<PortfolioNotifier, void>(PortfolioNotifier.new);

@@ -1,331 +1,227 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
-import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../models/document_asset.dart';
 import '../../models/document_version.dart';
-import '../../providers/document_version_provider.dart';
+import '../../providers/document_generation_provider.dart';
 import '../../services/firebase_service.dart';
 
-typedef OnVersionRestored = void Function(DocumentAsset restoredAsset);
-
 class VersionHistorySheet extends ConsumerWidget {
-  const VersionHistorySheet(
-      {super.key, required this.asset, required this.onVersionRestored});
+  const VersionHistorySheet({
+    super.key,
+    required this.asset,
+    required this.onVersionRestored,
+  });
+
   final DocumentAsset asset;
-  final OnVersionRestored onVersionRestored;
+  final ValueChanged<DocumentAsset> onVersionRestored;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    final versionsAsync = ref.watch(documentVersionsProvider(
-        (portfolioId: asset.portfolioId, documentId: asset.id)));
+    final versionsStream = FirebaseService.instance.watchVersions(
+      portfolioId: asset.portfolioId,
+      documentId: asset.id,
+    );
 
     return Container(
       decoration: BoxDecoration(
         color: c.card,
-        borderRadius:
-        const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        // Handle
-        Container(
-          margin: const EdgeInsets.only(top: 12),
-          width: 36, height: 4,
-          decoration: BoxDecoration(
-              color: c.border, borderRadius: BorderRadius.circular(2)),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-          child: Row(children: [
-            Icon(Icons.history_rounded, size: 18, color: c.iconSecondary),
-            const SizedBox(width: 8),
-            Text('Version History',
-                style: Theme.of(context).textTheme.titleLarge),
-            const Spacer(),
-            versionsAsync.when(
-              data: (v) => Text('${v.length} versions',
-                  style: Theme.of(context).textTheme.labelSmall),
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _Handle(c: c),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
+            child: Row(
+              children: [
+                const Icon(Icons.history_rounded, size: 22),
+                const SizedBox(width: 12),
+                Text('Version History',
+                    style: Theme.of(context).textTheme.titleLarge),
+              ],
             ),
-          ]),
-        ),
-        Divider(height: 1, color: c.border),
-        versionsAsync.when(
-          loading: () => const Padding(
-              padding: EdgeInsets.all(40),
-              child: CircularProgressIndicator()),
-          error: (e, _) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text('Could not load versions: $e',
-                style: const TextStyle(color: AppColors.error)),
           ),
-          data: (versions) {
-            if (versions.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.all(32),
-                child: Text('No version history yet.',
-                    style: TextStyle(color: c.textMuted)),
-              );
-            }
-            return ConstrainedBox(
-              constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.55),
-              child: ListView.separated(
-                shrinkWrap: true,
-                padding: const EdgeInsets.only(bottom: 24),
-                itemCount: versions.length,
-                separatorBuilder: (_, __) =>
-                    Divider(height: 1, color: c.border),
-                itemBuilder: (context, i) {
-                  final v = versions[i];
-                  return _VersionTile(
-                    version: v,
-                    isCurrent: i == 0,
-                    onPreview: () => _showPreview(context, v),
-                    onRestore: i == 0
-                        ? null
-                        : () => _restore(context, ref, v),
-                  );
-                },
-              ),
-            );
-          },
-        ),
-      ]),
-    );
-  }
+          Flexible(
+            child: StreamBuilder<List<DocumentVersion>>(
+              stream: versionsStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final versions = snapshot.data ?? [];
+                if (versions.isEmpty) {
+                  return _EmptyHistory(c: c);
+                }
 
-  void _showPreview(BuildContext context, DocumentVersion version) {
-    Navigator.of(context).push(MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (_) => _VersionPreviewScreen(version: version),
-    ));
-  }
-
-  Future<void> _restore(
-      BuildContext context, WidgetRef ref, DocumentVersion version) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Restore version?'),
-        content: Text(
-          'This will replace the current document with ${version.displayLabel}. '
-              'The current content will remain in history.',
-          style: TextStyle(color: context.colors.textBody, fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Restore')),
+                return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+                  itemCount: versions.length,
+                  shrinkWrap: true,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final v = versions[index];
+                    return _VersionTile(
+                      version: v,
+                      isCurrent: v.htmlContent == asset.htmlContent || (asset.isGraphical && v.imageUrl == asset.storageUrl),
+                      onRestore: () => _handleRestore(context, v),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
-    if (confirmed != true || !context.mounted) return;
-    try {
-      final restored = await FirebaseService.instance
-          .restoreDocumentVersion(currentAsset: asset, version: version);
-      if (context.mounted) {
-        Navigator.pop(context);
-        onVersionRestored(restored);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Restored to ${version.displayLabel}'),
-        ));
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Restore failed: $e'),
-          backgroundColor: AppColors.error,
-        ));
-      }
+  }
+
+  Future<void> _handleRestore(BuildContext context, DocumentVersion version) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Restore Version?'),
+        content: Text('This will set the current document to Version ${version.versionNumber}.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Restore')),
+        ],
+      ),
+    );
+
+    if (ok == true) {
+      final restored = await FirebaseService.instance.restoreDocumentVersion(
+        currentAsset: asset,
+        version: version,
+      );
+      onVersionRestored(restored);
+      if (context.mounted) Navigator.pop(context);
     }
   }
 }
-
-// ── Version Tile ──────────────────────────────────────────────────────────────
 
 class _VersionTile extends StatelessWidget {
   const _VersionTile({
     required this.version,
     required this.isCurrent,
-    required this.onPreview,
     required this.onRestore,
   });
+
   final DocumentVersion version;
   final bool isCurrent;
-  final VoidCallback onPreview;
-  final VoidCallback? onRestore;
+  final VoidCallback onRestore;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return InkWell(
-      onTap: onPreview,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        child: Row(children: [
-          Container(
-            width: 10, height: 10,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isCurrent ? AppColors.success : c.chipFill,
-              border: Border.all(
-                  color: isCurrent ? AppColors.success : c.border),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      decoration: BoxDecoration(
+        color: isCurrent ? c.chipFill : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isCurrent ? c.borderStrong : c.border),
+      ),
+      child: InkWell(
+        onTap: isCurrent ? null : onRestore,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
             children: [
-              Row(children: [
-                Text(version.displayLabel,
-                    style: TextStyle(
-                      color: isCurrent ? c.textPrimary : c.textSecondary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    )),
-                if (isCurrent) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                          color: AppColors.success.withValues(alpha: 0.4)),
-                    ),
-                    child: const Text('current',
-                        style: TextStyle(
-                            color: AppColors.success, fontSize: 10)),
+              if (version.imageUrl != null)
+                Container(
+                  width: 48,
+                  height: 48,
+                  margin: const EdgeInsets.only(right: 16),
+                  decoration: BoxDecoration(
+                    color: c.chipFill,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ],
-              ]),
-              if (version.refinementPrompt != null)
-                Text('"${version.refinementPrompt}"',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        color: c.textMuted,
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic)),
-              Text(_fmtDateTime(version.createdAt),
-                  style: TextStyle(color: c.textMuted, fontSize: 11)),
-            ],
-          )),
-          const SizedBox(width: 4),
-          IconButton(
-            icon: Icon(Icons.open_in_new_rounded,
-                size: 16, color: c.textMuted),
-            tooltip: 'Preview',
-            onPressed: onPreview,
-          ),
-          if (onRestore != null)
-            TextButton(
-              onPressed: onRestore,
-              style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  minimumSize: const Size(0, 32)),
-              child: Text('Restore',
-                  style:
-                  TextStyle(color: c.textBody, fontSize: 12)),
-            ),
-        ]),
-      ),
-    );
-  }
-
-  String _fmtDateTime(DateTime dt) {
-    const m = ['Jan','Feb','Mar','Apr','May','Jun',
-      'Jul','Aug','Sep','Oct','Nov','Dec'];
-    final h = dt.hour.toString().padLeft(2, '0');
-    final min = dt.minute.toString().padLeft(2, '0');
-    return '${dt.day} ${m[dt.month - 1]} ${dt.year} · $h:$min';
-  }
-}
-
-// ── Version Preview Screen ────────────────────────────────────────────────────
-
-class _VersionPreviewScreen extends StatefulWidget {
-  const _VersionPreviewScreen({required this.version});
-  final DocumentVersion version;
-
-  @override
-  State<_VersionPreviewScreen> createState() => _VersionPreviewScreenState();
-}
-
-class _VersionPreviewScreenState extends State<_VersionPreviewScreen> {
-  late final WebViewController _ctrl;
-  bool _ready = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white)
-      ..setNavigationDelegate(
-          NavigationDelegate(onPageFinished: (_) =>
-              setState(() => _ready = true)))
-      ..loadHtmlString(widget.version.htmlContent);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final v = widget.version;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(v.displayLabel),
-        leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.pop(context)),
-      ),
-      body: Column(children: [
-        Container(
-          width: double.infinity,
-          padding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          color: c.chipFill,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(_fmtDateTime(v.createdAt),
-                  style: TextStyle(color: c.textBody, fontSize: 12)),
-              if (v.refinementPrompt != null)
-                Text('"${v.refinementPrompt}"',
-                    style: TextStyle(
-                        color: c.textMuted,
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic)),
+                  clipBehavior: Clip.antiAlias,
+                  child: CachedNetworkImage(
+                    imageUrl: version.imageUrl!,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              else
+                Container(
+                  width: 48,
+                  height: 48,
+                  margin: const EdgeInsets.only(right: 16),
+                  decoration: BoxDecoration(
+                    color: c.chipFill,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.html_rounded, color: c.iconSecondary),
+                ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text('Version ${version.versionNumber}',
+                            style: const TextStyle(fontWeight: FontWeight.bold)),
+                        if (isCurrent) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text('CURRENT',
+                                style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.w900)),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      version.refinementPrompt ?? version.label ?? 'Original Generation',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: c.textMuted, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              if (!isCurrent)
+                Icon(Icons.restore_page_rounded, size: 20, color: c.textMuted),
             ],
           ),
         ),
-        Expanded(child: Stack(children: [
-          Container(color: Colors.white,
-              child: WebViewWidget(controller: _ctrl)),
-          if (!_ready)
-            Container(
-              color: c.surface,
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-        ])),
-      ]),
+      ),
     );
   }
+}
 
-  String _fmtDateTime(DateTime dt) {
-    const m = ['Jan','Feb','Mar','Apr','May','Jun',
-      'Jul','Aug','Sep','Oct','Nov','Dec'];
-    final h = dt.hour.toString().padLeft(2, '0');
-    final min = dt.minute.toString().padLeft(2, '0');
-    return '${dt.day} ${m[dt.month - 1]} ${dt.year} at $h:$min';
-  }
+class _Handle extends StatelessWidget {
+  const _Handle({required this.c});
+  final dynamic c;
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 36, height: 4,
+    margin: const EdgeInsets.symmetric(vertical: 12),
+    decoration: BoxDecoration(color: c.border, borderRadius: BorderRadius.circular(2)),
+  );
+}
+
+class _EmptyHistory extends StatelessWidget {
+  const _EmptyHistory({required this.c});
+  final dynamic c;
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.all(40),
+    child: Column(
+      children: [
+        Icon(Icons.history_toggle_off_rounded, size: 48, color: c.borderStrong),
+        const SizedBox(height: 16),
+        const Text('No previous versions available.', style: TextStyle(color: Colors.grey)),
+      ],
+    ),
+  );
 }

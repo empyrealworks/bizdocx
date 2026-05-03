@@ -75,10 +75,17 @@ class AiGenerationService {
     final prompt = '''
 You are an expert business document designer. A user wants to refine an existing HTML document.
 
+CURRENT DATE: ${DateTime.now().toLocal()}
+
 BUSINESS CONTEXT:
 - Company: ${context.companyName}
 - Mission: ${context.mission}
 - Brand Colors: ${context.brandColors.join(', ')}
+- Address: ${context.businessAddress}
+- Email: ${context.businessEmail}
+- Phone: ${context.businessPhone}
+- Website: ${context.website}
+- Country: ${context.country}
 ${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
 DOCUMENT TYPE: ${documentType.name}
 
@@ -305,11 +312,18 @@ Do NOT use a placeholder — use the real URL above.''';
     return '''
 You are an expert business designer and PDF-optimized HTML engineer.
 
+CURRENT DATE: ${DateTime.now().toLocal()}
+
 BUSINESS CONTEXT:
 - Company: ${context.companyName}
 - Mission: ${context.mission}
 - Brand Colors: ${context.brandColors.join(', ')}
 - Target Audience: ${context.targetAudience}
+- Address: ${context.businessAddress}
+- Email: ${context.businessEmail}
+- Phone: ${context.businessPhone}
+- Website: ${context.website}
+- Country: ${context.country}
 ${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
 DOCUMENT TYPE: ${documentType.name}
 $templateInstruction

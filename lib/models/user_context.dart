@@ -15,6 +15,15 @@ abstract class UserContext with _$UserContext {
     @Default('') String mission,
     @Default([]) List<String> brandColors,
     @Default('') String targetAudience,
+    
+    // New context fields
+    @Default('') String businessAddress,
+    @Default('') String businessEmail,
+    @Default('') String businessPhone,
+    @Default('') String website,
+    @Default('Nigeria') String country,
+    @Default('NGN') String defaultCurrency,
+
     String? logoStorageUrl,
     // Injected from recent doc metadata for stylistic continuity
     @Default([]) List<String> recentDocumentTitles,

@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserContext {
 
- String get userId; String get portfolioId; String get companyName; String get mission; List<String> get brandColors; String get targetAudience; String? get logoStorageUrl;// Injected from recent doc metadata for stylistic continuity
+ String get userId; String get portfolioId; String get companyName; String get mission; List<String> get brandColors; String get targetAudience;// New context fields
+ String get businessAddress; String get businessEmail; String get businessPhone; String get website; String get country; String get defaultCurrency; String? get logoStorageUrl;// Injected from recent doc metadata for stylistic continuity
  List<String> get recentDocumentTitles;// Client snippets for invoice/proposal auto-fill
  Map<String, String> get savedClientDetails;// Paths to user-uploaded assets in Storage
  List<String> get uploadedAssetStoragePaths; DateTime? get lastUpdated;
@@ -31,16 +32,16 @@ $UserContextCopyWith<UserContext> get copyWith => _$UserContextCopyWithImpl<User
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserContext&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.companyName, companyName) || other.companyName == companyName)&&(identical(other.mission, mission) || other.mission == mission)&&const DeepCollectionEquality().equals(other.brandColors, brandColors)&&(identical(other.targetAudience, targetAudience) || other.targetAudience == targetAudience)&&(identical(other.logoStorageUrl, logoStorageUrl) || other.logoStorageUrl == logoStorageUrl)&&const DeepCollectionEquality().equals(other.recentDocumentTitles, recentDocumentTitles)&&const DeepCollectionEquality().equals(other.savedClientDetails, savedClientDetails)&&const DeepCollectionEquality().equals(other.uploadedAssetStoragePaths, uploadedAssetStoragePaths)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserContext&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.companyName, companyName) || other.companyName == companyName)&&(identical(other.mission, mission) || other.mission == mission)&&const DeepCollectionEquality().equals(other.brandColors, brandColors)&&(identical(other.targetAudience, targetAudience) || other.targetAudience == targetAudience)&&(identical(other.businessAddress, businessAddress) || other.businessAddress == businessAddress)&&(identical(other.businessEmail, businessEmail) || other.businessEmail == businessEmail)&&(identical(other.businessPhone, businessPhone) || other.businessPhone == businessPhone)&&(identical(other.website, website) || other.website == website)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultCurrency, defaultCurrency) || other.defaultCurrency == defaultCurrency)&&(identical(other.logoStorageUrl, logoStorageUrl) || other.logoStorageUrl == logoStorageUrl)&&const DeepCollectionEquality().equals(other.recentDocumentTitles, recentDocumentTitles)&&const DeepCollectionEquality().equals(other.savedClientDetails, savedClientDetails)&&const DeepCollectionEquality().equals(other.uploadedAssetStoragePaths, uploadedAssetStoragePaths)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,portfolioId,companyName,mission,const DeepCollectionEquality().hash(brandColors),targetAudience,logoStorageUrl,const DeepCollectionEquality().hash(recentDocumentTitles),const DeepCollectionEquality().hash(savedClientDetails),const DeepCollectionEquality().hash(uploadedAssetStoragePaths),lastUpdated);
+int get hashCode => Object.hash(runtimeType,userId,portfolioId,companyName,mission,const DeepCollectionEquality().hash(brandColors),targetAudience,businessAddress,businessEmail,businessPhone,website,country,defaultCurrency,logoStorageUrl,const DeepCollectionEquality().hash(recentDocumentTitles),const DeepCollectionEquality().hash(savedClientDetails),const DeepCollectionEquality().hash(uploadedAssetStoragePaths),lastUpdated);
 
 @override
 String toString() {
-  return 'UserContext(userId: $userId, portfolioId: $portfolioId, companyName: $companyName, mission: $mission, brandColors: $brandColors, targetAudience: $targetAudience, logoStorageUrl: $logoStorageUrl, recentDocumentTitles: $recentDocumentTitles, savedClientDetails: $savedClientDetails, uploadedAssetStoragePaths: $uploadedAssetStoragePaths, lastUpdated: $lastUpdated)';
+  return 'UserContext(userId: $userId, portfolioId: $portfolioId, companyName: $companyName, mission: $mission, brandColors: $brandColors, targetAudience: $targetAudience, businessAddress: $businessAddress, businessEmail: $businessEmail, businessPhone: $businessPhone, website: $website, country: $country, defaultCurrency: $defaultCurrency, logoStorageUrl: $logoStorageUrl, recentDocumentTitles: $recentDocumentTitles, savedClientDetails: $savedClientDetails, uploadedAssetStoragePaths: $uploadedAssetStoragePaths, lastUpdated: $lastUpdated)';
 }
 
 
@@ -51,7 +52,7 @@ abstract mixin class $UserContextCopyWith<$Res>  {
   factory $UserContextCopyWith(UserContext value, $Res Function(UserContext) _then) = _$UserContextCopyWithImpl;
 @useResult
 $Res call({
- String userId, String portfolioId, String companyName, String mission, List<String> brandColors, String targetAudience, String? logoStorageUrl, List<String> recentDocumentTitles, Map<String, String> savedClientDetails, List<String> uploadedAssetStoragePaths, DateTime? lastUpdated
+ String userId, String portfolioId, String companyName, String mission, List<String> brandColors, String targetAudience, String businessAddress, String businessEmail, String businessPhone, String website, String country, String defaultCurrency, String? logoStorageUrl, List<String> recentDocumentTitles, Map<String, String> savedClientDetails, List<String> uploadedAssetStoragePaths, DateTime? lastUpdated
 });
 
 
@@ -68,7 +69,7 @@ class _$UserContextCopyWithImpl<$Res>
 
 /// Create a copy of UserContext
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? portfolioId = null,Object? companyName = null,Object? mission = null,Object? brandColors = null,Object? targetAudience = null,Object? logoStorageUrl = freezed,Object? recentDocumentTitles = null,Object? savedClientDetails = null,Object? uploadedAssetStoragePaths = null,Object? lastUpdated = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? portfolioId = null,Object? companyName = null,Object? mission = null,Object? brandColors = null,Object? targetAudience = null,Object? businessAddress = null,Object? businessEmail = null,Object? businessPhone = null,Object? website = null,Object? country = null,Object? defaultCurrency = null,Object? logoStorageUrl = freezed,Object? recentDocumentTitles = null,Object? savedClientDetails = null,Object? uploadedAssetStoragePaths = null,Object? lastUpdated = freezed,}) {
   return _then(_self.copyWith(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,portfolioId: null == portfolioId ? _self.portfolioId : portfolioId // ignore: cast_nullable_to_non_nullable
@@ -76,6 +77,12 @@ as String,companyName: null == companyName ? _self.companyName : companyName // 
 as String,mission: null == mission ? _self.mission : mission // ignore: cast_nullable_to_non_nullable
 as String,brandColors: null == brandColors ? _self.brandColors : brandColors // ignore: cast_nullable_to_non_nullable
 as List<String>,targetAudience: null == targetAudience ? _self.targetAudience : targetAudience // ignore: cast_nullable_to_non_nullable
+as String,businessAddress: null == businessAddress ? _self.businessAddress : businessAddress // ignore: cast_nullable_to_non_nullable
+as String,businessEmail: null == businessEmail ? _self.businessEmail : businessEmail // ignore: cast_nullable_to_non_nullable
+as String,businessPhone: null == businessPhone ? _self.businessPhone : businessPhone // ignore: cast_nullable_to_non_nullable
+as String,website: null == website ? _self.website : website // ignore: cast_nullable_to_non_nullable
+as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
+as String,defaultCurrency: null == defaultCurrency ? _self.defaultCurrency : defaultCurrency // ignore: cast_nullable_to_non_nullable
 as String,logoStorageUrl: freezed == logoStorageUrl ? _self.logoStorageUrl : logoStorageUrl // ignore: cast_nullable_to_non_nullable
 as String?,recentDocumentTitles: null == recentDocumentTitles ? _self.recentDocumentTitles : recentDocumentTitles // ignore: cast_nullable_to_non_nullable
 as List<String>,savedClientDetails: null == savedClientDetails ? _self.savedClientDetails : savedClientDetails // ignore: cast_nullable_to_non_nullable
@@ -166,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String portfolioId,  String companyName,  String mission,  List<String> brandColors,  String targetAudience,  String? logoStorageUrl,  List<String> recentDocumentTitles,  Map<String, String> savedClientDetails,  List<String> uploadedAssetStoragePaths,  DateTime? lastUpdated)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String portfolioId,  String companyName,  String mission,  List<String> brandColors,  String targetAudience,  String businessAddress,  String businessEmail,  String businessPhone,  String website,  String country,  String defaultCurrency,  String? logoStorageUrl,  List<String> recentDocumentTitles,  Map<String, String> savedClientDetails,  List<String> uploadedAssetStoragePaths,  DateTime? lastUpdated)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserContext() when $default != null:
-return $default(_that.userId,_that.portfolioId,_that.companyName,_that.mission,_that.brandColors,_that.targetAudience,_that.logoStorageUrl,_that.recentDocumentTitles,_that.savedClientDetails,_that.uploadedAssetStoragePaths,_that.lastUpdated);case _:
+return $default(_that.userId,_that.portfolioId,_that.companyName,_that.mission,_that.brandColors,_that.targetAudience,_that.businessAddress,_that.businessEmail,_that.businessPhone,_that.website,_that.country,_that.defaultCurrency,_that.logoStorageUrl,_that.recentDocumentTitles,_that.savedClientDetails,_that.uploadedAssetStoragePaths,_that.lastUpdated);case _:
   return orElse();
 
 }
@@ -187,10 +194,10 @@ return $default(_that.userId,_that.portfolioId,_that.companyName,_that.mission,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String portfolioId,  String companyName,  String mission,  List<String> brandColors,  String targetAudience,  String? logoStorageUrl,  List<String> recentDocumentTitles,  Map<String, String> savedClientDetails,  List<String> uploadedAssetStoragePaths,  DateTime? lastUpdated)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String portfolioId,  String companyName,  String mission,  List<String> brandColors,  String targetAudience,  String businessAddress,  String businessEmail,  String businessPhone,  String website,  String country,  String defaultCurrency,  String? logoStorageUrl,  List<String> recentDocumentTitles,  Map<String, String> savedClientDetails,  List<String> uploadedAssetStoragePaths,  DateTime? lastUpdated)  $default,) {final _that = this;
 switch (_that) {
 case _UserContext():
-return $default(_that.userId,_that.portfolioId,_that.companyName,_that.mission,_that.brandColors,_that.targetAudience,_that.logoStorageUrl,_that.recentDocumentTitles,_that.savedClientDetails,_that.uploadedAssetStoragePaths,_that.lastUpdated);case _:
+return $default(_that.userId,_that.portfolioId,_that.companyName,_that.mission,_that.brandColors,_that.targetAudience,_that.businessAddress,_that.businessEmail,_that.businessPhone,_that.website,_that.country,_that.defaultCurrency,_that.logoStorageUrl,_that.recentDocumentTitles,_that.savedClientDetails,_that.uploadedAssetStoragePaths,_that.lastUpdated);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +214,10 @@ return $default(_that.userId,_that.portfolioId,_that.companyName,_that.mission,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String portfolioId,  String companyName,  String mission,  List<String> brandColors,  String targetAudience,  String? logoStorageUrl,  List<String> recentDocumentTitles,  Map<String, String> savedClientDetails,  List<String> uploadedAssetStoragePaths,  DateTime? lastUpdated)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String portfolioId,  String companyName,  String mission,  List<String> brandColors,  String targetAudience,  String businessAddress,  String businessEmail,  String businessPhone,  String website,  String country,  String defaultCurrency,  String? logoStorageUrl,  List<String> recentDocumentTitles,  Map<String, String> savedClientDetails,  List<String> uploadedAssetStoragePaths,  DateTime? lastUpdated)?  $default,) {final _that = this;
 switch (_that) {
 case _UserContext() when $default != null:
-return $default(_that.userId,_that.portfolioId,_that.companyName,_that.mission,_that.brandColors,_that.targetAudience,_that.logoStorageUrl,_that.recentDocumentTitles,_that.savedClientDetails,_that.uploadedAssetStoragePaths,_that.lastUpdated);case _:
+return $default(_that.userId,_that.portfolioId,_that.companyName,_that.mission,_that.brandColors,_that.targetAudience,_that.businessAddress,_that.businessEmail,_that.businessPhone,_that.website,_that.country,_that.defaultCurrency,_that.logoStorageUrl,_that.recentDocumentTitles,_that.savedClientDetails,_that.uploadedAssetStoragePaths,_that.lastUpdated);case _:
   return null;
 
 }
@@ -222,7 +229,7 @@ return $default(_that.userId,_that.portfolioId,_that.companyName,_that.mission,_
 @JsonSerializable()
 
 class _UserContext extends UserContext {
-  const _UserContext({required this.userId, required this.portfolioId, this.companyName = '', this.mission = '', final  List<String> brandColors = const [], this.targetAudience = '', this.logoStorageUrl, final  List<String> recentDocumentTitles = const [], final  Map<String, String> savedClientDetails = const {}, final  List<String> uploadedAssetStoragePaths = const [], this.lastUpdated}): _brandColors = brandColors,_recentDocumentTitles = recentDocumentTitles,_savedClientDetails = savedClientDetails,_uploadedAssetStoragePaths = uploadedAssetStoragePaths,super._();
+  const _UserContext({required this.userId, required this.portfolioId, this.companyName = '', this.mission = '', final  List<String> brandColors = const [], this.targetAudience = '', this.businessAddress = '', this.businessEmail = '', this.businessPhone = '', this.website = '', this.country = 'Nigeria', this.defaultCurrency = 'NGN', this.logoStorageUrl, final  List<String> recentDocumentTitles = const [], final  Map<String, String> savedClientDetails = const {}, final  List<String> uploadedAssetStoragePaths = const [], this.lastUpdated}): _brandColors = brandColors,_recentDocumentTitles = recentDocumentTitles,_savedClientDetails = savedClientDetails,_uploadedAssetStoragePaths = uploadedAssetStoragePaths,super._();
   factory _UserContext.fromJson(Map<String, dynamic> json) => _$UserContextFromJson(json);
 
 @override final  String userId;
@@ -237,6 +244,13 @@ class _UserContext extends UserContext {
 }
 
 @override@JsonKey() final  String targetAudience;
+// New context fields
+@override@JsonKey() final  String businessAddress;
+@override@JsonKey() final  String businessEmail;
+@override@JsonKey() final  String businessPhone;
+@override@JsonKey() final  String website;
+@override@JsonKey() final  String country;
+@override@JsonKey() final  String defaultCurrency;
 @override final  String? logoStorageUrl;
 // Injected from recent doc metadata for stylistic continuity
  final  List<String> _recentDocumentTitles;
@@ -280,16 +294,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserContext&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.companyName, companyName) || other.companyName == companyName)&&(identical(other.mission, mission) || other.mission == mission)&&const DeepCollectionEquality().equals(other._brandColors, _brandColors)&&(identical(other.targetAudience, targetAudience) || other.targetAudience == targetAudience)&&(identical(other.logoStorageUrl, logoStorageUrl) || other.logoStorageUrl == logoStorageUrl)&&const DeepCollectionEquality().equals(other._recentDocumentTitles, _recentDocumentTitles)&&const DeepCollectionEquality().equals(other._savedClientDetails, _savedClientDetails)&&const DeepCollectionEquality().equals(other._uploadedAssetStoragePaths, _uploadedAssetStoragePaths)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserContext&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.companyName, companyName) || other.companyName == companyName)&&(identical(other.mission, mission) || other.mission == mission)&&const DeepCollectionEquality().equals(other._brandColors, _brandColors)&&(identical(other.targetAudience, targetAudience) || other.targetAudience == targetAudience)&&(identical(other.businessAddress, businessAddress) || other.businessAddress == businessAddress)&&(identical(other.businessEmail, businessEmail) || other.businessEmail == businessEmail)&&(identical(other.businessPhone, businessPhone) || other.businessPhone == businessPhone)&&(identical(other.website, website) || other.website == website)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultCurrency, defaultCurrency) || other.defaultCurrency == defaultCurrency)&&(identical(other.logoStorageUrl, logoStorageUrl) || other.logoStorageUrl == logoStorageUrl)&&const DeepCollectionEquality().equals(other._recentDocumentTitles, _recentDocumentTitles)&&const DeepCollectionEquality().equals(other._savedClientDetails, _savedClientDetails)&&const DeepCollectionEquality().equals(other._uploadedAssetStoragePaths, _uploadedAssetStoragePaths)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,portfolioId,companyName,mission,const DeepCollectionEquality().hash(_brandColors),targetAudience,logoStorageUrl,const DeepCollectionEquality().hash(_recentDocumentTitles),const DeepCollectionEquality().hash(_savedClientDetails),const DeepCollectionEquality().hash(_uploadedAssetStoragePaths),lastUpdated);
+int get hashCode => Object.hash(runtimeType,userId,portfolioId,companyName,mission,const DeepCollectionEquality().hash(_brandColors),targetAudience,businessAddress,businessEmail,businessPhone,website,country,defaultCurrency,logoStorageUrl,const DeepCollectionEquality().hash(_recentDocumentTitles),const DeepCollectionEquality().hash(_savedClientDetails),const DeepCollectionEquality().hash(_uploadedAssetStoragePaths),lastUpdated);
 
 @override
 String toString() {
-  return 'UserContext(userId: $userId, portfolioId: $portfolioId, companyName: $companyName, mission: $mission, brandColors: $brandColors, targetAudience: $targetAudience, logoStorageUrl: $logoStorageUrl, recentDocumentTitles: $recentDocumentTitles, savedClientDetails: $savedClientDetails, uploadedAssetStoragePaths: $uploadedAssetStoragePaths, lastUpdated: $lastUpdated)';
+  return 'UserContext(userId: $userId, portfolioId: $portfolioId, companyName: $companyName, mission: $mission, brandColors: $brandColors, targetAudience: $targetAudience, businessAddress: $businessAddress, businessEmail: $businessEmail, businessPhone: $businessPhone, website: $website, country: $country, defaultCurrency: $defaultCurrency, logoStorageUrl: $logoStorageUrl, recentDocumentTitles: $recentDocumentTitles, savedClientDetails: $savedClientDetails, uploadedAssetStoragePaths: $uploadedAssetStoragePaths, lastUpdated: $lastUpdated)';
 }
 
 
@@ -300,7 +314,7 @@ abstract mixin class _$UserContextCopyWith<$Res> implements $UserContextCopyWith
   factory _$UserContextCopyWith(_UserContext value, $Res Function(_UserContext) _then) = __$UserContextCopyWithImpl;
 @override @useResult
 $Res call({
- String userId, String portfolioId, String companyName, String mission, List<String> brandColors, String targetAudience, String? logoStorageUrl, List<String> recentDocumentTitles, Map<String, String> savedClientDetails, List<String> uploadedAssetStoragePaths, DateTime? lastUpdated
+ String userId, String portfolioId, String companyName, String mission, List<String> brandColors, String targetAudience, String businessAddress, String businessEmail, String businessPhone, String website, String country, String defaultCurrency, String? logoStorageUrl, List<String> recentDocumentTitles, Map<String, String> savedClientDetails, List<String> uploadedAssetStoragePaths, DateTime? lastUpdated
 });
 
 
@@ -317,7 +331,7 @@ class __$UserContextCopyWithImpl<$Res>
 
 /// Create a copy of UserContext
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? portfolioId = null,Object? companyName = null,Object? mission = null,Object? brandColors = null,Object? targetAudience = null,Object? logoStorageUrl = freezed,Object? recentDocumentTitles = null,Object? savedClientDetails = null,Object? uploadedAssetStoragePaths = null,Object? lastUpdated = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? portfolioId = null,Object? companyName = null,Object? mission = null,Object? brandColors = null,Object? targetAudience = null,Object? businessAddress = null,Object? businessEmail = null,Object? businessPhone = null,Object? website = null,Object? country = null,Object? defaultCurrency = null,Object? logoStorageUrl = freezed,Object? recentDocumentTitles = null,Object? savedClientDetails = null,Object? uploadedAssetStoragePaths = null,Object? lastUpdated = freezed,}) {
   return _then(_UserContext(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,portfolioId: null == portfolioId ? _self.portfolioId : portfolioId // ignore: cast_nullable_to_non_nullable
@@ -325,6 +339,12 @@ as String,companyName: null == companyName ? _self.companyName : companyName // 
 as String,mission: null == mission ? _self.mission : mission // ignore: cast_nullable_to_non_nullable
 as String,brandColors: null == brandColors ? _self._brandColors : brandColors // ignore: cast_nullable_to_non_nullable
 as List<String>,targetAudience: null == targetAudience ? _self.targetAudience : targetAudience // ignore: cast_nullable_to_non_nullable
+as String,businessAddress: null == businessAddress ? _self.businessAddress : businessAddress // ignore: cast_nullable_to_non_nullable
+as String,businessEmail: null == businessEmail ? _self.businessEmail : businessEmail // ignore: cast_nullable_to_non_nullable
+as String,businessPhone: null == businessPhone ? _self.businessPhone : businessPhone // ignore: cast_nullable_to_non_nullable
+as String,website: null == website ? _self.website : website // ignore: cast_nullable_to_non_nullable
+as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
+as String,defaultCurrency: null == defaultCurrency ? _self.defaultCurrency : defaultCurrency // ignore: cast_nullable_to_non_nullable
 as String,logoStorageUrl: freezed == logoStorageUrl ? _self.logoStorageUrl : logoStorageUrl // ignore: cast_nullable_to_non_nullable
 as String?,recentDocumentTitles: null == recentDocumentTitles ? _self._recentDocumentTitles : recentDocumentTitles // ignore: cast_nullable_to_non_nullable
 as List<String>,savedClientDetails: null == savedClientDetails ? _self._savedClientDetails : savedClientDetails // ignore: cast_nullable_to_non_nullable

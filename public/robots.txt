@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bizdocx.empyrealworks.com/sitemap.xml

@@ -22,7 +22,8 @@ mixin _$DocumentAsset {
  String? get prompt;// the original user prompt
  bool get isCached; DateTime get createdAt; DateTime? get updatedAt;// Template & Formatting
  String? get templateId; String? get aspectRatio; String? get orientation;// Revision tracking for credit logic
- int get revisionCount;
+ int get revisionCount;// Organization & Scanning
+ String? get folderId; String? get clientName; bool get isScanned; Map<String, dynamic> get metadata;
 /// Create a copy of DocumentAsset
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -35,16 +36,16 @@ $DocumentAssetCopyWith<DocumentAsset> get copyWith => _$DocumentAssetCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DocumentAsset&&(identical(other.id, id) || other.id == id)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.title, title) || other.title == title)&&(identical(other.type, type) || other.type == type)&&(identical(other.pipeline, pipeline) || other.pipeline == pipeline)&&(identical(other.htmlContent, htmlContent) || other.htmlContent == htmlContent)&&(identical(other.storageUrl, storageUrl) || other.storageUrl == storageUrl)&&(identical(other.localCachePath, localCachePath) || other.localCachePath == localCachePath)&&(identical(other.prompt, prompt) || other.prompt == prompt)&&(identical(other.isCached, isCached) || other.isCached == isCached)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.aspectRatio, aspectRatio) || other.aspectRatio == aspectRatio)&&(identical(other.orientation, orientation) || other.orientation == orientation)&&(identical(other.revisionCount, revisionCount) || other.revisionCount == revisionCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DocumentAsset&&(identical(other.id, id) || other.id == id)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.title, title) || other.title == title)&&(identical(other.type, type) || other.type == type)&&(identical(other.pipeline, pipeline) || other.pipeline == pipeline)&&(identical(other.htmlContent, htmlContent) || other.htmlContent == htmlContent)&&(identical(other.storageUrl, storageUrl) || other.storageUrl == storageUrl)&&(identical(other.localCachePath, localCachePath) || other.localCachePath == localCachePath)&&(identical(other.prompt, prompt) || other.prompt == prompt)&&(identical(other.isCached, isCached) || other.isCached == isCached)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.aspectRatio, aspectRatio) || other.aspectRatio == aspectRatio)&&(identical(other.orientation, orientation) || other.orientation == orientation)&&(identical(other.revisionCount, revisionCount) || other.revisionCount == revisionCount)&&(identical(other.folderId, folderId) || other.folderId == folderId)&&(identical(other.clientName, clientName) || other.clientName == clientName)&&(identical(other.isScanned, isScanned) || other.isScanned == isScanned)&&const DeepCollectionEquality().equals(other.metadata, metadata));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,portfolioId,userId,title,type,pipeline,htmlContent,storageUrl,localCachePath,prompt,isCached,createdAt,updatedAt,templateId,aspectRatio,orientation,revisionCount);
+int get hashCode => Object.hashAll([runtimeType,id,portfolioId,userId,title,type,pipeline,htmlContent,storageUrl,localCachePath,prompt,isCached,createdAt,updatedAt,templateId,aspectRatio,orientation,revisionCount,folderId,clientName,isScanned,const DeepCollectionEquality().hash(metadata)]);
 
 @override
 String toString() {
-  return 'DocumentAsset(id: $id, portfolioId: $portfolioId, userId: $userId, title: $title, type: $type, pipeline: $pipeline, htmlContent: $htmlContent, storageUrl: $storageUrl, localCachePath: $localCachePath, prompt: $prompt, isCached: $isCached, createdAt: $createdAt, updatedAt: $updatedAt, templateId: $templateId, aspectRatio: $aspectRatio, orientation: $orientation, revisionCount: $revisionCount)';
+  return 'DocumentAsset(id: $id, portfolioId: $portfolioId, userId: $userId, title: $title, type: $type, pipeline: $pipeline, htmlContent: $htmlContent, storageUrl: $storageUrl, localCachePath: $localCachePath, prompt: $prompt, isCached: $isCached, createdAt: $createdAt, updatedAt: $updatedAt, templateId: $templateId, aspectRatio: $aspectRatio, orientation: $orientation, revisionCount: $revisionCount, folderId: $folderId, clientName: $clientName, isScanned: $isScanned, metadata: $metadata)';
 }
 
 
@@ -55,7 +56,7 @@ abstract mixin class $DocumentAssetCopyWith<$Res>  {
   factory $DocumentAssetCopyWith(DocumentAsset value, $Res Function(DocumentAsset) _then) = _$DocumentAssetCopyWithImpl;
 @useResult
 $Res call({
- String id, String portfolioId, String userId, String title, DocumentType type, AssetPipeline pipeline, String? htmlContent, String? storageUrl, String? localCachePath, String? prompt, bool isCached, DateTime createdAt, DateTime? updatedAt, String? templateId, String? aspectRatio, String? orientation, int revisionCount
+ String id, String portfolioId, String userId, String title, DocumentType type, AssetPipeline pipeline, String? htmlContent, String? storageUrl, String? localCachePath, String? prompt, bool isCached, DateTime createdAt, DateTime? updatedAt, String? templateId, String? aspectRatio, String? orientation, int revisionCount, String? folderId, String? clientName, bool isScanned, Map<String, dynamic> metadata
 });
 
 
@@ -72,7 +73,7 @@ class _$DocumentAssetCopyWithImpl<$Res>
 
 /// Create a copy of DocumentAsset
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? portfolioId = null,Object? userId = null,Object? title = null,Object? type = null,Object? pipeline = null,Object? htmlContent = freezed,Object? storageUrl = freezed,Object? localCachePath = freezed,Object? prompt = freezed,Object? isCached = null,Object? createdAt = null,Object? updatedAt = freezed,Object? templateId = freezed,Object? aspectRatio = freezed,Object? orientation = freezed,Object? revisionCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? portfolioId = null,Object? userId = null,Object? title = null,Object? type = null,Object? pipeline = null,Object? htmlContent = freezed,Object? storageUrl = freezed,Object? localCachePath = freezed,Object? prompt = freezed,Object? isCached = null,Object? createdAt = null,Object? updatedAt = freezed,Object? templateId = freezed,Object? aspectRatio = freezed,Object? orientation = freezed,Object? revisionCount = null,Object? folderId = freezed,Object? clientName = freezed,Object? isScanned = null,Object? metadata = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,portfolioId: null == portfolioId ? _self.portfolioId : portfolioId // ignore: cast_nullable_to_non_nullable
@@ -91,7 +92,11 @@ as DateTime?,templateId: freezed == templateId ? _self.templateId : templateId /
 as String?,aspectRatio: freezed == aspectRatio ? _self.aspectRatio : aspectRatio // ignore: cast_nullable_to_non_nullable
 as String?,orientation: freezed == orientation ? _self.orientation : orientation // ignore: cast_nullable_to_non_nullable
 as String?,revisionCount: null == revisionCount ? _self.revisionCount : revisionCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,folderId: freezed == folderId ? _self.folderId : folderId // ignore: cast_nullable_to_non_nullable
+as String?,clientName: freezed == clientName ? _self.clientName : clientName // ignore: cast_nullable_to_non_nullable
+as String?,isScanned: null == isScanned ? _self.isScanned : isScanned // ignore: cast_nullable_to_non_nullable
+as bool,metadata: null == metadata ? _self.metadata : metadata // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
   ));
 }
 
@@ -176,10 +181,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  int revisionCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  int revisionCount,  String? folderId,  String? clientName,  bool isScanned,  Map<String, dynamic> metadata)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DocumentAsset() when $default != null:
-return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.revisionCount);case _:
+return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.revisionCount,_that.folderId,_that.clientName,_that.isScanned,_that.metadata);case _:
   return orElse();
 
 }
@@ -197,10 +202,10 @@ return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  int revisionCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  int revisionCount,  String? folderId,  String? clientName,  bool isScanned,  Map<String, dynamic> metadata)  $default,) {final _that = this;
 switch (_that) {
 case _DocumentAsset():
-return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.revisionCount);case _:
+return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.revisionCount,_that.folderId,_that.clientName,_that.isScanned,_that.metadata);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -217,10 +222,10 @@ return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  int revisionCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  int revisionCount,  String? folderId,  String? clientName,  bool isScanned,  Map<String, dynamic> metadata)?  $default,) {final _that = this;
 switch (_that) {
 case _DocumentAsset() when $default != null:
-return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.revisionCount);case _:
+return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.revisionCount,_that.folderId,_that.clientName,_that.isScanned,_that.metadata);case _:
   return null;
 
 }
@@ -232,7 +237,7 @@ return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_
 @JsonSerializable()
 
 class _DocumentAsset extends DocumentAsset {
-  const _DocumentAsset({required this.id, required this.portfolioId, required this.userId, required this.title, required this.type, required this.pipeline, this.htmlContent, this.storageUrl, this.localCachePath, this.prompt, this.isCached = false, required this.createdAt, this.updatedAt, this.templateId, this.aspectRatio, this.orientation, this.revisionCount = 0}): super._();
+  const _DocumentAsset({required this.id, required this.portfolioId, required this.userId, required this.title, required this.type, required this.pipeline, this.htmlContent, this.storageUrl, this.localCachePath, this.prompt, this.isCached = false, required this.createdAt, this.updatedAt, this.templateId, this.aspectRatio, this.orientation, this.revisionCount = 0, this.folderId, this.clientName, this.isScanned = false, final  Map<String, dynamic> metadata = const {}}): _metadata = metadata,super._();
   factory _DocumentAsset.fromJson(Map<String, dynamic> json) => _$DocumentAssetFromJson(json);
 
 @override final  String id;
@@ -259,6 +264,17 @@ class _DocumentAsset extends DocumentAsset {
 @override final  String? orientation;
 // Revision tracking for credit logic
 @override@JsonKey() final  int revisionCount;
+// Organization & Scanning
+@override final  String? folderId;
+@override final  String? clientName;
+@override@JsonKey() final  bool isScanned;
+ final  Map<String, dynamic> _metadata;
+@override@JsonKey() Map<String, dynamic> get metadata {
+  if (_metadata is EqualUnmodifiableMapView) return _metadata;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_metadata);
+}
+
 
 /// Create a copy of DocumentAsset
 /// with the given fields replaced by the non-null parameter values.
@@ -273,16 +289,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DocumentAsset&&(identical(other.id, id) || other.id == id)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.title, title) || other.title == title)&&(identical(other.type, type) || other.type == type)&&(identical(other.pipeline, pipeline) || other.pipeline == pipeline)&&(identical(other.htmlContent, htmlContent) || other.htmlContent == htmlContent)&&(identical(other.storageUrl, storageUrl) || other.storageUrl == storageUrl)&&(identical(other.localCachePath, localCachePath) || other.localCachePath == localCachePath)&&(identical(other.prompt, prompt) || other.prompt == prompt)&&(identical(other.isCached, isCached) || other.isCached == isCached)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.aspectRatio, aspectRatio) || other.aspectRatio == aspectRatio)&&(identical(other.orientation, orientation) || other.orientation == orientation)&&(identical(other.revisionCount, revisionCount) || other.revisionCount == revisionCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DocumentAsset&&(identical(other.id, id) || other.id == id)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.title, title) || other.title == title)&&(identical(other.type, type) || other.type == type)&&(identical(other.pipeline, pipeline) || other.pipeline == pipeline)&&(identical(other.htmlContent, htmlContent) || other.htmlContent == htmlContent)&&(identical(other.storageUrl, storageUrl) || other.storageUrl == storageUrl)&&(identical(other.localCachePath, localCachePath) || other.localCachePath == localCachePath)&&(identical(other.prompt, prompt) || other.prompt == prompt)&&(identical(other.isCached, isCached) || other.isCached == isCached)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.aspectRatio, aspectRatio) || other.aspectRatio == aspectRatio)&&(identical(other.orientation, orientation) || other.orientation == orientation)&&(identical(other.revisionCount, revisionCount) || other.revisionCount == revisionCount)&&(identical(other.folderId, folderId) || other.folderId == folderId)&&(identical(other.clientName, clientName) || other.clientName == clientName)&&(identical(other.isScanned, isScanned) || other.isScanned == isScanned)&&const DeepCollectionEquality().equals(other._metadata, _metadata));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,portfolioId,userId,title,type,pipeline,htmlContent,storageUrl,localCachePath,prompt,isCached,createdAt,updatedAt,templateId,aspectRatio,orientation,revisionCount);
+int get hashCode => Object.hashAll([runtimeType,id,portfolioId,userId,title,type,pipeline,htmlContent,storageUrl,localCachePath,prompt,isCached,createdAt,updatedAt,templateId,aspectRatio,orientation,revisionCount,folderId,clientName,isScanned,const DeepCollectionEquality().hash(_metadata)]);
 
 @override
 String toString() {
-  return 'DocumentAsset(id: $id, portfolioId: $portfolioId, userId: $userId, title: $title, type: $type, pipeline: $pipeline, htmlContent: $htmlContent, storageUrl: $storageUrl, localCachePath: $localCachePath, prompt: $prompt, isCached: $isCached, createdAt: $createdAt, updatedAt: $updatedAt, templateId: $templateId, aspectRatio: $aspectRatio, orientation: $orientation, revisionCount: $revisionCount)';
+  return 'DocumentAsset(id: $id, portfolioId: $portfolioId, userId: $userId, title: $title, type: $type, pipeline: $pipeline, htmlContent: $htmlContent, storageUrl: $storageUrl, localCachePath: $localCachePath, prompt: $prompt, isCached: $isCached, createdAt: $createdAt, updatedAt: $updatedAt, templateId: $templateId, aspectRatio: $aspectRatio, orientation: $orientation, revisionCount: $revisionCount, folderId: $folderId, clientName: $clientName, isScanned: $isScanned, metadata: $metadata)';
 }
 
 
@@ -293,7 +309,7 @@ abstract mixin class _$DocumentAssetCopyWith<$Res> implements $DocumentAssetCopy
   factory _$DocumentAssetCopyWith(_DocumentAsset value, $Res Function(_DocumentAsset) _then) = __$DocumentAssetCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String portfolioId, String userId, String title, DocumentType type, AssetPipeline pipeline, String? htmlContent, String? storageUrl, String? localCachePath, String? prompt, bool isCached, DateTime createdAt, DateTime? updatedAt, String? templateId, String? aspectRatio, String? orientation, int revisionCount
+ String id, String portfolioId, String userId, String title, DocumentType type, AssetPipeline pipeline, String? htmlContent, String? storageUrl, String? localCachePath, String? prompt, bool isCached, DateTime createdAt, DateTime? updatedAt, String? templateId, String? aspectRatio, String? orientation, int revisionCount, String? folderId, String? clientName, bool isScanned, Map<String, dynamic> metadata
 });
 
 
@@ -310,7 +326,7 @@ class __$DocumentAssetCopyWithImpl<$Res>
 
 /// Create a copy of DocumentAsset
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? portfolioId = null,Object? userId = null,Object? title = null,Object? type = null,Object? pipeline = null,Object? htmlContent = freezed,Object? storageUrl = freezed,Object? localCachePath = freezed,Object? prompt = freezed,Object? isCached = null,Object? createdAt = null,Object? updatedAt = freezed,Object? templateId = freezed,Object? aspectRatio = freezed,Object? orientation = freezed,Object? revisionCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? portfolioId = null,Object? userId = null,Object? title = null,Object? type = null,Object? pipeline = null,Object? htmlContent = freezed,Object? storageUrl = freezed,Object? localCachePath = freezed,Object? prompt = freezed,Object? isCached = null,Object? createdAt = null,Object? updatedAt = freezed,Object? templateId = freezed,Object? aspectRatio = freezed,Object? orientation = freezed,Object? revisionCount = null,Object? folderId = freezed,Object? clientName = freezed,Object? isScanned = null,Object? metadata = null,}) {
   return _then(_DocumentAsset(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,portfolioId: null == portfolioId ? _self.portfolioId : portfolioId // ignore: cast_nullable_to_non_nullable
@@ -329,7 +345,11 @@ as DateTime?,templateId: freezed == templateId ? _self.templateId : templateId /
 as String?,aspectRatio: freezed == aspectRatio ? _self.aspectRatio : aspectRatio // ignore: cast_nullable_to_non_nullable
 as String?,orientation: freezed == orientation ? _self.orientation : orientation // ignore: cast_nullable_to_non_nullable
 as String?,revisionCount: null == revisionCount ? _self.revisionCount : revisionCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,folderId: freezed == folderId ? _self.folderId : folderId // ignore: cast_nullable_to_non_nullable
+as String?,clientName: freezed == clientName ? _self.clientName : clientName // ignore: cast_nullable_to_non_nullable
+as String?,isScanned: null == isScanned ? _self.isScanned : isScanned // ignore: cast_nullable_to_non_nullable
+as bool,metadata: null == metadata ? _self._metadata : metadata // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
   ));
 }
 

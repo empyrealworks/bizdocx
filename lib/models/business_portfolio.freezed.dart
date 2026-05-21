@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 mixin _$BusinessPortfolio {
 
  String get id; String get userId; String get name; String get description; String get mission; List<String> get brandColors; String get targetAudience;// New context fields
- String get businessAddress; String get businessEmail; String get businessPhone; String get website; String get country; String get defaultCurrency; DateTime get createdAt; DateTime? get updatedAt; List<String> get documentIds;
+ String get businessAddress; String get businessEmail; String get businessPhone; String get website; String get country; String get defaultCurrency; DateTime get createdAt; DateTime? get updatedAt; List<String> get documentIds;// Workflow Settings
+ bool get enableManualMode; List<String> get recentClients;
 /// Create a copy of BusinessPortfolio
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +30,16 @@ $BusinessPortfolioCopyWith<BusinessPortfolio> get copyWith => _$BusinessPortfoli
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BusinessPortfolio&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.mission, mission) || other.mission == mission)&&const DeepCollectionEquality().equals(other.brandColors, brandColors)&&(identical(other.targetAudience, targetAudience) || other.targetAudience == targetAudience)&&(identical(other.businessAddress, businessAddress) || other.businessAddress == businessAddress)&&(identical(other.businessEmail, businessEmail) || other.businessEmail == businessEmail)&&(identical(other.businessPhone, businessPhone) || other.businessPhone == businessPhone)&&(identical(other.website, website) || other.website == website)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultCurrency, defaultCurrency) || other.defaultCurrency == defaultCurrency)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.documentIds, documentIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BusinessPortfolio&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.mission, mission) || other.mission == mission)&&const DeepCollectionEquality().equals(other.brandColors, brandColors)&&(identical(other.targetAudience, targetAudience) || other.targetAudience == targetAudience)&&(identical(other.businessAddress, businessAddress) || other.businessAddress == businessAddress)&&(identical(other.businessEmail, businessEmail) || other.businessEmail == businessEmail)&&(identical(other.businessPhone, businessPhone) || other.businessPhone == businessPhone)&&(identical(other.website, website) || other.website == website)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultCurrency, defaultCurrency) || other.defaultCurrency == defaultCurrency)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.documentIds, documentIds)&&(identical(other.enableManualMode, enableManualMode) || other.enableManualMode == enableManualMode)&&const DeepCollectionEquality().equals(other.recentClients, recentClients));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,name,description,mission,const DeepCollectionEquality().hash(brandColors),targetAudience,businessAddress,businessEmail,businessPhone,website,country,defaultCurrency,createdAt,updatedAt,const DeepCollectionEquality().hash(documentIds));
+int get hashCode => Object.hash(runtimeType,id,userId,name,description,mission,const DeepCollectionEquality().hash(brandColors),targetAudience,businessAddress,businessEmail,businessPhone,website,country,defaultCurrency,createdAt,updatedAt,const DeepCollectionEquality().hash(documentIds),enableManualMode,const DeepCollectionEquality().hash(recentClients));
 
 @override
 String toString() {
-  return 'BusinessPortfolio(id: $id, userId: $userId, name: $name, description: $description, mission: $mission, brandColors: $brandColors, targetAudience: $targetAudience, businessAddress: $businessAddress, businessEmail: $businessEmail, businessPhone: $businessPhone, website: $website, country: $country, defaultCurrency: $defaultCurrency, createdAt: $createdAt, updatedAt: $updatedAt, documentIds: $documentIds)';
+  return 'BusinessPortfolio(id: $id, userId: $userId, name: $name, description: $description, mission: $mission, brandColors: $brandColors, targetAudience: $targetAudience, businessAddress: $businessAddress, businessEmail: $businessEmail, businessPhone: $businessPhone, website: $website, country: $country, defaultCurrency: $defaultCurrency, createdAt: $createdAt, updatedAt: $updatedAt, documentIds: $documentIds, enableManualMode: $enableManualMode, recentClients: $recentClients)';
 }
 
 
@@ -49,7 +50,7 @@ abstract mixin class $BusinessPortfolioCopyWith<$Res>  {
   factory $BusinessPortfolioCopyWith(BusinessPortfolio value, $Res Function(BusinessPortfolio) _then) = _$BusinessPortfolioCopyWithImpl;
 @useResult
 $Res call({
- String id, String userId, String name, String description, String mission, List<String> brandColors, String targetAudience, String businessAddress, String businessEmail, String businessPhone, String website, String country, String defaultCurrency, DateTime createdAt, DateTime? updatedAt, List<String> documentIds
+ String id, String userId, String name, String description, String mission, List<String> brandColors, String targetAudience, String businessAddress, String businessEmail, String businessPhone, String website, String country, String defaultCurrency, DateTime createdAt, DateTime? updatedAt, List<String> documentIds, bool enableManualMode, List<String> recentClients
 });
 
 
@@ -66,7 +67,7 @@ class _$BusinessPortfolioCopyWithImpl<$Res>
 
 /// Create a copy of BusinessPortfolio
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? name = null,Object? description = null,Object? mission = null,Object? brandColors = null,Object? targetAudience = null,Object? businessAddress = null,Object? businessEmail = null,Object? businessPhone = null,Object? website = null,Object? country = null,Object? defaultCurrency = null,Object? createdAt = null,Object? updatedAt = freezed,Object? documentIds = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? name = null,Object? description = null,Object? mission = null,Object? brandColors = null,Object? targetAudience = null,Object? businessAddress = null,Object? businessEmail = null,Object? businessPhone = null,Object? website = null,Object? country = null,Object? defaultCurrency = null,Object? createdAt = null,Object? updatedAt = freezed,Object? documentIds = null,Object? enableManualMode = null,Object? recentClients = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -84,6 +85,8 @@ as String,defaultCurrency: null == defaultCurrency ? _self.defaultCurrency : def
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,documentIds: null == documentIds ? _self.documentIds : documentIds // ignore: cast_nullable_to_non_nullable
+as List<String>,enableManualMode: null == enableManualMode ? _self.enableManualMode : enableManualMode // ignore: cast_nullable_to_non_nullable
+as bool,recentClients: null == recentClients ? _self.recentClients : recentClients // ignore: cast_nullable_to_non_nullable
 as List<String>,
   ));
 }
@@ -169,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId,  String name,  String description,  String mission,  List<String> brandColors,  String targetAudience,  String businessAddress,  String businessEmail,  String businessPhone,  String website,  String country,  String defaultCurrency,  DateTime createdAt,  DateTime? updatedAt,  List<String> documentIds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId,  String name,  String description,  String mission,  List<String> brandColors,  String targetAudience,  String businessAddress,  String businessEmail,  String businessPhone,  String website,  String country,  String defaultCurrency,  DateTime createdAt,  DateTime? updatedAt,  List<String> documentIds,  bool enableManualMode,  List<String> recentClients)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BusinessPortfolio() when $default != null:
-return $default(_that.id,_that.userId,_that.name,_that.description,_that.mission,_that.brandColors,_that.targetAudience,_that.businessAddress,_that.businessEmail,_that.businessPhone,_that.website,_that.country,_that.defaultCurrency,_that.createdAt,_that.updatedAt,_that.documentIds);case _:
+return $default(_that.id,_that.userId,_that.name,_that.description,_that.mission,_that.brandColors,_that.targetAudience,_that.businessAddress,_that.businessEmail,_that.businessPhone,_that.website,_that.country,_that.defaultCurrency,_that.createdAt,_that.updatedAt,_that.documentIds,_that.enableManualMode,_that.recentClients);case _:
   return orElse();
 
 }
@@ -190,10 +193,10 @@ return $default(_that.id,_that.userId,_that.name,_that.description,_that.mission
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId,  String name,  String description,  String mission,  List<String> brandColors,  String targetAudience,  String businessAddress,  String businessEmail,  String businessPhone,  String website,  String country,  String defaultCurrency,  DateTime createdAt,  DateTime? updatedAt,  List<String> documentIds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId,  String name,  String description,  String mission,  List<String> brandColors,  String targetAudience,  String businessAddress,  String businessEmail,  String businessPhone,  String website,  String country,  String defaultCurrency,  DateTime createdAt,  DateTime? updatedAt,  List<String> documentIds,  bool enableManualMode,  List<String> recentClients)  $default,) {final _that = this;
 switch (_that) {
 case _BusinessPortfolio():
-return $default(_that.id,_that.userId,_that.name,_that.description,_that.mission,_that.brandColors,_that.targetAudience,_that.businessAddress,_that.businessEmail,_that.businessPhone,_that.website,_that.country,_that.defaultCurrency,_that.createdAt,_that.updatedAt,_that.documentIds);case _:
+return $default(_that.id,_that.userId,_that.name,_that.description,_that.mission,_that.brandColors,_that.targetAudience,_that.businessAddress,_that.businessEmail,_that.businessPhone,_that.website,_that.country,_that.defaultCurrency,_that.createdAt,_that.updatedAt,_that.documentIds,_that.enableManualMode,_that.recentClients);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +213,10 @@ return $default(_that.id,_that.userId,_that.name,_that.description,_that.mission
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId,  String name,  String description,  String mission,  List<String> brandColors,  String targetAudience,  String businessAddress,  String businessEmail,  String businessPhone,  String website,  String country,  String defaultCurrency,  DateTime createdAt,  DateTime? updatedAt,  List<String> documentIds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId,  String name,  String description,  String mission,  List<String> brandColors,  String targetAudience,  String businessAddress,  String businessEmail,  String businessPhone,  String website,  String country,  String defaultCurrency,  DateTime createdAt,  DateTime? updatedAt,  List<String> documentIds,  bool enableManualMode,  List<String> recentClients)?  $default,) {final _that = this;
 switch (_that) {
 case _BusinessPortfolio() when $default != null:
-return $default(_that.id,_that.userId,_that.name,_that.description,_that.mission,_that.brandColors,_that.targetAudience,_that.businessAddress,_that.businessEmail,_that.businessPhone,_that.website,_that.country,_that.defaultCurrency,_that.createdAt,_that.updatedAt,_that.documentIds);case _:
+return $default(_that.id,_that.userId,_that.name,_that.description,_that.mission,_that.brandColors,_that.targetAudience,_that.businessAddress,_that.businessEmail,_that.businessPhone,_that.website,_that.country,_that.defaultCurrency,_that.createdAt,_that.updatedAt,_that.documentIds,_that.enableManualMode,_that.recentClients);case _:
   return null;
 
 }
@@ -225,7 +228,7 @@ return $default(_that.id,_that.userId,_that.name,_that.description,_that.mission
 @JsonSerializable()
 
 class _BusinessPortfolio extends BusinessPortfolio {
-  const _BusinessPortfolio({required this.id, required this.userId, required this.name, this.description = '', this.mission = '', final  List<String> brandColors = const [], this.targetAudience = '', this.businessAddress = '', this.businessEmail = '', this.businessPhone = '', this.website = '', this.country = 'Nigeria', this.defaultCurrency = 'NGN', required this.createdAt, this.updatedAt, final  List<String> documentIds = const []}): _brandColors = brandColors,_documentIds = documentIds,super._();
+  const _BusinessPortfolio({required this.id, required this.userId, required this.name, this.description = '', this.mission = '', final  List<String> brandColors = const [], this.targetAudience = '', this.businessAddress = '', this.businessEmail = '', this.businessPhone = '', this.website = '', this.country = 'Nigeria', this.defaultCurrency = 'NGN', required this.createdAt, this.updatedAt, final  List<String> documentIds = const [], this.enableManualMode = false, final  List<String> recentClients = const []}): _brandColors = brandColors,_documentIds = documentIds,_recentClients = recentClients,super._();
   factory _BusinessPortfolio.fromJson(Map<String, dynamic> json) => _$BusinessPortfolioFromJson(json);
 
 @override final  String id;
@@ -257,6 +260,15 @@ class _BusinessPortfolio extends BusinessPortfolio {
   return EqualUnmodifiableListView(_documentIds);
 }
 
+// Workflow Settings
+@override@JsonKey() final  bool enableManualMode;
+ final  List<String> _recentClients;
+@override@JsonKey() List<String> get recentClients {
+  if (_recentClients is EqualUnmodifiableListView) return _recentClients;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_recentClients);
+}
+
 
 /// Create a copy of BusinessPortfolio
 /// with the given fields replaced by the non-null parameter values.
@@ -271,16 +283,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BusinessPortfolio&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.mission, mission) || other.mission == mission)&&const DeepCollectionEquality().equals(other._brandColors, _brandColors)&&(identical(other.targetAudience, targetAudience) || other.targetAudience == targetAudience)&&(identical(other.businessAddress, businessAddress) || other.businessAddress == businessAddress)&&(identical(other.businessEmail, businessEmail) || other.businessEmail == businessEmail)&&(identical(other.businessPhone, businessPhone) || other.businessPhone == businessPhone)&&(identical(other.website, website) || other.website == website)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultCurrency, defaultCurrency) || other.defaultCurrency == defaultCurrency)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other._documentIds, _documentIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BusinessPortfolio&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.mission, mission) || other.mission == mission)&&const DeepCollectionEquality().equals(other._brandColors, _brandColors)&&(identical(other.targetAudience, targetAudience) || other.targetAudience == targetAudience)&&(identical(other.businessAddress, businessAddress) || other.businessAddress == businessAddress)&&(identical(other.businessEmail, businessEmail) || other.businessEmail == businessEmail)&&(identical(other.businessPhone, businessPhone) || other.businessPhone == businessPhone)&&(identical(other.website, website) || other.website == website)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultCurrency, defaultCurrency) || other.defaultCurrency == defaultCurrency)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other._documentIds, _documentIds)&&(identical(other.enableManualMode, enableManualMode) || other.enableManualMode == enableManualMode)&&const DeepCollectionEquality().equals(other._recentClients, _recentClients));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,name,description,mission,const DeepCollectionEquality().hash(_brandColors),targetAudience,businessAddress,businessEmail,businessPhone,website,country,defaultCurrency,createdAt,updatedAt,const DeepCollectionEquality().hash(_documentIds));
+int get hashCode => Object.hash(runtimeType,id,userId,name,description,mission,const DeepCollectionEquality().hash(_brandColors),targetAudience,businessAddress,businessEmail,businessPhone,website,country,defaultCurrency,createdAt,updatedAt,const DeepCollectionEquality().hash(_documentIds),enableManualMode,const DeepCollectionEquality().hash(_recentClients));
 
 @override
 String toString() {
-  return 'BusinessPortfolio(id: $id, userId: $userId, name: $name, description: $description, mission: $mission, brandColors: $brandColors, targetAudience: $targetAudience, businessAddress: $businessAddress, businessEmail: $businessEmail, businessPhone: $businessPhone, website: $website, country: $country, defaultCurrency: $defaultCurrency, createdAt: $createdAt, updatedAt: $updatedAt, documentIds: $documentIds)';
+  return 'BusinessPortfolio(id: $id, userId: $userId, name: $name, description: $description, mission: $mission, brandColors: $brandColors, targetAudience: $targetAudience, businessAddress: $businessAddress, businessEmail: $businessEmail, businessPhone: $businessPhone, website: $website, country: $country, defaultCurrency: $defaultCurrency, createdAt: $createdAt, updatedAt: $updatedAt, documentIds: $documentIds, enableManualMode: $enableManualMode, recentClients: $recentClients)';
 }
 
 
@@ -291,7 +303,7 @@ abstract mixin class _$BusinessPortfolioCopyWith<$Res> implements $BusinessPortf
   factory _$BusinessPortfolioCopyWith(_BusinessPortfolio value, $Res Function(_BusinessPortfolio) _then) = __$BusinessPortfolioCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String userId, String name, String description, String mission, List<String> brandColors, String targetAudience, String businessAddress, String businessEmail, String businessPhone, String website, String country, String defaultCurrency, DateTime createdAt, DateTime? updatedAt, List<String> documentIds
+ String id, String userId, String name, String description, String mission, List<String> brandColors, String targetAudience, String businessAddress, String businessEmail, String businessPhone, String website, String country, String defaultCurrency, DateTime createdAt, DateTime? updatedAt, List<String> documentIds, bool enableManualMode, List<String> recentClients
 });
 
 
@@ -308,7 +320,7 @@ class __$BusinessPortfolioCopyWithImpl<$Res>
 
 /// Create a copy of BusinessPortfolio
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? name = null,Object? description = null,Object? mission = null,Object? brandColors = null,Object? targetAudience = null,Object? businessAddress = null,Object? businessEmail = null,Object? businessPhone = null,Object? website = null,Object? country = null,Object? defaultCurrency = null,Object? createdAt = null,Object? updatedAt = freezed,Object? documentIds = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? name = null,Object? description = null,Object? mission = null,Object? brandColors = null,Object? targetAudience = null,Object? businessAddress = null,Object? businessEmail = null,Object? businessPhone = null,Object? website = null,Object? country = null,Object? defaultCurrency = null,Object? createdAt = null,Object? updatedAt = freezed,Object? documentIds = null,Object? enableManualMode = null,Object? recentClients = null,}) {
   return _then(_BusinessPortfolio(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -326,6 +338,8 @@ as String,defaultCurrency: null == defaultCurrency ? _self.defaultCurrency : def
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,documentIds: null == documentIds ? _self._documentIds : documentIds // ignore: cast_nullable_to_non_nullable
+as List<String>,enableManualMode: null == enableManualMode ? _self.enableManualMode : enableManualMode // ignore: cast_nullable_to_non_nullable
+as bool,recentClients: null == recentClients ? _self._recentClients : recentClients // ignore: cast_nullable_to_non_nullable
 as List<String>,
   ));
 }

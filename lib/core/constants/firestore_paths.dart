@@ -14,6 +14,11 @@ abstract final class FirestorePaths {
   static String document(String uid, String pid, String did) =>
       'users/$uid/portfolios/$pid/documents/$did';
 
+  static String foldersCol(String uid, String pid) =>
+      'users/$uid/portfolios/$pid/folders';
+  static String folder(String uid, String pid, String fid) =>
+      'users/$uid/portfolios/$pid/folders/$fid';
+
   /// Version snapshots for a single document.
   static String versionsCol(String uid, String pid, String did) =>
       'users/$uid/portfolios/$pid/documents/$did/versions';

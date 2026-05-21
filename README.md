@@ -5,6 +5,10 @@ AI-powered business document hub. Generate professional invoices, proposals, log
 ## Features
 
 - **Portfolios**: Manage separate identities for each of your businesses.
+- **Paper-to-Digital Bridge**: Scan physical documents using multimodal AI (**Gemini 3.1 Pro**) to extract data and digitize them with your brand's styling.
+- **Autonomous Organization**: AI automatically categorizes and routes documents into type-specific folders (Invoices, Proposals, etc.).
+- **Manual Mode Toggle**: Take full administrative control over your filing cabinet with a dedicated manual organization mode.
+- **Batch Productivity**: Multi-select documents to move, delete, or export in bulk.
 - **AI Generation**: Powered by Gemini 3.1 Pro for structural documents and Imagen 4.0 for graphical assets.
 - **Responsive Design**: Standardized A4 layouts for professional print-ready results.
 - **Offline First**: Documents are cached locally for zero-latency viewing and offline access.
@@ -18,12 +22,13 @@ AI-powered business document hub. Generate professional invoices, proposals, log
 - Flutter SDK (latest stable version)
 - Firebase Account
 - Google AI Studio API Key (for Gemini/Imagen)
+- Camera Access (for scanning features)
 
 ### Setup
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/bizdocx.git
+   git clone https://github.com/empyrealworks/bizdocx.git
    cd bizdocx
    ```
 
@@ -57,8 +62,9 @@ AI-powered business document hub. Generate professional invoices, proposals, log
 ## Architecture
 
 - **State Management**: Flutter Riverpod 3.x
+- **Multimodal AI**: Gemini 3.1 Pro (Vision & Text)
 - **Navigation**: GoRouter
-- **Database**: Cloud Firestore
+- **Database**: Cloud Firestore (with Offline Persistence)
 - **Storage**: Firebase Storage
 - **Authentication**: Firebase Auth (Email/Password + Google Sign-In)
 - **Local Caching**: SharedPreferences + path_provider

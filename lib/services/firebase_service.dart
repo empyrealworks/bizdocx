@@ -7,9 +7,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:uuid/uuid.dart';
 
 import '../core/constants/firestore_paths.dart';
-import '../env/env.dart';
 import '../models/business_portfolio.dart';
 import '../models/document_asset.dart';
+import '../models/document_folder.dart';
 import '../models/document_version.dart';
 import '../models/user_context.dart';
 import '../models/user_profile.dart';
@@ -448,6 +448,87 @@ class FirebaseService {
       'documentIds': FieldValue.arrayRemove([asset.id]),
       'updatedAt': Timestamp.now(),
     });
+  }
+
+  // ── Folder CRUD ───────────────────────────────────────────────────────────
+
+  Stream<List<DocumentFolder>> watchFolders(String portfolioId) {
+    return _db
+        .collection(FirestorePaths.foldersCol(currentUid, portfolioId))
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map((s) => s.docs.map(DocumentFolder.fromFirestore).toList());
+  }
+
+  Future<DocumentFolder> saveFolder(DocumentFolder folder) async {
+    final uid = currentUid;
+    final id = folder.id.isEmpty ? _uuid.v4() : folder.id;
+    final doc = folder.copyWith(id: id);
+    await _db
+        .doc(FirestorePaths.folder(uid, folder.portfolioId, id))
+        .set(doc.toFirestore());
+    return doc;
+  }
+
+  Future<void> deleteFolder(DocumentFolder folder) async {
+    final uid = currentUid;
+    final batch = _db.batch();
+    
+    // Deleting a folder unsets it from all documents
+    final docs = await _db
+        .collection(FirestorePaths.documentsCol(uid, folder.portfolioId))
+        .where('folderId', isEqualTo: folder.id)
+        .get();
+        
+    for (var doc in docs.docs) {
+      batch.update(doc.reference, {'folderId': FieldValue.delete()});
+    }
+    
+    batch.delete(_db.doc(FirestorePaths.folder(uid, folder.portfolioId, folder.id)));
+    await batch.commit();
+  }
+
+  Future<void> renameFolder(DocumentFolder folder, String newName) async {
+    await _db
+        .doc(FirestorePaths.folder(currentUid, folder.portfolioId, folder.id))
+        .update({'name': newName});
+  }
+
+  // ── Batch Operations ──────────────────────────────────────────────────────
+
+  Future<void> batchMoveDocuments({
+    required String portfolioId,
+    required List<String> documentIds,
+    String? targetFolderId,
+  }) async {
+    final uid = currentUid;
+    final batch = _db.batch();
+    
+    for (var id in documentIds) {
+      batch.update(
+        _db.doc(FirestorePaths.document(uid, portfolioId, id)),
+        {'folderId': targetFolderId ?? FieldValue.delete()},
+      );
+    }
+    await batch.commit();
+  }
+
+  Future<void> batchDeleteDocuments(List<DocumentAsset> assets) async {
+    final uid = currentUid;
+    final batch = _db.batch();
+    
+    for (var asset in assets) {
+      batch.delete(_db.doc(FirestorePaths.document(uid, asset.portfolioId, asset.id)));
+      batch.update(_db.doc(FirestorePaths.portfolio(uid, asset.portfolioId)), {
+        'documentIds': FieldValue.arrayRemove([asset.id]),
+        'updatedAt': Timestamp.now(),
+      });
+      // Storage deletion handled separately as batch doesn't support it
+      if (asset.isGraphical && asset.storageUrl != null) {
+        try { await _storage.refFromURL(asset.storageUrl!).delete(); } catch (_) {}
+      }
+    }
+    await batch.commit();
   }
 
   // ── Version History ───────────────────────────────────────────────────────

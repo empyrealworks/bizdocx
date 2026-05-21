@@ -34,6 +34,12 @@ _BusinessPortfolio _$BusinessPortfolioFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      enableManualMode: json['enableManualMode'] as bool? ?? false,
+      recentClients:
+          (json['recentClients'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$BusinessPortfolioToJson(_BusinessPortfolio instance) =>
@@ -54,4 +60,6 @@ Map<String, dynamic> _$BusinessPortfolioToJson(_BusinessPortfolio instance) =>
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
       'documentIds': instance.documentIds,
+      'enableManualMode': instance.enableManualMode,
+      'recentClients': instance.recentClients,
     };

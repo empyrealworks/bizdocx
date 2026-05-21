@@ -26,6 +26,10 @@ abstract class BusinessPortfolio with _$BusinessPortfolio {
     required DateTime createdAt,
     DateTime? updatedAt,
     @Default([]) List<String> documentIds,
+
+    // Workflow Settings
+    @Default(false) bool enableManualMode,
+    @Default([]) List<String> recentClients,
   }) = _BusinessPortfolio;
 
   const BusinessPortfolio._();

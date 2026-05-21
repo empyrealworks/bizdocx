@@ -177,6 +177,124 @@ INSTRUCTION FOR REFINEMENT:
     }
   }
 
+  // ── Scanned Document Intelligence ──────────────────────────────────────────
+
+  Future<Map<String, dynamic>> analyzeScannedDocument({
+    required Uint8List imageBytes,
+    required UserContext context,
+    required UserTier tier,
+  }) async {
+    const model = _modelPro; // Always use Pro for Vision/Extraction
+    final logoInstruction = _logoInstruction(context, DocumentType.other);
+
+    final prompt = '''
+Analyze the attached document image. Your goal is to extract all meaningful data and re-generate this document as a clean, professional, and brand-aligned HTML document.
+
+BUSINESS CONTEXT (The User's Brand):
+- Company: ${context.companyName}
+- Brand Colors: ${context.brandColors.join(', ')}
+- Address: ${context.businessAddress}
+${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
+
+INSTRUCTIONS:
+1. Extract all text, line items, dates, and totals from the scan.
+2. Map this data into a high-fidelity HTML structure.
+3. Apply the user's BRAND COLORS and professional styling.
+4. If a logo is provided in the context, embed it.
+5. Use Flexbox for layout. No 'display: grid'.
+6. Return a JSON object with exactly two keys:
+   - "html": The complete HTML document starting with <!DOCTYPE html>.
+   - "metadata": A JSON object containing:
+     - "type": (e.g., "invoice", "proposal", "receipt")
+     - "client": The name of the client/recipient identified in the scan.
+     - "total": The grand total value (if applicable).
+     - "date": The document date found in the scan.
+
+Return ONLY the JSON object. No preamble, no markdown code fences.
+''';
+
+    final payload = {
+      'contents': [
+        {
+          'parts': [
+            {'text': prompt},
+            {
+              'inlineData': {
+                'mimeType': 'image/png',
+                'data': base64Encode(imageBytes),
+              }
+            }
+          ]
+        }
+      ],
+      'generationConfig': {
+        'temperature': 0.2,
+        'responseMimeType': 'application/json',
+      },
+    };
+
+    final url = '$_baseUrl/$model:generateContent?key=$_apiKey';
+    final response = await _post(url, payload);
+    
+    try {
+      final text = response['candidates'][0]['content']['parts'][0]['text'] as String;
+      return jsonDecode(text) as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('[AI Scan] Error parsing response: $e');
+      throw Exception('Failed to analyze scanned document');
+    }
+  }
+
+  Future<Map<String, dynamic>> categorizeDocument({
+    required String content,
+    required List<String> recentClients,
+  }) async {
+    const model = _modelFlash; // Use Flash for categorization
+
+    final prompt = '''
+Analyze the following document content and determine its category and key metadata.
+
+DOCUMENT CONTENT:
+$content
+
+RECENT CLIENTS: ${recentClients.join(', ')}
+
+INSTRUCTIONS:
+Determine the document type and extract relevant metadata.
+Return a JSON object with:
+- "type": One of [invoice, proposal, letterhead, businessCard, logo, icon, contract, other]
+- "clientName": The identified client/recipient.
+- "metadata": { "total_value": "...", "due_date": "...", "client_email": "..." }
+
+Return ONLY the JSON object.
+''';
+
+    final payload = {
+      'contents': [
+        {
+          'parts': [
+            {'text': prompt}
+          ]
+        }
+      ],
+      'generationConfig': {
+        'temperature': 0.1,
+        'responseMimeType': 'application/json',
+      },
+    };
+
+    final url = '$_baseUrl/$model:generateContent?key=$_apiKey';
+    final response = await _post(url, payload);
+    
+    try {
+      final text = response['candidates'][0]['content']['parts'][0]['text'] as String;
+      return jsonDecode(text) as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('[AI Categorize] Error parsing response: $e');
+      throw Exception('Failed to categorize document');
+    }
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   Future<String> _callGenerateContent(String model, String prompt) async {

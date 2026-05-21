@@ -11,10 +11,18 @@ class DocumentTile extends ConsumerStatefulWidget {
     super.key,
     required this.asset,
     required this.onTap,
+    this.selectionMode = false,
+    this.isSelected = false,
+    this.onSelect,
+    this.onLongPress,
   });
 
   final DocumentAsset asset;
   final VoidCallback onTap;
+  final bool selectionMode;
+  final bool isSelected;
+  final ValueChanged<String>? onSelect;
+  final VoidCallback? onLongPress;
 
   @override
   ConsumerState<DocumentTile> createState() => _DocumentTileState();
@@ -61,21 +69,31 @@ class _DocumentTileState extends ConsumerState<DocumentTile> {
   Widget build(BuildContext context) {
     final c = context.colors;
     return GestureDetector(
-      onTap: widget.onTap,
-      onLongPress: () => setState(() => _showDelete = !_showDelete),
+      onTap: widget.selectionMode ? () => widget.onSelect?.call(widget.asset.id) : widget.onTap,
+      onLongPress: widget.selectionMode ? null : widget.onLongPress ?? () => setState(() => _showDelete = !_showDelete),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: c.card,
+          color: widget.isSelected ? context.colors.textPrimary.withValues(alpha: 0.05) : c.card,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _showDelete ? AppColors.error.withValues(alpha: 0.5) : c.border,
-            width: _showDelete ? 1.5 : 1,
+            color: widget.isSelected 
+              ? context.colors.textPrimary 
+              : (_showDelete ? AppColors.error.withValues(alpha: 0.5) : c.border),
+            width: (widget.isSelected || _showDelete) ? 1.5 : 1,
           ),
         ),
         child: Row(
           children: [
+            if (widget.selectionMode) ...[
+               Icon(
+                 widget.isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                 color: widget.isSelected ? context.colors.textPrimary : c.textMuted,
+                 size: 20,
+               ),
+               const SizedBox(width: 14),
+            ],
             _TypeIcon(type: widget.asset.type),
             const SizedBox(width: 14),
             Expanded(
@@ -103,13 +121,15 @@ class _DocumentTileState extends ConsumerState<DocumentTile> {
                 onPressed: _confirmDelete,
                 visualDensity: VisualDensity.compact,
               )
-            else
+            else if (!widget.selectionMode)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   if (widget.asset.isCached)
                     const Icon(Icons.offline_pin_rounded,
                         size: 14, color: AppColors.success),
+                  if (widget.asset.isScanned)
+                    const Icon(Icons.document_scanner, size: 12, color: AppColors.silver),
                   const SizedBox(height: 4),
                   Icon(Icons.arrow_forward_ios, size: 12, color: c.textMuted),
                 ],

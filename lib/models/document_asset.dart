@@ -43,6 +43,12 @@ abstract class DocumentAsset with _$DocumentAsset {
     
     // Revision tracking for credit logic
     @Default(0) int revisionCount,
+
+    // Organization & Scanning
+    String? folderId,
+    String? clientName,
+    @Default(false) bool isScanned,
+    @Default({}) Map<String, dynamic> metadata,
   }) = _DocumentAsset;
 
   const DocumentAsset._();

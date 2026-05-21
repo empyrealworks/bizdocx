@@ -27,6 +27,10 @@ _DocumentAsset _$DocumentAssetFromJson(Map<String, dynamic> json) =>
       aspectRatio: json['aspectRatio'] as String?,
       orientation: json['orientation'] as String?,
       revisionCount: (json['revisionCount'] as num?)?.toInt() ?? 0,
+      folderId: json['folderId'] as String?,
+      clientName: json['clientName'] as String?,
+      isScanned: json['isScanned'] as bool? ?? false,
+      metadata: json['metadata'] as Map<String, dynamic>? ?? const {},
     );
 
 Map<String, dynamic> _$DocumentAssetToJson(_DocumentAsset instance) =>
@@ -48,6 +52,10 @@ Map<String, dynamic> _$DocumentAssetToJson(_DocumentAsset instance) =>
       'aspectRatio': instance.aspectRatio,
       'orientation': instance.orientation,
       'revisionCount': instance.revisionCount,
+      'folderId': instance.folderId,
+      'clientName': instance.clientName,
+      'isScanned': instance.isScanned,
+      'metadata': instance.metadata,
     };
 
 const _$DocumentTypeEnumMap = {

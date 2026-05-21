@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/document_asset.dart';
+import '../models/document_folder.dart';
 import '../models/user_context.dart';
 import '../models/document_template.dart';
 import '../models/user_profile.dart';
@@ -211,6 +212,53 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
 
     await fb.appendRecentDocument(portfolioId, title);
     _checkCancelled();
+
+    // NEW: Automatic Categorization & Folder Routing
+    try {
+      final portfolios = await fb.watchPortfolios().first;
+      final portfolio = portfolios.firstWhere((p) => p.id == portfolioId);
+
+      if (!portfolio.enableManualMode) {
+        final categorization = await ai.categorizeDocument(
+          content: html,
+          recentClients: portfolio.recentClients,
+        );
+        
+        final folderName = (categorization['type'] ?? type.name).toString().toUpperCase();
+        
+        // 1. Find or create folder
+        final folders = await fb.watchFolders(portfolioId).first;
+        var folder = folders.where((f) => f.name == folderName).firstOrNull;
+        
+        if (folder == null) {
+          folder = await fb.saveFolder(DocumentFolder(
+            id: '',
+            portfolioId: portfolioId,
+            name: folderName,
+            createdAt: DateTime.now(),
+            isAiGenerated: true,
+          ));
+        }
+        
+        // 2. Update document with categorization data
+        final clientName = categorization['clientName']?.toString();
+        final updatedAsset = saved.copyWith(
+          folderId: folder.id,
+          clientName: clientName,
+          metadata: categorization['metadata'] as Map<String, dynamic>? ?? {},
+        );
+        await fb.updateDocumentAsset(updatedAsset);
+        
+        // 3. Update recent clients if new
+        if (clientName != null && !portfolio.recentClients.contains(clientName)) {
+          await fb.updatePortfolio(portfolio.copyWith(
+            recentClients: [...portfolio.recentClients, clientName],
+          ));
+        }
+      }
+    } catch (e) {
+      debugPrint('[AI] Auto-categorization failed: $e');
+    }
 
     state = GenerationState(phase: GenerationPhase.idle, result: saved);
     return saved;

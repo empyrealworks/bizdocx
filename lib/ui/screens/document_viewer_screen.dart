@@ -14,6 +14,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/document_generation_provider.dart';
 import '../../providers/offline_file_provider.dart';
 import '../../providers/profile_provider.dart';
+import '../sheets/lifecycle_workflow_sheet.dart';
 import '../sheets/version_history_sheet.dart';
 import '../widgets/generation_state_overlay.dart';
 
@@ -165,17 +166,28 @@ class _DocumentViewerScreenState
             ),
             if (_asset.isStructural) ...[
               IconButton(
+                icon: const Icon(Icons.transform_rounded, size: 22),
+                tooltip: 'Re-use or Modify',
+                onPressed: busy 
+                  ? null 
+                  : () => showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (ctx) => LifecycleWorkflowSheet(asset: _asset),
+                  ),
+              ),
+              IconButton(
                 icon: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
                   child: Icon(
                     _refineBarVisible
                         ? Icons.keyboard_hide_outlined
-                        : Icons.edit_note_rounded,
+                        : Icons.auto_awesome,
                     key: ValueKey(_refineBarVisible),
                     size: 22,
                   ),
                 ),
-                tooltip: 'Refine document',
+                tooltip: 'AI Refinement',
                 onPressed: busy
                     ? null
                     : () => setState(

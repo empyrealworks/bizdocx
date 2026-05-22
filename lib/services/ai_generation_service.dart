@@ -94,6 +94,9 @@ REFINEMENT REQUEST: "$refinementPrompt"
 EXISTING DOCUMENT HTML:
 $existingHtml
 
+SMART FIELDS MANDATE:
+Ensure all business variables (Client Name, Dates, Totals, etc.) are wrapped in <span data-smart-field="key"> elements. Preserve existing spans unless the refinement explicitly changes their content.
+
 INSTRUCTIONS:
 1. Apply ONLY the changes described in the refinement request.
 2. Keep all unchanged sections exactly as they are.
@@ -195,6 +198,13 @@ BUSINESS CONTEXT (The User's Brand):
 - Brand Colors: ${context.brandColors.join(', ')}
 - Address: ${context.businessAddress}
 ${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
+
+SMART FIELDS MANDATE:
+You MUST wrap every business variable in a <span data-smart-field="key"> tag.
+Available Keys:
+- client_name, business_name, date_created, due_date, invoice_number, proposal_title, total_amount, currency_symbol, line_item_description.
+
+Example: Total: <span data-smart-field="total_amount">\$450.00</span>
 
 INSTRUCTIONS:
 1. Extract all text, line items, dates, and totals from the scan.
@@ -446,6 +456,21 @@ ${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
 DOCUMENT TYPE: ${documentType.name}
 $templateInstruction
 USER REQUEST: $userPrompt
+
+SMART FIELDS MANDATE:
+Every high-frequency business variable MUST be wrapped in a <span data-smart-field="key"> element.
+Required Keys:
+- client_name: The name of the client/recipient.
+- business_name: Your company name (${context.companyName}).
+- date_created: The document creation date.
+- due_date: The deadline or expiry date (if applicable).
+- invoice_number: The unique ID for the document (if applicable).
+- proposal_title: The main heading/title of the document.
+- total_amount: The grand total or final price.
+- currency_symbol: The symbol (e.g. \$, ₦, £).
+- line_item_description: Text describing a product or service.
+
+Example: Total Due: <span data-smart-field="total_amount">\$1,200.00</span>
 
 TECHNICAL REQUIREMENTS FOR FIXED DIMENSIONS:
 1. Output ONLY raw HTML with 100% inline CSS.

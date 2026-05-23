@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -14,7 +15,9 @@ import '../../providers/auth_provider.dart';
 import '../../providers/document_generation_provider.dart';
 import '../../providers/offline_file_provider.dart';
 import '../../providers/profile_provider.dart';
+import '../../services/prefs_service.dart';
 import '../sheets/lifecycle_workflow_sheet.dart';
+import '../sheets/signature_sheet.dart';
 import '../sheets/version_history_sheet.dart';
 import '../widgets/generation_state_overlay.dart';
 
@@ -35,6 +38,12 @@ class _DocumentViewerScreenState
   final _refineCtrl = TextEditingController();
   bool _refineBarVisible = false;
   bool _exporting = false;
+
+  final GlobalKey _reuseKey = GlobalKey();
+  final GlobalKey _aiKey = GlobalKey();
+  final GlobalKey _signKey = GlobalKey();
+  final GlobalKey _historyKey = GlobalKey();
+  final GlobalKey _exportKey = GlobalKey();
 
   @override
   void initState() {
@@ -99,6 +108,15 @@ class _DocumentViewerScreenState
     );
   }
 
+  void _showSignature() async {
+    final result = await showModalBottomSheet<DocumentAsset>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => SignatureSheet(asset: _asset),
+    );
+    if (result != null && mounted) _applyUpdated(result);
+  }
+
   Future<void> _export() async {
     final user = ref.read(currentUserProvider);
     if (user == null) return;
@@ -145,10 +163,40 @@ class _DocumentViewerScreenState
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(documentListProvider(_asset.portfolioId), (prev, next) {
+      next.whenData((docs) {
+        final remote = docs.where((d) => d.id == _asset.id).firstOrNull;
+        if (remote != null && remote.htmlContent != _asset.htmlContent) {
+          _applyUpdated(remote);
+        }
+      });
+    });
+
+    return ShowCaseWidget(
+      onFinish: () => PrefsService.instance.markViewerTutorialSeen(),
+      builder: (context) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!PrefsService.instance.hasSeenViewerTutorial) {
+            ShowCaseWidget.of(context).startShowCase([
+              _reuseKey,
+              _aiKey,
+              _signKey,
+              _historyKey,
+              _exportKey,
+            ]);
+          }
+        });
+        return _buildScaffold(context);
+      },
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
     final c = context.colors;
     final genState = ref.watch(documentGenerationProvider(_asset.portfolioId));
     final profile = ref.watch(userProfileProvider).value;
     final busy = genState.isLoading || _exporting;
+    final isSigned = _asset.status == DocumentStatus.signed;
 
     return Stack(children: [
       Scaffold(
@@ -159,49 +207,90 @@ class _DocumentViewerScreenState
               onPressed: () =>
                   context.go('/portfolio/${_asset.portfolioId}')),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.history_rounded, size: 22),
-              tooltip: 'Version history',
-              onPressed: busy ? null : _showHistory,
+            if (_asset.isStructural && !isSigned)
+              Showcase(
+                key: _signKey,
+                description: 'Capture a secure, hand-drawn e-signature to finalize and lock this document.',
+                child: IconButton(
+                  icon: const Icon(Icons.draw_rounded, size: 22),
+                  tooltip: 'Sign Document',
+                  onPressed: busy ? null : _showSignature,
+                ),
+              ),
+            Showcase(
+              key: _historyKey,
+              description: 'Travel back in time and restore any previous version of your document.',
+              child: IconButton(
+                icon: const Icon(Icons.history_rounded, size: 22),
+                tooltip: 'Version history',
+                onPressed: busy ? null : _showHistory,
+              ),
             ),
             if (_asset.isStructural) ...[
-              IconButton(
-                icon: const Icon(Icons.transform_rounded, size: 22),
-                tooltip: 'Re-use or Modify',
-                onPressed: busy 
-                  ? null 
-                  : () => showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (ctx) => LifecycleWorkflowSheet(asset: _asset),
-                  ),
+              Showcase(
+                key: _reuseKey,
+                description: 'Duplicate this layout for a new project or fix typos instantly without using AI credits.',
+                child: IconButton(
+                  icon: const Icon(Icons.transform_rounded, size: 22),
+                  tooltip: 'Re-use or Modify',
+                  onPressed: busy 
+                    ? null 
+                    : () async {
+                        final router = GoRouter.of(context);
+                        final result = await showModalBottomSheet<DocumentAsset>(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (ctx) => LifecycleWorkflowSheet(asset: _asset),
+                        );
+                        if (result != null && mounted) {
+                          if (result.id == _asset.id) {
+                            _applyUpdated(result);
+                          } else {
+                            router.pushReplacement(
+                              '/portfolio/${result.portfolioId}/doc/${result.id}',
+                              extra: result,
+                            );
+                          }
+                        }
+                      },
+                ),
               ),
-              IconButton(
-                icon: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  child: Icon(
-                    _refineBarVisible
-                        ? Icons.keyboard_hide_outlined
-                        : Icons.auto_awesome,
-                    key: ValueKey(_refineBarVisible),
-                    size: 22,
+              if (!isSigned)
+                Showcase(
+                  key: _aiKey,
+                  description: 'Chat with AI to make deep structural changes or design updates to your document.',
+                  child: IconButton(
+                    icon: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(
+                        _refineBarVisible
+                            ? Icons.keyboard_hide_outlined
+                            : Icons.auto_awesome,
+                        key: ValueKey(_refineBarVisible),
+                        size: 22,
+                      ),
+                    ),
+                    tooltip: 'AI Refinement',
+                    onPressed: busy
+                        ? null
+                        : () => setState(
+                            () => _refineBarVisible = !_refineBarVisible),
                   ),
                 ),
-                tooltip: 'AI Refinement',
-                onPressed: busy
-                    ? null
-                    : () => setState(
-                        () => _refineBarVisible = !_refineBarVisible),
-              ),
             ],
-            IconButton(
-              icon: const Icon(Icons.ios_share_rounded),
-              tooltip: 'Export / Share',
-              onPressed: busy ? null : _export,
+            Showcase(
+              key: _exportKey,
+              description: 'Export your high-fidelity document as a PDF or share it with clients.',
+              child: IconButton(
+                icon: const Icon(Icons.ios_share_rounded),
+                tooltip: 'Export / Share',
+                onPressed: busy ? null : _export,
+              ),
             ),
           ],
         ),
         body: Column(children: [
+          if (isSigned) const _SignedBadge(),
           if (profile != null && profile.totalCredits < 150)
              _LowBalanceBanner(balance: profile.totalCredits),
           Expanded(
@@ -248,6 +337,29 @@ class _DocumentViewerScreenState
           },
         ),
     ]);
+  }
+}
+
+class _SignedBadge extends StatelessWidget {
+  const _SignedBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: AppColors.success.withValues(alpha: 0.1),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: const Row(
+        children: [
+          Icon(Icons.verified_rounded, color: AppColors.success, size: 14),
+          SizedBox(width: 8),
+          Text(
+            'DOCUMENT SIGNED & LOCKED',
+            style: TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+          ),
+        ],
+      ),
+    );
   }
 }
 

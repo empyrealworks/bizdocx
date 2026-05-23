@@ -31,6 +31,14 @@ _DocumentAsset _$DocumentAssetFromJson(Map<String, dynamic> json) =>
       clientName: json['clientName'] as String?,
       isScanned: json['isScanned'] as bool? ?? false,
       metadata: json['metadata'] as Map<String, dynamic>? ?? const {},
+      status:
+          $enumDecodeNullable(_$DocumentStatusEnumMap, json['status']) ??
+          DocumentStatus.draft,
+      signatureBase64: json['signatureBase64'] as String?,
+      signedAt: json['signedAt'] == null
+          ? null
+          : DateTime.parse(json['signedAt'] as String),
+      signatureMetadata: json['signatureMetadata'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$DocumentAssetToJson(_DocumentAsset instance) =>
@@ -56,6 +64,10 @@ Map<String, dynamic> _$DocumentAssetToJson(_DocumentAsset instance) =>
       'clientName': instance.clientName,
       'isScanned': instance.isScanned,
       'metadata': instance.metadata,
+      'status': _$DocumentStatusEnumMap[instance.status]!,
+      'signatureBase64': instance.signatureBase64,
+      'signedAt': instance.signedAt?.toIso8601String(),
+      'signatureMetadata': instance.signatureMetadata,
     };
 
 const _$DocumentTypeEnumMap = {
@@ -72,4 +84,9 @@ const _$DocumentTypeEnumMap = {
 const _$AssetPipelineEnumMap = {
   AssetPipeline.structural: 'structural',
   AssetPipeline.graphical: 'graphical',
+};
+
+const _$DocumentStatusEnumMap = {
+  DocumentStatus.draft: 'draft',
+  DocumentStatus.signed: 'signed',
 };

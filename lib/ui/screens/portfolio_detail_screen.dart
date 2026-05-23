@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import '../../core/extensions/context_extensions.dart';
 import '../../models/business_portfolio.dart';
@@ -10,6 +11,7 @@ import '../../providers/document_generation_provider.dart';
 import '../../providers/folder_provider.dart';
 import '../../providers/portfolio_provider.dart';
 import '../../services/firebase_service.dart';
+import '../../services/prefs_service.dart';
 import '../sheets/asset_manager_sheet.dart';
 import '../sheets/edit_portfolio_sheet.dart';
 import '../sheets/scanning_workflow_sheet.dart';
@@ -29,6 +31,18 @@ class _PortfolioDetailScreenState
   AssetPipeline? _pipelineFilter;
   DocumentType?  _typeFilter;
 
+  final GlobalKey _bannerKey = GlobalKey();
+  final GlobalKey _assetKey = GlobalKey();
+  final GlobalKey _manualKey = GlobalKey();
+  final GlobalKey _sortKey = GlobalKey();
+  final GlobalKey _scanKey = GlobalKey();
+  final GlobalKey _genKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   List<DocumentAsset> _applyFilters(List<DocumentAsset> docs) => docs
       .where((d) =>
   (_pipelineFilter == null || d.pipeline == _pipelineFilter) &&
@@ -37,6 +51,27 @@ class _PortfolioDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    return ShowCaseWidget(
+      onFinish: () => PrefsService.instance.markPortfolioTutorialSeen(),
+      builder: (context) {
+         WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!PrefsService.instance.hasSeenPortfolioTutorial) {
+              ShowCaseWidget.of(context).startShowCase([
+                _bannerKey,
+                _assetKey,
+                _manualKey,
+                _sortKey,
+                _scanKey,
+                _genKey,
+              ]);
+            }
+         });
+         return _buildScaffold(context);
+      },
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
     final c = context.colors;
 
     final portfolio = ref.watch(portfolioListProvider)
@@ -72,18 +107,30 @@ class _PortfolioDetailScreenState
               tooltip: 'Delete selected',
             ),
           ] else if (portfolio != null) ...[
-            _ManualModeToggle(portfolio: portfolio),
-            IconButton(
-              icon: const Icon(Icons.sort),
-              onPressed: () => _showSortMenu(context, folderNotifier),
-              tooltip: 'Sort options',
+            Showcase(
+              key: _manualKey,
+              description: 'AI Organization is on by default. Toggle this to manually manage your filing cabinet.',
+              child: _ManualModeToggle(portfolio: portfolio),
             ),
-            IconButton(
-              icon: Icon(Icons.photo_library_outlined,
-                  size: 20, color: c.iconPrimary),
-              tooltip: 'Manage assets & logo',
-              onPressed: () => _showSheet(
-                  context, AssetManagerSheet(portfolioId: widget.portfolioId)),
+            Showcase(
+              key: _sortKey,
+              description: 'Group files by Client, Document Type, or Creation Date.',
+              child: IconButton(
+                icon: const Icon(Icons.sort),
+                onPressed: () => _showSortMenu(context, folderNotifier),
+                tooltip: 'Sort options',
+              ),
+            ),
+            Showcase(
+              key: _assetKey,
+              description: 'Upload your company logo and define brand colors here.',
+              child: IconButton(
+                icon: Icon(Icons.photo_library_outlined,
+                    size: 20, color: c.iconPrimary),
+                tooltip: 'Manage assets & logo',
+                onPressed: () => _showSheet(
+                    context, AssetManagerSheet(portfolioId: widget.portfolioId)),
+              ),
             ),
             IconButton(
               icon: Icon(Icons.edit_outlined,
@@ -98,7 +145,11 @@ class _PortfolioDetailScreenState
       body: Column(
         children: [
           if (portfolio != null && !folderState.isSelectionMode) 
-            _ContextBanner(portfolio: portfolio),
+            Showcase(
+              key: _bannerKey,
+              description: 'This is your business identity. Every generated doc will use this context.',
+              child: _ContextBanner(portfolio: portfolio),
+            ),
           if (!folderState.isSelectionMode)
             _FilterBar(
               pipelineFilter: _pipelineFilter,
@@ -147,7 +198,7 @@ class _PortfolioDetailScreenState
                     selectedIds: folderState.selectedDocumentIds,
                     onSelect: folderNotifier.toggleDocumentSelection,
                     onLongPress: folderNotifier.toggleSelectionMode,
-                  );
+                   );
                 }
 
                 // AI Generated / Categorized View
@@ -170,23 +221,31 @@ class _PortfolioDetailScreenState
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          FloatingActionButton.extended(
-            onPressed: () => _showScanningSheet(context),
-            backgroundColor: context.colors.card,
-            foregroundColor: context.colors.iconPrimary,
-            heroTag: 'scan_fab',
-            icon: const Icon(Icons.document_scanner_outlined),
-            label: const Text('Scan'),
+          Showcase(
+            key: _scanKey,
+            description: 'Scan physical invoices or receipts to digitize them with your brand.',
+            child: FloatingActionButton.extended(
+              onPressed: () => _showScanningSheet(context),
+              backgroundColor: context.colors.card,
+              foregroundColor: context.colors.iconPrimary,
+              heroTag: 'scan_fab',
+              icon: const Icon(Icons.document_scanner_outlined),
+              label: const Text('Scan'),
+            ),
           ),
           const SizedBox(height: 12),
-          FloatingActionButton.extended(
-            onPressed: () =>
-                context.go('/portfolio/${widget.portfolioId}/generate'),
-            backgroundColor: context.colors.filledButtonBg,
-            foregroundColor: context.colors.filledButtonFg,
-            icon: const Icon(Icons.auto_awesome, size: 18),
-            label: const Text('Generate'),
-            heroTag: 'gen_fab',
+          Showcase(
+            key: _genKey,
+            description: 'Describe what you need and let AI generate professional docs in seconds.',
+            child: FloatingActionButton.extended(
+              onPressed: () =>
+                  context.go('/portfolio/${widget.portfolioId}/generate'),
+              backgroundColor: context.colors.filledButtonBg,
+              foregroundColor: context.colors.filledButtonFg,
+              icon: const Icon(Icons.auto_awesome, size: 18),
+              label: const Text('Generate'),
+              heroTag: 'gen_fab',
+            ),
           ),
         ],
       ),

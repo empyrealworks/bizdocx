@@ -60,10 +60,10 @@ class _SmartFieldEditorSheetState extends ConsumerState<SmartFieldEditorSheet> {
         clientName: clientName ?? widget.asset.clientName,
       );
 
-      await FirebaseService.instance.updateDocumentAsset(updatedAsset);
+      final result = await FirebaseService.instance.updateDocumentAsset(updatedAsset);
       
       if (mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context, result);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Document updated successfully locally.')),
         );

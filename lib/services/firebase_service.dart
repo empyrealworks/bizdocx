@@ -447,6 +447,10 @@ class FirebaseService {
       title: '${original.title} (Copy)',
       isCached: false,
       localCachePath: null,
+      status: DocumentStatus.draft,
+      signatureBase64: null,
+      signedAt: null,
+      signatureMetadata: null,
     );
 
     await saveDocumentAsset(duplicated);

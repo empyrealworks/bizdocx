@@ -1,6 +1,6 @@
 name: bizdocx
 description: BizDocx - AI-powered business document hub.
-version: 0.3.3+8
+version: 0.4.0+9
 publish_to: none
 
 environment:
@@ -45,6 +45,7 @@ dependencies:
 
   # ── Subscriptions ──────────────────────────────────────
   purchases_flutter: ^10.0.1
+  showcaseview: ^5.0.2
 
 dev_dependencies:
   flutter_test:

@@ -49,4 +49,17 @@ class SmartFieldUtility {
 
     return result;
   }
+
+  /// Injects the signature HTML into the placeholder.
+  static String injectSignature(String html, String signatureHtml) {
+    final keyRegex = RegExp(
+      r'(<span[^>]*data-smart-field="signature"[^>]*>)(.*?)(</span>)',
+      caseSensitive: false,
+      dotAll: true,
+    );
+    
+    return html.replaceFirstMapped(keyRegex, (match) {
+      return signatureHtml;
+    });
+  }
 }

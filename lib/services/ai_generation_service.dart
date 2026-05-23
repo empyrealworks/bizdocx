@@ -202,7 +202,7 @@ ${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
 SMART FIELDS MANDATE:
 You MUST wrap every business variable in a <span data-smart-field="key"> tag.
 Available Keys:
-- client_name, business_name, date_created, due_date, invoice_number, proposal_title, total_amount, currency_symbol, line_item_description.
+- client_name, business_name, date_created, due_date, invoice_number, proposal_title, total_amount, currency_symbol, line_item_description, signature.
 
 Example: Total: <span data-smart-field="total_amount">\$450.00</span>
 
@@ -469,6 +469,7 @@ Required Keys:
 - total_amount: The grand total or final price.
 - currency_symbol: The symbol (e.g. \$, ₦, £).
 - line_item_description: Text describing a product or service.
+- signature: A placeholder for the user signature (usually at the bottom).
 
 Example: Total Due: <span data-smart-field="total_amount">\$1,200.00</span>
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/extensions/context_extensions.dart';
 import '../../models/document_asset.dart';
@@ -32,7 +31,7 @@ class LifecycleWorkflowSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Choose how you want to interact with this document.',
+            'Duplicate this design for a new project or fix typos instantly.',
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
@@ -40,16 +39,25 @@ class LifecycleWorkflowSheet extends ConsumerWidget {
           
           _WorkflowCard(
             title: 'Use for New Document',
-            subtitle: 'Duplicate this layout for a new client or project. 0 credit cost.',
+            subtitle: 'Clone this layout for a new client. Zero credit cost.',
             icon: Icons.copy_rounded,
             onTap: () => _handleDuplicate(context),
           ),
           const SizedBox(height: 16),
           _WorkflowCard(
-            title: 'Modify Current Document',
-            subtitle: 'Update text, dates, or remodel the entire design.',
-            icon: Icons.edit_document,
-            onTap: () => _showModifyOptions(context),
+            title: 'Quick Local Edit',
+            subtitle: asset.status == DocumentStatus.signed 
+                ? 'Editing is disabled for signed documents.' 
+                : 'Update names, dates, or totals locally. Zero credit cost.',
+            icon: Icons.bolt_rounded,
+            onTap: asset.status == DocumentStatus.signed ? (){} : () async {
+              final result = await showModalBottomSheet<DocumentAsset>(
+                context: context,
+                isScrollControlled: true,
+                builder: (ctx) => SmartFieldEditorSheet(asset: asset),
+              );
+              if (context.mounted) Navigator.pop(context, result);
+            },
           ),
           const SizedBox(height: 16),
         ],
@@ -63,71 +71,13 @@ class LifecycleWorkflowSheet extends ConsumerWidget {
     
     // 2. Open Smart Field Editor for the new asset
     if (context.mounted) {
-      Navigator.pop(context); // Close selection sheet
-      showModalBottomSheet(
+      final result = await showModalBottomSheet<DocumentAsset>(
         context: context,
         isScrollControlled: true,
         builder: (ctx) => SmartFieldEditorSheet(asset: newAsset, isNew: true),
       );
+      if (context.mounted) Navigator.pop(context, result ?? newAsset);
     }
-  }
-
-  void _showModifyOptions(BuildContext context) {
-    Navigator.pop(context);
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => _ModifyOptionsSheet(asset: asset),
-    );
-  }
-}
-
-class _ModifyOptionsSheet extends StatelessWidget {
-  const _ModifyOptionsSheet({required this.asset});
-  final DocumentAsset asset;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-      decoration: BoxDecoration(
-        color: c.card,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('Modify Document', style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 24),
-          _WorkflowCard(
-            title: 'Quick Local Edit',
-            subtitle: 'Edit names, dates, and totals locally. 0 credit cost.',
-            icon: Icons.bolt_rounded,
-            onTap: () {
-              Navigator.pop(context);
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (ctx) => SmartFieldEditorSheet(asset: asset),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          _WorkflowCard(
-            title: 'Deep AI Remodel',
-            subtitle: 'Structural changes or design updates via AI. 5 credit cost.',
-            icon: Icons.auto_awesome,
-            onTap: () {
-              // Path to Refinement Screen
-              Navigator.pop(context);
-              context.push('/portfolio/${asset.portfolioId}/doc/${asset.id}/refine', extra: asset);
-            },
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
-    );
   }
 }
 

@@ -15,6 +15,8 @@ enum DocumentType {
   other,
 }
 
+enum DocumentStatus { draft, signed }
+
 enum AssetPipeline { structural, graphical }
 
 @freezed
@@ -49,6 +51,12 @@ abstract class DocumentAsset with _$DocumentAsset {
     String? clientName,
     @Default(false) bool isScanned,
     @Default({}) Map<String, dynamic> metadata,
+
+    // E-Signature
+    @Default(DocumentStatus.draft) DocumentStatus status,
+    String? signatureBase64,
+    DateTime? signedAt,
+    Map<String, dynamic>? signatureMetadata,
   }) = _DocumentAsset;
 
   const DocumentAsset._();
@@ -67,6 +75,9 @@ abstract class DocumentAsset with _$DocumentAsset {
       'updatedAt': data['updatedAt'] is Timestamp
           ? (data['updatedAt'] as Timestamp).toDate().toIso8601String()
           : data['updatedAt'],
+      'signedAt': data['signedAt'] is Timestamp
+          ? (data['signedAt'] as Timestamp).toDate().toIso8601String()
+          : data['signedAt'],
     });
   }
 
@@ -76,6 +87,7 @@ abstract class DocumentAsset with _$DocumentAsset {
       ...json,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      'signedAt': signedAt != null ? Timestamp.fromDate(signedAt!) : null,
     }..remove('id')..remove('localCachePath')..remove('isCached');
   }
 

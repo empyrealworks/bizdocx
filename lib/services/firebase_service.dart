@@ -436,6 +436,35 @@ class FirebaseService {
     return updated;
   }
 
+  Future<DocumentAsset> duplicateDocumentAsset(DocumentAsset original) async {
+    final newId = _uuid.v4();
+    final now = DateTime.now();
+    final duplicated = original.copyWith(
+      id: newId,
+      createdAt: now,
+      updatedAt: now,
+      revisionCount: 0,
+      title: '${original.title} (Copy)',
+      isCached: false,
+      localCachePath: null,
+      status: DocumentStatus.draft,
+      signatureBase64: null,
+      signedAt: null,
+      signatureMetadata: null,
+    );
+
+    await saveDocumentAsset(duplicated);
+    
+    // Also duplicate the version history (v1)
+    await saveDocumentVersion(
+      asset: duplicated,
+      versionNumber: 1,
+      label: 'Original (Duplicated)',
+    );
+
+    return duplicated;
+  }
+
   Future<void> deleteDocumentAsset(DocumentAsset asset) async {
     final uid = currentUid;
     await _db

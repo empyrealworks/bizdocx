@@ -7,6 +7,10 @@ AI-powered business document hub. Generate professional invoices, proposals, log
 - **Portfolios**: Manage separate identities for each of your businesses.
 - **Paper-to-Digital Bridge**: Scan physical documents using multimodal AI (**Gemini 3.1 Pro**) to extract data and digitize them with your brand's styling.
 - **Autonomous Organization**: AI automatically categorizes and routes documents into type-specific folders (Invoices, Proposals, etc.).
+- **Smart Fields & Layout Preservation**: High-frequency variables are tokenized in the HTML, allowing for instant local edits without breaking design or consuming AI credits.
+- **Secure E-Signatures**: Sign contracts and proposals with built-in, hand-drawn e-signatures. Finalize and lock documents instantly for an official audit trail.
+- **Guided Screen Tutorials**: Step-by-step interactive walkthroughs using `showcaseview` to help new users master the portfolio and document viewer screens.
+- **Document Lifecycle**: Duplicate existing layouts for new clients (Path A) or perform quick local edits (Path B) to save time and credits.
 - **Manual Mode Toggle**: Take full administrative control over your filing cabinet with a dedicated manual organization mode.
 - **Batch Productivity**: Multi-select documents to move, delete, or export in bulk.
 - **AI Generation**: Powered by Gemini 3.1 Pro for structural documents and Imagen 4.0 for graphical assets.

@@ -7,9 +7,12 @@ import '../../../providers/onboarding_provider.dart';
 import 'onboarding_components.dart';
 import 'pages/welcome_slide.dart';
 import 'pages/portfolios_slide.dart';
+import 'pages/scan_digitize_slide.dart';
 import 'pages/generation_slide.dart';
+import 'pages/autonomous_filing_slide.dart';
 import 'pages/assets_slide.dart';
 import 'pages/refinement_slide.dart';
+import 'pages/smart_fields_slide.dart';
 import 'pages/get_started_slide.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -26,7 +29,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   late final AnimationController _slideCtrl;
   int _page = 0;
 
-  static const _totalPages = 6;
+  static const _totalPages = 9;
 
   @override
   void initState() {
@@ -94,9 +97,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
               children: [
                 WelcomeSlide(anim: _slideCtrl),
                 PortfoliosSlide(anim: _slideCtrl),
+                ScanDigitizeSlide(anim: _slideCtrl),
                 GenerationSlide(anim: _slideCtrl),
+                AutonomousFilingSlide(anim: _slideCtrl),
                 AssetsSlide(anim: _slideCtrl),
                 RefinementSlide(anim: _slideCtrl),
+                SmartFieldsSlide(anim: _slideCtrl),
                 GetStartedSlide(anim: _slideCtrl, onTap: _complete),
               ],
             ),

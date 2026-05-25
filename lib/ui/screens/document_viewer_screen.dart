@@ -130,9 +130,10 @@ class _DocumentViewerScreenState
           pid: _asset.portfolioId,
           docId: _asset.id,
         );
+        final safeTitle = _asset.title.replaceAll(RegExp(r'[/\\]'), '-');
         await Printing.sharePdf(
           bytes: await file.readAsBytes(),
-          filename: '${_asset.title}.pdf',
+          filename: '$safeTitle.pdf',
         );
       } catch (e) {
         if (mounted) {
@@ -147,9 +148,10 @@ class _DocumentViewerScreenState
     } else if (_asset.isGraphical) {
       ref.read(offlineFileProvider(_asset)).whenData((file) async {
         if (file != null) {
+          final safeTitle = _asset.title.replaceAll(RegExp(r'[/\\]'), '-');
           await Printing.sharePdf(
             bytes: await file.readAsBytes(),
-            filename: '${_asset.title}.png',
+            filename: '$safeTitle.png',
           );
         }
       });

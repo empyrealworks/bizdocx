@@ -48,6 +48,7 @@ class AiGenerationService {
     required UserTier tier,
     DocumentTemplate? template,
     String? orientation,
+    PaperSize paperSize = PaperSize.a4,
   }) async {
     final model = _getTextModel(tier);
     final prompt = _buildStructuralPrompt(
@@ -56,6 +57,7 @@ class AiGenerationService {
       context: context,
       template: template,
       orientation: orientation,
+      paperSize: paperSize,
     );
     debugPrint('[AI] Structural prompt length: ${prompt.length} using $model');
     return _callGenerateContent(model, prompt);
@@ -68,9 +70,14 @@ class AiGenerationService {
     required DocumentType documentType,
     required UserContext context,
     required UserTier tier,
+    PaperSize paperSize = PaperSize.a4,
   }) async {
     final model = _getTextModel(tier);
     final logoInstruction = _logoInstruction(context, documentType);
+
+    final continuousInstruction = paperSize == PaperSize.continuous
+        ? '\nCONTINUOUS MODE MANDATE: This document must be a single, long, flowing page. AVOID all page-break CSS properties (like page-break-after, page-break-inside). The content should NEVER be split into separate pages. Ensure the container grows with its content.\n'
+        : '';
 
     final prompt = '''
 You are an expert business document designer. A user wants to refine an existing HTML document.
@@ -88,7 +95,7 @@ BUSINESS CONTEXT:
 - Country: ${context.country}
 ${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
 DOCUMENT TYPE: ${documentType.name}
-
+$continuousInstruction
 REFINEMENT REQUEST: "$refinementPrompt"
 
 EXISTING DOCUMENT HTML:
@@ -393,12 +400,14 @@ Do NOT use a placeholder — use the real URL above.''';
     required UserContext context,
     DocumentTemplate? template,
     String? orientation,
+    PaperSize paperSize = PaperSize.a4,
   }) {
     final logoInstruction = _logoInstruction(context, documentType);
     
-    // Default to A4 Portrait (96 DPI)
-    String width = '794px';
-    String minHeight = '1123px';
+    // Calculate Dimensions (at 96 DPI)
+    String width;
+    String minHeight;
+    String overflow = 'hidden';
     bool isLandscape = orientation == 'landscape';
 
     // Letterheads are ALWAYS Portrait A4
@@ -406,14 +415,41 @@ Do NOT use a placeholder — use the real URL above.''';
       isLandscape = false;
     }
 
-    // Handle A4 Landscape
-    if (isLandscape && (
-        documentType == DocumentType.invoice ||
-        documentType == DocumentType.proposal ||
-        documentType == DocumentType.contract ||
-        documentType == DocumentType.other)) {
-      width = '1123px';
-      minHeight = '794px';
+    switch (paperSize) {
+      case PaperSize.a3:
+        width = isLandscape ? '1587px' : '1123px';
+        minHeight = isLandscape ? '1123px' : '1587px';
+        break;
+      case PaperSize.a5:
+        width = isLandscape ? '794px' : '559px';
+        minHeight = isLandscape ? '559px' : '794px';
+        break;
+      case PaperSize.letter:
+        width = isLandscape ? '1056px' : '816px';
+        minHeight = isLandscape ? '816px' : '1056px';
+        break;
+      case PaperSize.legal:
+        width = isLandscape ? '1344px' : '816px';
+        minHeight = isLandscape ? '816px' : '1344px';
+        break;
+      case PaperSize.executive:
+        width = isLandscape ? '1008px' : '696px';
+        minHeight = isLandscape ? '696px' : '1008px';
+        break;
+      case PaperSize.tabloid:
+        width = isLandscape ? '1632px' : '1056px';
+        minHeight = isLandscape ? '1056px' : '1632px';
+        break;
+      case PaperSize.continuous:
+        width = '794px'; // Maintain A4 width for consistency
+        minHeight = 'auto'; // Allow single-page flow
+        overflow = 'visible';
+        break;
+      case PaperSize.a4:
+      default:
+        width = isLandscape ? '1123px' : '794px';
+        minHeight = isLandscape ? '794px' : '1123px';
+        break;
     }
 
     // Business Cards have special small dimensions
@@ -437,6 +473,10 @@ Do NOT use a placeholder — use the real URL above.''';
         ? '\nSELECTED TEMPLATE: ${template.name}\nSTYLE INSTRUCTIONS: ${template.promptInstructions}\n' 
         : '';
 
+    final continuousInstruction = paperSize == PaperSize.continuous
+        ? '\nCONTINUOUS MODE MANDATE: This document must be a single, long, flowing page. AVOID all page-break CSS properties (like page-break-after, page-break-inside). The content should NEVER be split into separate pages. Ensure the container grows with its content.\n'
+        : '';
+
     return '''
 You are an expert business designer and PDF-optimized HTML engineer.
 
@@ -455,6 +495,7 @@ BUSINESS CONTEXT:
 ${logoInstruction.isNotEmpty ? '\n$logoInstruction\n' : ''}
 DOCUMENT TYPE: ${documentType.name}
 $templateInstruction
+$continuousInstruction
 USER REQUEST: $userPrompt
 
 SMART FIELDS MANDATE:
@@ -475,7 +516,7 @@ Example: Total Due: <span data-smart-field="total_amount">\$1,200.00</span>
 
 TECHNICAL REQUIREMENTS FOR FIXED DIMENSIONS:
 1. Output ONLY raw HTML with 100% inline CSS.
-2. FIXED PAGE DIMENSIONS: All content must be wrapped in a main container div with class "page-container" and exactly "width: $width; min-height: $minHeight; padding: ${documentType == DocumentType.businessCard ? '20px' : '40px'}; margin: 0 auto; background: white; box-sizing: border-box; position: relative; overflow: hidden;". 
+2. FIXED PAGE DIMENSIONS: All content must be wrapped in a main container div with class "page-container" and exactly "width: $width; min-height: $minHeight; padding: ${documentType == DocumentType.businessCard ? '20px' : '40px'}; margin: 0 auto; background: white; box-sizing: border-box; position: relative; overflow: $overflow;".
 3. NON-RESPONSIVE DESIGN: The layout MUST be fixed at the dimensions above. Do NOT use percentage widths for main structures; use pixels or fixed ratios. This ensures a consistent look when printed or exported.
 4. Use Flexbox or HTML Tables for layout. NEVER use 'display: grid'.
 5. Design: clean, minimal, premium. Ample white space.

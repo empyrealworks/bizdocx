@@ -32,6 +32,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
   DocumentTemplate? _selectedTemplate;
   String _selectedOrientation = 'portrait';
   String _selectedAspectRatio = '1:1';
+  PaperSize _selectedPaperSize = PaperSize.a4;
 
   @override
   void initState() {
@@ -88,6 +89,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
       template: _selectedTemplate,
       orientation: _selectedOrientation,
       aspectRatio: _selectedAspectRatio,
+      paperSize: _selectedPaperSize,
     );
 
     if (asset != null && mounted) {
@@ -187,6 +189,16 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                   _OrientationPicker(
                     selected: _selectedOrientation,
                     onChanged: (o) => setState(() => _selectedOrientation = o),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
+                if (_selectedPipeline == AssetPipeline.structural) ...[
+                  _SectionLabel('Document Format'),
+                  const SizedBox(height: 12),
+                  _PaperSizePicker(
+                    selected: _selectedPaperSize,
+                    onChanged: (s) => setState(() => _selectedPaperSize = s),
                   ),
                   const SizedBox(height: 24),
                 ],
@@ -465,6 +477,56 @@ class _OrientationPicker extends StatelessWidget {
         );
       }).toList(),
     );
+  }
+}
+
+class _PaperSizePicker extends StatelessWidget {
+  const _PaperSizePicker({required this.selected, required this.onChanged});
+  final PaperSize selected;
+  final ValueChanged<PaperSize> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: PaperSize.values.map((s) {
+        final active = selected == s;
+        return GestureDetector(
+          onTap: () => onChanged(s),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: active ? c.filledButtonBg : c.chipFill,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: active ? c.filledButtonBg : c.border),
+            ),
+            child: Text(
+              _label(s),
+              style: TextStyle(
+                color: active ? c.filledButtonFg : c.textBody,
+                fontSize: 12,
+                fontWeight: active ? FontWeight.bold : FontWeight.w500,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  String _label(PaperSize s) {
+    switch (s) {
+      case PaperSize.a4: return 'A4 Standard';
+      case PaperSize.a3: return 'A3 Large';
+      case PaperSize.a5: return 'A5 Small';
+      case PaperSize.letter: return 'US Letter';
+      case PaperSize.legal: return 'US Legal';
+      case PaperSize.executive: return 'Executive';
+      case PaperSize.tabloid: return 'Tabloid';
+      case PaperSize.continuous: return 'Continuous (Long)';
+    }
   }
 }
 

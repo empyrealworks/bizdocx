@@ -17,6 +17,17 @@ enum DocumentType {
 
 enum DocumentStatus { draft, signed }
 
+enum PaperSize {
+  a4,
+  a3,
+  a5,
+  letter,
+  legal,
+  executive,
+  tabloid,
+  continuous,
+}
+
 enum AssetPipeline { structural, graphical }
 
 @freezed
@@ -42,6 +53,7 @@ abstract class DocumentAsset with _$DocumentAsset {
     String? templateId,
     String? aspectRatio,
     String? orientation,
+    @Default(PaperSize.a4) PaperSize paperSize,
 
     // Revision tracking for credit logic
     @Default(0) int revisionCount,

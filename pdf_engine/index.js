@@ -37,17 +37,37 @@ app.post('/generate-pdf', async (req, res) => {
     // Set content and wait for network to be idle (useful if there are external images/fonts)
     await page.setContent(html, { waitUntil: 'networkidle' });
 
-    // Generate PDF with background colors enabled
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
+    // Generate PDF options
+    const paperSize = req.body.paperSize || 'a4';
+    const pdfOptions = {
       printBackground: true,
-      margin: {
-        top: '0px',
-        right: '0px',
-        bottom: '0px',
-        left: '0px'
-      }
-    });
+      margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' }
+    };
+
+    if (paperSize === 'continuous') {
+      // For continuous mode, calculate the content height
+      const contentHeight = await page.evaluate(() => {
+        const body = document.body;
+        const html = document.documentElement;
+        return Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
+      });
+      pdfOptions.width = '794px'; // Maintain A4 width
+      pdfOptions.height = `${contentHeight + 40}px`; // Add a small buffer
+    } else {
+      // Map frontend enum to Playwright formats
+      const formats = {
+        'a4': 'A4',
+        'a3': 'A3',
+        'a5': 'A5',
+        'letter': 'Letter',
+        'legal': 'Legal',
+        'executive': 'Executive',
+        'tabloid': 'Tabloid'
+      };
+      pdfOptions.format = formats[paperSize] || 'A4';
+    }
+
+    const pdfBuffer = await page.pdf(pdfOptions);
 
     res.contentType('application/pdf');
     res.send(pdfBuffer);

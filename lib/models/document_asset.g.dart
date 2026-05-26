@@ -26,6 +26,9 @@ _DocumentAsset _$DocumentAssetFromJson(Map<String, dynamic> json) =>
       templateId: json['templateId'] as String?,
       aspectRatio: json['aspectRatio'] as String?,
       orientation: json['orientation'] as String?,
+      paperSize:
+          $enumDecodeNullable(_$PaperSizeEnumMap, json['paperSize']) ??
+          PaperSize.a4,
       revisionCount: (json['revisionCount'] as num?)?.toInt() ?? 0,
       folderId: json['folderId'] as String?,
       clientName: json['clientName'] as String?,
@@ -59,6 +62,7 @@ Map<String, dynamic> _$DocumentAssetToJson(_DocumentAsset instance) =>
       'templateId': instance.templateId,
       'aspectRatio': instance.aspectRatio,
       'orientation': instance.orientation,
+      'paperSize': _$PaperSizeEnumMap[instance.paperSize]!,
       'revisionCount': instance.revisionCount,
       'folderId': instance.folderId,
       'clientName': instance.clientName,
@@ -84,6 +88,17 @@ const _$DocumentTypeEnumMap = {
 const _$AssetPipelineEnumMap = {
   AssetPipeline.structural: 'structural',
   AssetPipeline.graphical: 'graphical',
+};
+
+const _$PaperSizeEnumMap = {
+  PaperSize.a4: 'a4',
+  PaperSize.a3: 'a3',
+  PaperSize.a5: 'a5',
+  PaperSize.letter: 'letter',
+  PaperSize.legal: 'legal',
+  PaperSize.executive: 'executive',
+  PaperSize.tabloid: 'tabloid',
+  PaperSize.continuous: 'continuous',
 };
 
 const _$DocumentStatusEnumMap = {

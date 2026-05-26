@@ -93,6 +93,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     DocumentTemplate? template,
     String? aspectRatio,
     String? orientation,
+    PaperSize paperSize = PaperSize.a4,
   }) async {
     final fb = FirebaseService.instance;
     final ai = AiGenerationService.instance;
@@ -130,6 +131,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
           tier: profile.tier,
           template: template,
           orientation: orientation,
+          paperSize: paperSize,
         );
       } else {
         return await _generateGraphical(
@@ -167,6 +169,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
     required UserTier tier,
     DocumentTemplate? template,
     String? orientation,
+    PaperSize paperSize = PaperSize.a4,
   }) async {
     final html = await ai.generateStructuralDocument(
       userPrompt: prompt,
@@ -175,6 +178,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       template: template,
       orientation: orientation,
       tier: tier,
+      paperSize: paperSize,
     );
     _checkCancelled();
 
@@ -194,6 +198,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
       createdAt: DateTime.now(),
       templateId: template?.id,
       orientation: orientation,
+      paperSize: paperSize,
       revisionCount: 0,
     );
 
@@ -369,6 +374,7 @@ class DocumentGenerationNotifier extends Notifier<GenerationState> {
         documentType: existingAsset.type,
         context: context,
         tier: profile.tier,
+        paperSize: existingAsset.paperSize,
       );
       _checkCancelled();
 

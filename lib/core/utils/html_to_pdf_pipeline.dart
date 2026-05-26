@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../env/env.dart';
+import '../../models/document_asset.dart';
 import '../../models/user_profile.dart';
 import '../../services/firebase_service.dart';
 import '../../services/local_cache_service.dart';
@@ -23,8 +24,9 @@ class HtmlToPdfPipeline {
     required String uid,
     required String pid,
     required String docId,
+    PaperSize paperSize = PaperSize.a4,
   }) async {
-    debugPrint('[Pipeline] Converting HTML → PDF via Remote Engine for doc: $docId');
+    debugPrint('[Pipeline] Converting HTML → PDF via Remote Engine for doc: $docId (Size: $paperSize)');
 
     if (html.trim().isEmpty) throw Exception('Empty HTML content');
 
@@ -47,7 +49,10 @@ class HtmlToPdfPipeline {
       final response = await http.post(
         Uri.parse(_pdfEngineUrl),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'html': processedHtml}),
+        body: jsonEncode({
+          'html': processedHtml,
+          'paperSize': paperSize.name,
+        }),
       );
 
       if (response.statusCode != 200) {

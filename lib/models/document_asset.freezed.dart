@@ -21,7 +21,7 @@ mixin _$DocumentAsset {
  String? get localCachePath;// absolute path on device
  String? get prompt;// the original user prompt
  bool get isCached; DateTime get createdAt; DateTime? get updatedAt;// Template & Formatting
- String? get templateId; String? get aspectRatio; String? get orientation;// Revision tracking for credit logic
+ String? get templateId; String? get aspectRatio; String? get orientation; PaperSize get paperSize;// Revision tracking for credit logic
  int get revisionCount;// Organization & Scanning
  String? get folderId; String? get clientName; bool get isScanned; Map<String, dynamic> get metadata;// E-Signature
  DocumentStatus get status; String? get signatureBase64; DateTime? get signedAt; Map<String, dynamic>? get signatureMetadata;
@@ -37,16 +37,16 @@ $DocumentAssetCopyWith<DocumentAsset> get copyWith => _$DocumentAssetCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DocumentAsset&&(identical(other.id, id) || other.id == id)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.title, title) || other.title == title)&&(identical(other.type, type) || other.type == type)&&(identical(other.pipeline, pipeline) || other.pipeline == pipeline)&&(identical(other.htmlContent, htmlContent) || other.htmlContent == htmlContent)&&(identical(other.storageUrl, storageUrl) || other.storageUrl == storageUrl)&&(identical(other.localCachePath, localCachePath) || other.localCachePath == localCachePath)&&(identical(other.prompt, prompt) || other.prompt == prompt)&&(identical(other.isCached, isCached) || other.isCached == isCached)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.aspectRatio, aspectRatio) || other.aspectRatio == aspectRatio)&&(identical(other.orientation, orientation) || other.orientation == orientation)&&(identical(other.revisionCount, revisionCount) || other.revisionCount == revisionCount)&&(identical(other.folderId, folderId) || other.folderId == folderId)&&(identical(other.clientName, clientName) || other.clientName == clientName)&&(identical(other.isScanned, isScanned) || other.isScanned == isScanned)&&const DeepCollectionEquality().equals(other.metadata, metadata)&&(identical(other.status, status) || other.status == status)&&(identical(other.signatureBase64, signatureBase64) || other.signatureBase64 == signatureBase64)&&(identical(other.signedAt, signedAt) || other.signedAt == signedAt)&&const DeepCollectionEquality().equals(other.signatureMetadata, signatureMetadata));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DocumentAsset&&(identical(other.id, id) || other.id == id)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.title, title) || other.title == title)&&(identical(other.type, type) || other.type == type)&&(identical(other.pipeline, pipeline) || other.pipeline == pipeline)&&(identical(other.htmlContent, htmlContent) || other.htmlContent == htmlContent)&&(identical(other.storageUrl, storageUrl) || other.storageUrl == storageUrl)&&(identical(other.localCachePath, localCachePath) || other.localCachePath == localCachePath)&&(identical(other.prompt, prompt) || other.prompt == prompt)&&(identical(other.isCached, isCached) || other.isCached == isCached)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.aspectRatio, aspectRatio) || other.aspectRatio == aspectRatio)&&(identical(other.orientation, orientation) || other.orientation == orientation)&&(identical(other.paperSize, paperSize) || other.paperSize == paperSize)&&(identical(other.revisionCount, revisionCount) || other.revisionCount == revisionCount)&&(identical(other.folderId, folderId) || other.folderId == folderId)&&(identical(other.clientName, clientName) || other.clientName == clientName)&&(identical(other.isScanned, isScanned) || other.isScanned == isScanned)&&const DeepCollectionEquality().equals(other.metadata, metadata)&&(identical(other.status, status) || other.status == status)&&(identical(other.signatureBase64, signatureBase64) || other.signatureBase64 == signatureBase64)&&(identical(other.signedAt, signedAt) || other.signedAt == signedAt)&&const DeepCollectionEquality().equals(other.signatureMetadata, signatureMetadata));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,portfolioId,userId,title,type,pipeline,htmlContent,storageUrl,localCachePath,prompt,isCached,createdAt,updatedAt,templateId,aspectRatio,orientation,revisionCount,folderId,clientName,isScanned,const DeepCollectionEquality().hash(metadata),status,signatureBase64,signedAt,const DeepCollectionEquality().hash(signatureMetadata)]);
+int get hashCode => Object.hashAll([runtimeType,id,portfolioId,userId,title,type,pipeline,htmlContent,storageUrl,localCachePath,prompt,isCached,createdAt,updatedAt,templateId,aspectRatio,orientation,paperSize,revisionCount,folderId,clientName,isScanned,const DeepCollectionEquality().hash(metadata),status,signatureBase64,signedAt,const DeepCollectionEquality().hash(signatureMetadata)]);
 
 @override
 String toString() {
-  return 'DocumentAsset(id: $id, portfolioId: $portfolioId, userId: $userId, title: $title, type: $type, pipeline: $pipeline, htmlContent: $htmlContent, storageUrl: $storageUrl, localCachePath: $localCachePath, prompt: $prompt, isCached: $isCached, createdAt: $createdAt, updatedAt: $updatedAt, templateId: $templateId, aspectRatio: $aspectRatio, orientation: $orientation, revisionCount: $revisionCount, folderId: $folderId, clientName: $clientName, isScanned: $isScanned, metadata: $metadata, status: $status, signatureBase64: $signatureBase64, signedAt: $signedAt, signatureMetadata: $signatureMetadata)';
+  return 'DocumentAsset(id: $id, portfolioId: $portfolioId, userId: $userId, title: $title, type: $type, pipeline: $pipeline, htmlContent: $htmlContent, storageUrl: $storageUrl, localCachePath: $localCachePath, prompt: $prompt, isCached: $isCached, createdAt: $createdAt, updatedAt: $updatedAt, templateId: $templateId, aspectRatio: $aspectRatio, orientation: $orientation, paperSize: $paperSize, revisionCount: $revisionCount, folderId: $folderId, clientName: $clientName, isScanned: $isScanned, metadata: $metadata, status: $status, signatureBase64: $signatureBase64, signedAt: $signedAt, signatureMetadata: $signatureMetadata)';
 }
 
 
@@ -57,7 +57,7 @@ abstract mixin class $DocumentAssetCopyWith<$Res>  {
   factory $DocumentAssetCopyWith(DocumentAsset value, $Res Function(DocumentAsset) _then) = _$DocumentAssetCopyWithImpl;
 @useResult
 $Res call({
- String id, String portfolioId, String userId, String title, DocumentType type, AssetPipeline pipeline, String? htmlContent, String? storageUrl, String? localCachePath, String? prompt, bool isCached, DateTime createdAt, DateTime? updatedAt, String? templateId, String? aspectRatio, String? orientation, int revisionCount, String? folderId, String? clientName, bool isScanned, Map<String, dynamic> metadata, DocumentStatus status, String? signatureBase64, DateTime? signedAt, Map<String, dynamic>? signatureMetadata
+ String id, String portfolioId, String userId, String title, DocumentType type, AssetPipeline pipeline, String? htmlContent, String? storageUrl, String? localCachePath, String? prompt, bool isCached, DateTime createdAt, DateTime? updatedAt, String? templateId, String? aspectRatio, String? orientation, PaperSize paperSize, int revisionCount, String? folderId, String? clientName, bool isScanned, Map<String, dynamic> metadata, DocumentStatus status, String? signatureBase64, DateTime? signedAt, Map<String, dynamic>? signatureMetadata
 });
 
 
@@ -74,7 +74,7 @@ class _$DocumentAssetCopyWithImpl<$Res>
 
 /// Create a copy of DocumentAsset
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? portfolioId = null,Object? userId = null,Object? title = null,Object? type = null,Object? pipeline = null,Object? htmlContent = freezed,Object? storageUrl = freezed,Object? localCachePath = freezed,Object? prompt = freezed,Object? isCached = null,Object? createdAt = null,Object? updatedAt = freezed,Object? templateId = freezed,Object? aspectRatio = freezed,Object? orientation = freezed,Object? revisionCount = null,Object? folderId = freezed,Object? clientName = freezed,Object? isScanned = null,Object? metadata = null,Object? status = null,Object? signatureBase64 = freezed,Object? signedAt = freezed,Object? signatureMetadata = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? portfolioId = null,Object? userId = null,Object? title = null,Object? type = null,Object? pipeline = null,Object? htmlContent = freezed,Object? storageUrl = freezed,Object? localCachePath = freezed,Object? prompt = freezed,Object? isCached = null,Object? createdAt = null,Object? updatedAt = freezed,Object? templateId = freezed,Object? aspectRatio = freezed,Object? orientation = freezed,Object? paperSize = null,Object? revisionCount = null,Object? folderId = freezed,Object? clientName = freezed,Object? isScanned = null,Object? metadata = null,Object? status = null,Object? signatureBase64 = freezed,Object? signedAt = freezed,Object? signatureMetadata = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,portfolioId: null == portfolioId ? _self.portfolioId : portfolioId // ignore: cast_nullable_to_non_nullable
@@ -92,7 +92,8 @@ as DateTime,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ign
 as DateTime?,templateId: freezed == templateId ? _self.templateId : templateId // ignore: cast_nullable_to_non_nullable
 as String?,aspectRatio: freezed == aspectRatio ? _self.aspectRatio : aspectRatio // ignore: cast_nullable_to_non_nullable
 as String?,orientation: freezed == orientation ? _self.orientation : orientation // ignore: cast_nullable_to_non_nullable
-as String?,revisionCount: null == revisionCount ? _self.revisionCount : revisionCount // ignore: cast_nullable_to_non_nullable
+as String?,paperSize: null == paperSize ? _self.paperSize : paperSize // ignore: cast_nullable_to_non_nullable
+as PaperSize,revisionCount: null == revisionCount ? _self.revisionCount : revisionCount // ignore: cast_nullable_to_non_nullable
 as int,folderId: freezed == folderId ? _self.folderId : folderId // ignore: cast_nullable_to_non_nullable
 as String?,clientName: freezed == clientName ? _self.clientName : clientName // ignore: cast_nullable_to_non_nullable
 as String?,isScanned: null == isScanned ? _self.isScanned : isScanned // ignore: cast_nullable_to_non_nullable
@@ -186,10 +187,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  int revisionCount,  String? folderId,  String? clientName,  bool isScanned,  Map<String, dynamic> metadata,  DocumentStatus status,  String? signatureBase64,  DateTime? signedAt,  Map<String, dynamic>? signatureMetadata)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  PaperSize paperSize,  int revisionCount,  String? folderId,  String? clientName,  bool isScanned,  Map<String, dynamic> metadata,  DocumentStatus status,  String? signatureBase64,  DateTime? signedAt,  Map<String, dynamic>? signatureMetadata)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DocumentAsset() when $default != null:
-return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.revisionCount,_that.folderId,_that.clientName,_that.isScanned,_that.metadata,_that.status,_that.signatureBase64,_that.signedAt,_that.signatureMetadata);case _:
+return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.paperSize,_that.revisionCount,_that.folderId,_that.clientName,_that.isScanned,_that.metadata,_that.status,_that.signatureBase64,_that.signedAt,_that.signatureMetadata);case _:
   return orElse();
 
 }
@@ -207,10 +208,10 @@ return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  int revisionCount,  String? folderId,  String? clientName,  bool isScanned,  Map<String, dynamic> metadata,  DocumentStatus status,  String? signatureBase64,  DateTime? signedAt,  Map<String, dynamic>? signatureMetadata)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  PaperSize paperSize,  int revisionCount,  String? folderId,  String? clientName,  bool isScanned,  Map<String, dynamic> metadata,  DocumentStatus status,  String? signatureBase64,  DateTime? signedAt,  Map<String, dynamic>? signatureMetadata)  $default,) {final _that = this;
 switch (_that) {
 case _DocumentAsset():
-return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.revisionCount,_that.folderId,_that.clientName,_that.isScanned,_that.metadata,_that.status,_that.signatureBase64,_that.signedAt,_that.signatureMetadata);case _:
+return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.paperSize,_that.revisionCount,_that.folderId,_that.clientName,_that.isScanned,_that.metadata,_that.status,_that.signatureBase64,_that.signedAt,_that.signatureMetadata);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -227,10 +228,10 @@ return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  int revisionCount,  String? folderId,  String? clientName,  bool isScanned,  Map<String, dynamic> metadata,  DocumentStatus status,  String? signatureBase64,  DateTime? signedAt,  Map<String, dynamic>? signatureMetadata)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String portfolioId,  String userId,  String title,  DocumentType type,  AssetPipeline pipeline,  String? htmlContent,  String? storageUrl,  String? localCachePath,  String? prompt,  bool isCached,  DateTime createdAt,  DateTime? updatedAt,  String? templateId,  String? aspectRatio,  String? orientation,  PaperSize paperSize,  int revisionCount,  String? folderId,  String? clientName,  bool isScanned,  Map<String, dynamic> metadata,  DocumentStatus status,  String? signatureBase64,  DateTime? signedAt,  Map<String, dynamic>? signatureMetadata)?  $default,) {final _that = this;
 switch (_that) {
 case _DocumentAsset() when $default != null:
-return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.revisionCount,_that.folderId,_that.clientName,_that.isScanned,_that.metadata,_that.status,_that.signatureBase64,_that.signedAt,_that.signatureMetadata);case _:
+return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_that.pipeline,_that.htmlContent,_that.storageUrl,_that.localCachePath,_that.prompt,_that.isCached,_that.createdAt,_that.updatedAt,_that.templateId,_that.aspectRatio,_that.orientation,_that.paperSize,_that.revisionCount,_that.folderId,_that.clientName,_that.isScanned,_that.metadata,_that.status,_that.signatureBase64,_that.signedAt,_that.signatureMetadata);case _:
   return null;
 
 }
@@ -242,7 +243,7 @@ return $default(_that.id,_that.portfolioId,_that.userId,_that.title,_that.type,_
 @JsonSerializable()
 
 class _DocumentAsset extends DocumentAsset {
-  const _DocumentAsset({required this.id, required this.portfolioId, required this.userId, required this.title, required this.type, required this.pipeline, this.htmlContent, this.storageUrl, this.localCachePath, this.prompt, this.isCached = false, required this.createdAt, this.updatedAt, this.templateId, this.aspectRatio, this.orientation, this.revisionCount = 0, this.folderId, this.clientName, this.isScanned = false, final  Map<String, dynamic> metadata = const {}, this.status = DocumentStatus.draft, this.signatureBase64, this.signedAt, final  Map<String, dynamic>? signatureMetadata}): _metadata = metadata,_signatureMetadata = signatureMetadata,super._();
+  const _DocumentAsset({required this.id, required this.portfolioId, required this.userId, required this.title, required this.type, required this.pipeline, this.htmlContent, this.storageUrl, this.localCachePath, this.prompt, this.isCached = false, required this.createdAt, this.updatedAt, this.templateId, this.aspectRatio, this.orientation, this.paperSize = PaperSize.a4, this.revisionCount = 0, this.folderId, this.clientName, this.isScanned = false, final  Map<String, dynamic> metadata = const {}, this.status = DocumentStatus.draft, this.signatureBase64, this.signedAt, final  Map<String, dynamic>? signatureMetadata}): _metadata = metadata,_signatureMetadata = signatureMetadata,super._();
   factory _DocumentAsset.fromJson(Map<String, dynamic> json) => _$DocumentAssetFromJson(json);
 
 @override final  String id;
@@ -267,6 +268,7 @@ class _DocumentAsset extends DocumentAsset {
 @override final  String? templateId;
 @override final  String? aspectRatio;
 @override final  String? orientation;
+@override@JsonKey() final  PaperSize paperSize;
 // Revision tracking for credit logic
 @override@JsonKey() final  int revisionCount;
 // Organization & Scanning
@@ -307,16 +309,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DocumentAsset&&(identical(other.id, id) || other.id == id)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.title, title) || other.title == title)&&(identical(other.type, type) || other.type == type)&&(identical(other.pipeline, pipeline) || other.pipeline == pipeline)&&(identical(other.htmlContent, htmlContent) || other.htmlContent == htmlContent)&&(identical(other.storageUrl, storageUrl) || other.storageUrl == storageUrl)&&(identical(other.localCachePath, localCachePath) || other.localCachePath == localCachePath)&&(identical(other.prompt, prompt) || other.prompt == prompt)&&(identical(other.isCached, isCached) || other.isCached == isCached)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.aspectRatio, aspectRatio) || other.aspectRatio == aspectRatio)&&(identical(other.orientation, orientation) || other.orientation == orientation)&&(identical(other.revisionCount, revisionCount) || other.revisionCount == revisionCount)&&(identical(other.folderId, folderId) || other.folderId == folderId)&&(identical(other.clientName, clientName) || other.clientName == clientName)&&(identical(other.isScanned, isScanned) || other.isScanned == isScanned)&&const DeepCollectionEquality().equals(other._metadata, _metadata)&&(identical(other.status, status) || other.status == status)&&(identical(other.signatureBase64, signatureBase64) || other.signatureBase64 == signatureBase64)&&(identical(other.signedAt, signedAt) || other.signedAt == signedAt)&&const DeepCollectionEquality().equals(other._signatureMetadata, _signatureMetadata));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DocumentAsset&&(identical(other.id, id) || other.id == id)&&(identical(other.portfolioId, portfolioId) || other.portfolioId == portfolioId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.title, title) || other.title == title)&&(identical(other.type, type) || other.type == type)&&(identical(other.pipeline, pipeline) || other.pipeline == pipeline)&&(identical(other.htmlContent, htmlContent) || other.htmlContent == htmlContent)&&(identical(other.storageUrl, storageUrl) || other.storageUrl == storageUrl)&&(identical(other.localCachePath, localCachePath) || other.localCachePath == localCachePath)&&(identical(other.prompt, prompt) || other.prompt == prompt)&&(identical(other.isCached, isCached) || other.isCached == isCached)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.aspectRatio, aspectRatio) || other.aspectRatio == aspectRatio)&&(identical(other.orientation, orientation) || other.orientation == orientation)&&(identical(other.paperSize, paperSize) || other.paperSize == paperSize)&&(identical(other.revisionCount, revisionCount) || other.revisionCount == revisionCount)&&(identical(other.folderId, folderId) || other.folderId == folderId)&&(identical(other.clientName, clientName) || other.clientName == clientName)&&(identical(other.isScanned, isScanned) || other.isScanned == isScanned)&&const DeepCollectionEquality().equals(other._metadata, _metadata)&&(identical(other.status, status) || other.status == status)&&(identical(other.signatureBase64, signatureBase64) || other.signatureBase64 == signatureBase64)&&(identical(other.signedAt, signedAt) || other.signedAt == signedAt)&&const DeepCollectionEquality().equals(other._signatureMetadata, _signatureMetadata));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,portfolioId,userId,title,type,pipeline,htmlContent,storageUrl,localCachePath,prompt,isCached,createdAt,updatedAt,templateId,aspectRatio,orientation,revisionCount,folderId,clientName,isScanned,const DeepCollectionEquality().hash(_metadata),status,signatureBase64,signedAt,const DeepCollectionEquality().hash(_signatureMetadata)]);
+int get hashCode => Object.hashAll([runtimeType,id,portfolioId,userId,title,type,pipeline,htmlContent,storageUrl,localCachePath,prompt,isCached,createdAt,updatedAt,templateId,aspectRatio,orientation,paperSize,revisionCount,folderId,clientName,isScanned,const DeepCollectionEquality().hash(_metadata),status,signatureBase64,signedAt,const DeepCollectionEquality().hash(_signatureMetadata)]);
 
 @override
 String toString() {
-  return 'DocumentAsset(id: $id, portfolioId: $portfolioId, userId: $userId, title: $title, type: $type, pipeline: $pipeline, htmlContent: $htmlContent, storageUrl: $storageUrl, localCachePath: $localCachePath, prompt: $prompt, isCached: $isCached, createdAt: $createdAt, updatedAt: $updatedAt, templateId: $templateId, aspectRatio: $aspectRatio, orientation: $orientation, revisionCount: $revisionCount, folderId: $folderId, clientName: $clientName, isScanned: $isScanned, metadata: $metadata, status: $status, signatureBase64: $signatureBase64, signedAt: $signedAt, signatureMetadata: $signatureMetadata)';
+  return 'DocumentAsset(id: $id, portfolioId: $portfolioId, userId: $userId, title: $title, type: $type, pipeline: $pipeline, htmlContent: $htmlContent, storageUrl: $storageUrl, localCachePath: $localCachePath, prompt: $prompt, isCached: $isCached, createdAt: $createdAt, updatedAt: $updatedAt, templateId: $templateId, aspectRatio: $aspectRatio, orientation: $orientation, paperSize: $paperSize, revisionCount: $revisionCount, folderId: $folderId, clientName: $clientName, isScanned: $isScanned, metadata: $metadata, status: $status, signatureBase64: $signatureBase64, signedAt: $signedAt, signatureMetadata: $signatureMetadata)';
 }
 
 
@@ -327,7 +329,7 @@ abstract mixin class _$DocumentAssetCopyWith<$Res> implements $DocumentAssetCopy
   factory _$DocumentAssetCopyWith(_DocumentAsset value, $Res Function(_DocumentAsset) _then) = __$DocumentAssetCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String portfolioId, String userId, String title, DocumentType type, AssetPipeline pipeline, String? htmlContent, String? storageUrl, String? localCachePath, String? prompt, bool isCached, DateTime createdAt, DateTime? updatedAt, String? templateId, String? aspectRatio, String? orientation, int revisionCount, String? folderId, String? clientName, bool isScanned, Map<String, dynamic> metadata, DocumentStatus status, String? signatureBase64, DateTime? signedAt, Map<String, dynamic>? signatureMetadata
+ String id, String portfolioId, String userId, String title, DocumentType type, AssetPipeline pipeline, String? htmlContent, String? storageUrl, String? localCachePath, String? prompt, bool isCached, DateTime createdAt, DateTime? updatedAt, String? templateId, String? aspectRatio, String? orientation, PaperSize paperSize, int revisionCount, String? folderId, String? clientName, bool isScanned, Map<String, dynamic> metadata, DocumentStatus status, String? signatureBase64, DateTime? signedAt, Map<String, dynamic>? signatureMetadata
 });
 
 
@@ -344,7 +346,7 @@ class __$DocumentAssetCopyWithImpl<$Res>
 
 /// Create a copy of DocumentAsset
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? portfolioId = null,Object? userId = null,Object? title = null,Object? type = null,Object? pipeline = null,Object? htmlContent = freezed,Object? storageUrl = freezed,Object? localCachePath = freezed,Object? prompt = freezed,Object? isCached = null,Object? createdAt = null,Object? updatedAt = freezed,Object? templateId = freezed,Object? aspectRatio = freezed,Object? orientation = freezed,Object? revisionCount = null,Object? folderId = freezed,Object? clientName = freezed,Object? isScanned = null,Object? metadata = null,Object? status = null,Object? signatureBase64 = freezed,Object? signedAt = freezed,Object? signatureMetadata = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? portfolioId = null,Object? userId = null,Object? title = null,Object? type = null,Object? pipeline = null,Object? htmlContent = freezed,Object? storageUrl = freezed,Object? localCachePath = freezed,Object? prompt = freezed,Object? isCached = null,Object? createdAt = null,Object? updatedAt = freezed,Object? templateId = freezed,Object? aspectRatio = freezed,Object? orientation = freezed,Object? paperSize = null,Object? revisionCount = null,Object? folderId = freezed,Object? clientName = freezed,Object? isScanned = null,Object? metadata = null,Object? status = null,Object? signatureBase64 = freezed,Object? signedAt = freezed,Object? signatureMetadata = freezed,}) {
   return _then(_DocumentAsset(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,portfolioId: null == portfolioId ? _self.portfolioId : portfolioId // ignore: cast_nullable_to_non_nullable
@@ -362,7 +364,8 @@ as DateTime,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ign
 as DateTime?,templateId: freezed == templateId ? _self.templateId : templateId // ignore: cast_nullable_to_non_nullable
 as String?,aspectRatio: freezed == aspectRatio ? _self.aspectRatio : aspectRatio // ignore: cast_nullable_to_non_nullable
 as String?,orientation: freezed == orientation ? _self.orientation : orientation // ignore: cast_nullable_to_non_nullable
-as String?,revisionCount: null == revisionCount ? _self.revisionCount : revisionCount // ignore: cast_nullable_to_non_nullable
+as String?,paperSize: null == paperSize ? _self.paperSize : paperSize // ignore: cast_nullable_to_non_nullable
+as PaperSize,revisionCount: null == revisionCount ? _self.revisionCount : revisionCount // ignore: cast_nullable_to_non_nullable
 as int,folderId: freezed == folderId ? _self.folderId : folderId // ignore: cast_nullable_to_non_nullable
 as String?,clientName: freezed == clientName ? _self.clientName : clientName // ignore: cast_nullable_to_non_nullable
 as String?,isScanned: null == isScanned ? _self.isScanned : isScanned // ignore: cast_nullable_to_non_nullable

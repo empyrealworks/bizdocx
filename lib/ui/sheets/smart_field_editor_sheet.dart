@@ -7,9 +7,9 @@ import '../../models/document_asset.dart';
 import '../../services/firebase_service.dart';
 
 class SmartFieldEditorSheet extends ConsumerStatefulWidget {
-  const SmartFieldEditorSheet({super.key, required this.asset, this.isNew = false});
+  const SmartFieldEditorSheet({super.key, required this.asset, this.isDuplicating = false});
   final DocumentAsset asset;
-  final bool isNew;
+  final bool isDuplicating;
 
   @override
   ConsumerState<SmartFieldEditorSheet> createState() => _SmartFieldEditorSheetState();
@@ -55,9 +55,16 @@ class _SmartFieldEditorSheetState extends ConsumerState<SmartFieldEditorSheet> {
       // If we extracted a client name, update the model field too
       final clientName = updates['client_name'];
 
-      final updatedAsset = widget.asset.copyWith(
+      DocumentAsset targetAsset = widget.asset;
+
+      // If we are duplicating, create the copy in Firestore first
+      if (widget.isDuplicating) {
+        targetAsset = await FirebaseService.instance.duplicateDocumentAsset(widget.asset);
+      }
+
+      final updatedAsset = targetAsset.copyWith(
         htmlContent: newHtml,
-        clientName: clientName ?? widget.asset.clientName,
+        clientName: clientName ?? targetAsset.clientName,
       );
 
       final result = await FirebaseService.instance.updateDocumentAsset(updatedAsset);
@@ -65,7 +72,7 @@ class _SmartFieldEditorSheetState extends ConsumerState<SmartFieldEditorSheet> {
       if (mounted) {
         Navigator.pop(context, result);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Document updated successfully locally.')),
+          SnackBar(content: Text(widget.isDuplicating ? 'New document created successfully.' : 'Document updated successfully.')),
         );
       }
     } catch (e) {
@@ -99,7 +106,7 @@ class _SmartFieldEditorSheetState extends ConsumerState<SmartFieldEditorSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  widget.isNew ? 'New Document Details' : 'Quick Local Edit',
+                  widget.isDuplicating ? 'New Document Details' : 'Quick Local Edit',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 IconButton(

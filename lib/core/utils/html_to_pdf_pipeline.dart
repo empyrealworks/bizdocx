@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../env/env.dart';
+import '../../models/document_asset.dart';
 import '../../models/user_profile.dart';
 import '../../services/firebase_service.dart';
 import '../../services/local_cache_service.dart';

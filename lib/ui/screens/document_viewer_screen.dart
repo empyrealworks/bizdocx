@@ -112,6 +112,8 @@ class _DocumentViewerScreenState
     final result = await showModalBottomSheet<DocumentAsset>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      enableDrag: false,
       builder: (ctx) => SignatureSheet(asset: _asset),
     );
     if (result != null && mounted) _applyUpdated(result);
@@ -130,10 +132,9 @@ class _DocumentViewerScreenState
           pid: _asset.portfolioId,
           docId: _asset.id,
         );
-        final safeTitle = _asset.title.replaceAll(RegExp(r'[/\\]'), '-');
         await Printing.sharePdf(
           bytes: await file.readAsBytes(),
-          filename: '$safeTitle.pdf',
+          filename: '${_asset.title}.pdf',
         );
       } catch (e) {
         if (mounted) {
@@ -148,10 +149,9 @@ class _DocumentViewerScreenState
     } else if (_asset.isGraphical) {
       ref.read(offlineFileProvider(_asset)).whenData((file) async {
         if (file != null) {
-          final safeTitle = _asset.title.replaceAll(RegExp(r'[/\\]'), '-');
           await Printing.sharePdf(
             bytes: await file.readAsBytes(),
-            filename: '$safeTitle.png',
+            filename: '${_asset.title}.png',
           );
         }
       });

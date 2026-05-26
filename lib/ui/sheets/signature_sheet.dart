@@ -20,16 +20,28 @@ class _SignatureSheetState extends ConsumerState<SignatureSheet> {
   final List<Offset?> _points = [];
   bool _isSaving = false;
 
+  // Use a simple ChangeNotifier to handle repaints without full builds
+  final ChangeNotifier _repaintNotifier = ChangeNotifier();
+
+  @override
+  void dispose() {
+    _repaintNotifier.dispose();
+    super.dispose();
+  }
+
   Future<void> _applySignature() async {
     if (_points.isEmpty) return;
+    
+    final platform = Theme.of(context).platform.toString();
+    final dpr = MediaQuery.of(context).devicePixelRatio;
+
     setState(() => _isSaving = true);
 
     try {
-      // 1. Render signature to bytes
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
       final painter = SignaturePainter(points: _points, color: Colors.black, strokeWidth: 3);
-      const size = Size(600, 200); // Fixed resolution for signature
+      const size = Size(600, 200); 
       painter.paint(canvas, size);
       
       final picture = recorder.endRecording();
@@ -38,14 +50,9 @@ class _SignatureSheetState extends ConsumerState<SignatureSheet> {
       final bytes = byteData!.buffer.asUint8List();
       final base64 = base64Encode(bytes);
 
-      final platform = Theme.of(context).platform.toString();
-      final dpr = MediaQuery.of(context).devicePixelRatio;
-
-      // 2. Inject into HTML
       final signatureHtml = '<img src="data:image/png;base64,$base64" alt="Signature" style="max-height: 80px; max-width: 250px; display: block;" />';
       final newHtml = SmartFieldUtility.injectSignature(widget.asset.htmlContent!, signatureHtml);
 
-      // 3. Update Model
       final updated = widget.asset.copyWith(
         htmlContent: newHtml,
         status: DocumentStatus.signed,
@@ -116,16 +123,25 @@ class _SignatureSheetState extends ConsumerState<SignatureSheet> {
             ),
             child: GestureDetector(
               onPanUpdate: (details) {
-                setState(() {
-                  _points.add(details.localPosition);
-                });
+                _points.add(details.localPosition);
+                // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+                _repaintNotifier.notifyListeners();
               },
-              onPanEnd: (details) => _points.add(null),
+              onPanEnd: (details) {
+                _points.add(null);
+                // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+                _repaintNotifier.notifyListeners();
+              },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: CustomPaint(
-                  painter: SignaturePainter(points: _points, color: Colors.black),
-                  size: Size.infinite,
+                child: ListenableBuilder(
+                  listenable: _repaintNotifier,
+                  builder: (context, _) {
+                    return CustomPaint(
+                      painter: SignaturePainter(points: List.from(_points), color: Colors.black),
+                      size: Size.infinite,
+                    );
+                  },
                 ),
               ),
             ),
@@ -135,13 +151,20 @@ class _SignatureSheetState extends ConsumerState<SignatureSheet> {
           Row(
             children: [
               TextButton.icon(
-                onPressed: () => setState(() => _points.clear()),
+                onPressed: () {
+                  _points.clear();
+                  // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+                  _repaintNotifier.notifyListeners();
+                },
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Clear'),
               ),
               const Spacer(),
               FilledButton(
-                onPressed: _isSaving || _points.isEmpty ? null : _applySignature,
+                onPressed: _isSaving ? null : _applySignature,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(120, 44), // Override any global infinite width
+                ),
                 child: _isSaving
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
                     : const Text('Apply Signature'),
@@ -177,5 +200,5 @@ class SignaturePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(SignaturePainter oldDelegate) => oldDelegate.points != points;
+  bool shouldRepaint(SignaturePainter oldDelegate) => true;
 }

@@ -408,8 +408,8 @@ Do NOT use a placeholder — use the real URL above.''';
 
     // Handle A4 Landscape
     if (isLandscape && (
-        documentType == DocumentType.invoice || 
-        documentType == DocumentType.proposal || 
+        documentType == DocumentType.invoice ||
+        documentType == DocumentType.proposal ||
         documentType == DocumentType.contract ||
         documentType == DocumentType.other)) {
       width = '1123px';

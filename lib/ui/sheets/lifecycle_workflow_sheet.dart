@@ -41,7 +41,14 @@ class LifecycleWorkflowSheet extends ConsumerWidget {
             title: 'Use for New Document',
             subtitle: 'Clone this layout for a new client. Zero credit cost.',
             icon: Icons.copy_rounded,
-            onTap: () => _handleDuplicate(context),
+            onTap: () async {
+              final result = await showModalBottomSheet<DocumentAsset>(
+                context: context,
+                isScrollControlled: true,
+                builder: (ctx) => SmartFieldEditorSheet(asset: asset, isDuplicating: true),
+              );
+              if (context.mounted) Navigator.pop(context, result);
+            },
           ),
           const SizedBox(height: 16),
           _WorkflowCard(
@@ -50,7 +57,8 @@ class LifecycleWorkflowSheet extends ConsumerWidget {
                 ? 'Editing is disabled for signed documents.' 
                 : 'Update names, dates, or totals locally. Zero credit cost.',
             icon: Icons.bolt_rounded,
-            onTap: asset.status == DocumentStatus.signed ? (){} : () async {
+            enabled: asset.status != DocumentStatus.signed,
+            onTap: () async {
               final result = await showModalBottomSheet<DocumentAsset>(
                 context: context,
                 isScrollControlled: true,
@@ -64,21 +72,6 @@ class LifecycleWorkflowSheet extends ConsumerWidget {
       ),
     );
   }
-
-  Future<void> _handleDuplicate(BuildContext context) async {
-    // 1. Duplicate in Firestore
-    final newAsset = await FirebaseService.instance.duplicateDocumentAsset(asset);
-    
-    // 2. Open Smart Field Editor for the new asset
-    if (context.mounted) {
-      final result = await showModalBottomSheet<DocumentAsset>(
-        context: context,
-        isScrollControlled: true,
-        builder: (ctx) => SmartFieldEditorSheet(asset: newAsset, isNew: true),
-      );
-      if (context.mounted) Navigator.pop(context, result ?? newAsset);
-    }
-  }
 }
 
 class _WorkflowCard extends StatelessWidget {
@@ -87,47 +80,57 @@ class _WorkflowCard extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     required this.onTap,
+    this.enabled = true,
   });
 
   final String title;
   final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: c.border),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: c.chipFill,
-                borderRadius: BorderRadius.circular(12),
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.5,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: enabled ? c.border : c.border.withValues(alpha: 0.5)),
+            borderRadius: BorderRadius.circular(16),
+            color: enabled ? null : c.chipFill.withValues(alpha: 0.5),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: enabled ? c.chipFill : c.border.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  enabled ? icon : Icons.lock_outline_rounded, 
+                  color: enabled ? c.iconPrimary : c.textMuted, 
+                  size: 24,
+                ),
               ),
-              child: Icon(icon, color: c.iconPrimary, size: 24),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: TextStyle(color: c.textMuted, fontSize: 13)),
-                ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: enabled ? null : c.textMuted)),
+                    const SizedBox(height: 4),
+                    Text(subtitle, style: TextStyle(color: c.textMuted, fontSize: 13)),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

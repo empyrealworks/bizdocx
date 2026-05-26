@@ -42,7 +42,7 @@ abstract class DocumentAsset with _$DocumentAsset {
     String? templateId,
     String? aspectRatio,
     String? orientation,
-    
+
     // Revision tracking for credit logic
     @Default(0) int revisionCount,
 

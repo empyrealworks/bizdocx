@@ -71,27 +71,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(
-        path: '/settings',
-        builder: (_, __) => const SettingsScreen(),
-        routes: [
-          GoRoute(
-            path: 'privacy',
-            builder: (_, __) => const PrivacyPolicyScreen(),
-          ),
-          GoRoute(
-            path: 'contact',
-            builder: (_, __) => const ContactUsScreen(),
-          ),
-          GoRoute(
-            path: 'subscription',
-            builder: (_, __) => const SubscriptionScreen(),
-          ),
-        ],
-      ),
-      GoRoute(
         path: '/',
         builder: (_, __) => const PortfolioDashboardScreen(),
         routes: [
+          GoRoute(
+            path: 'settings',
+            builder: (_, __) => const SettingsScreen(),
+            routes: [
+              GoRoute(
+                path: 'privacy',
+                builder: (_, __) => const PrivacyPolicyScreen(),
+              ),
+              GoRoute(
+                path: 'contact',
+                builder: (_, __) => const ContactUsScreen(),
+              ),
+              GoRoute(
+                path: 'subscription',
+                builder: (_, __) => const SubscriptionScreen(),
+              ),
+            ],
+          ),
           GoRoute(
             path: 'portfolio/:portfolioId',
             builder: (_, state) => PortfolioDetailScreen(

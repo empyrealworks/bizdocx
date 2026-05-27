@@ -81,7 +81,7 @@ class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScr
           IconButton(
             icon: Icon(Icons.settings_outlined, size: 20, color: c.iconPrimary),
             tooltip: 'Settings',
-            onPressed: () => context.go('/settings'),
+            onPressed: () => context.push('/settings'),
           ),
           IconButton(
             icon: Icon(Icons.logout_rounded, size: 20, color: c.iconPrimary),

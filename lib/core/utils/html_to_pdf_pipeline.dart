@@ -16,6 +16,7 @@ class HtmlToPdfPipeline {
 
   // PDF Engine URL injected via envied.
   static final _pdfEngineUrl = Env.pdfEngineUrl;
+  static final _pdfEngineApiKey = Env.pdfEngineApiKey;
 
   final _cache = LocalCacheService.instance;
 
@@ -47,8 +48,8 @@ class HtmlToPdfPipeline {
     try {
       // 4. Request PDF from Microservice
       final response = await http.post(
-        Uri.parse(_pdfEngineUrl),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$_pdfEngineUrl/generate-pdf'),
+        headers: {'Content-Type': 'application/json', 'X-Api-Key': _pdfEngineApiKey,},
         body: jsonEncode({
           'html': processedHtml,
           'paperSize': paperSize.name,

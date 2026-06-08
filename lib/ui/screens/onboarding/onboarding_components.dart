@@ -151,7 +151,7 @@ class OnboardingNextButton extends StatelessWidget {
         child: isLast
             ? Center(
           child: Text(
-            'Get Started',
+            context.l10n.getStarted,
             style: TextStyle(
               color: c.filledButtonFg,
               fontSize: 15,

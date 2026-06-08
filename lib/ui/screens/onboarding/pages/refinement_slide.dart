@@ -9,12 +9,12 @@ class RefinementSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return OnboardingPageShell(
       anim: anim,
-      eyebrow: 'Refine & History',
-      headline: 'Iterate until\nit\'s perfect.',
-      body:
-      'Send follow-up prompts to adjust any detail. Every change is versioned — preview and restore any previous state with one tap.',
+      eyebrow: l.refineTitle,
+      headline: l.refineHeadline,
+      body: l.refineBody,
       accentColor: const Color(0xFF4ECDC4),
       illustration: const _RefinementIllustration(),
     );
@@ -34,11 +34,14 @@ class _RefinementIllustrationState extends State<_RefinementIllustration>
   late final AnimationController _ctrl;
   int _activeVersion = 2;
 
-  static const _versions = [
-    (label: 'Version 3', prompt: '"Change due date to June 30"'),
-    (label: 'Version 2', prompt: '"Add 10% VAT line"'),
-    (label: 'Original',  prompt: null),
-  ];
+  List<_VersionData> _versions(BuildContext context) {
+    final l = context.l10n;
+    return [
+      _VersionData(label: l.versionNumber(3), prompt: '"Change due date to June 30"'),
+      _VersionData(label: l.versionNumber(2), prompt: '"Add 10% VAT line"'),
+      _VersionData(label: l.original,  prompt: null),
+    ];
+  }
 
   @override
   void initState() {
@@ -66,7 +69,9 @@ class _RefinementIllustrationState extends State<_RefinementIllustration>
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     const accent = Color(0xFF4ECDC4);
+    final versions = _versions(context);
 
     return Container(
       color: c.surface,
@@ -91,7 +96,7 @@ class _RefinementIllustrationState extends State<_RefinementIllustration>
               children: [
                 Expanded(
                   child: Text(
-                    '"${_versions[_activeVersion].prompt ?? 'Initial generation'}"',
+                    '"${versions[_activeVersion].prompt ?? 'Initial generation'}"', // Localize this if needed
                     style: TextStyle(
                       color: c.textBody,
                       fontSize: 13,
@@ -120,7 +125,7 @@ class _RefinementIllustrationState extends State<_RefinementIllustration>
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-              itemCount: _versions.length,
+              itemCount: versions.length,
               physics: const NeverScrollableScrollPhysics(),
               separatorBuilder: (_, __) => Container(
                 margin: const EdgeInsets.only(left: 17),
@@ -128,7 +133,7 @@ class _RefinementIllustrationState extends State<_RefinementIllustration>
                 color: c.border,
               ),
               itemBuilder: (context, i) {
-                final v = _versions[i];
+                final v = versions[i];
                 final isCurrent = i == 0;
                 final isActive = i == _activeVersion;
                 return AnimatedContainer(
@@ -186,8 +191,8 @@ class _RefinementIllustrationState extends State<_RefinementIllustration>
                                     borderRadius:
                                     BorderRadius.circular(4),
                                   ),
-                                  child: const Text('current',
-                                      style: TextStyle(
+                                  child: Text(l.current.toLowerCase(),
+                                      style: const TextStyle(
                                         color: AppColors.success,
                                         fontSize: 9,
                                         fontWeight: FontWeight.w600,
@@ -207,7 +212,7 @@ class _RefinementIllustrationState extends State<_RefinementIllustration>
                         ),
                       ),
                       if (!isCurrent)
-                        Text('Restore',
+                        Text(l.restore,
                             style: TextStyle(
                               color: accent, fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -222,4 +227,10 @@ class _RefinementIllustrationState extends State<_RefinementIllustration>
       ),
     );
   }
+}
+
+class _VersionData {
+  final String label;
+  final String? prompt;
+  _VersionData({required this.label, this.prompt});
 }

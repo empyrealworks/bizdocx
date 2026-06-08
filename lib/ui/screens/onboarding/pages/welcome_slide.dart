@@ -8,12 +8,12 @@ class WelcomeSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return OnboardingPageShell(
       anim: anim,
-      eyebrow: 'Welcome to BizDocx',
-      headline: 'Business documents,\nbeautifully made.',
-      body:
-      'Generate professional invoices, proposals, logos, and more — powered by AI and tailored to your brand.',
+      eyebrow: l.welcomeTitle,
+      headline: l.welcomeHeadline,
+      body: l.welcomeBody,
       accentColor: const Color(0xFF6C7FFF),
       illustration: const _WelcomeIllustration(),
     );
@@ -102,7 +102,7 @@ class _WelcomeIllustrationState extends State<_WelcomeIllustration>
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'BizDocx',
+                        context.l10n.appTitle,
                         style: TextStyle(
                           color: c.textPrimary,
                           fontSize: 28,
@@ -121,7 +121,7 @@ class _WelcomeIllustrationState extends State<_WelcomeIllustration>
             top: 48, left: 28,
             child: _FloatingChip(
               icon: Icons.receipt_long_outlined,
-              label: 'Invoice',
+              label: context.l10n.invoice,
               delay: 0,
               accent: const Color(0xFF6C7FFF),
             ),
@@ -130,7 +130,7 @@ class _WelcomeIllustrationState extends State<_WelcomeIllustration>
             top: 60, right: 24,
             child: _FloatingChip(
               icon: Icons.auto_awesome_outlined,
-              label: 'Logo',
+              label: context.l10n.logo,
               delay: 400,
               accent: const Color(0xFFFF6B6B),
             ),
@@ -139,7 +139,7 @@ class _WelcomeIllustrationState extends State<_WelcomeIllustration>
             bottom: 52, left: 36,
             child: _FloatingChip(
               icon: Icons.assignment_outlined,
-              label: 'Proposal',
+              label: context.l10n.proposal,
               delay: 200,
               accent: const Color(0xFF4ECDC4),
             ),
@@ -148,7 +148,7 @@ class _WelcomeIllustrationState extends State<_WelcomeIllustration>
             bottom: 44, right: 28,
             child: _FloatingChip(
               icon: Icons.handshake_outlined,
-              label: 'Contract',
+              label: context.l10n.contract,
               delay: 600,
               accent: const Color(0xFFFFBE0B),
             ),

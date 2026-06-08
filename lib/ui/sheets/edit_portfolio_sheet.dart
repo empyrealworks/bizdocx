@@ -97,6 +97,7 @@ class _EditPortfolioSheetState
   @override
   Widget build(BuildContext context) {
     final c     = context.colors;
+    final l     = context.l10n;
     final state = ref.watch(portfolioNotifierProvider);
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
@@ -117,7 +118,7 @@ class _EditPortfolioSheetState
             padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottom),
             children: [
               Row(children: [
-                Text('Edit Business',
+                Text(l.editBusiness,
                     style: Theme.of(context).textTheme.headlineMedium),
                 const Spacer(),
                 IconButton(
@@ -127,47 +128,47 @@ class _EditPortfolioSheetState
               ]),
               const SizedBox(height: 24),
               
-              _SectionLabel('Basic Info'),
+              _SectionLabel(l.basicInfo),
               const SizedBox(height: 12),
-              _field(_nameCtrl, 'Business Name *',
-                  validator: (v) => v!.isEmpty ? 'Required' : null),
+              _field(_nameCtrl, l.businessName,
+                  validator: (v) => v!.isEmpty ? l.required : null),
               const SizedBox(height: 12),
-              _field(_descCtrl, 'Short Description'),
+              _field(_descCtrl, l.shortDescription),
               const SizedBox(height: 12),
-              _field(_missionCtrl, 'Mission Statement', maxLines: 2),
+              _field(_missionCtrl, l.missionStatement, maxLines: 2),
               
               const SizedBox(height: 24),
-              _SectionLabel('Contact & Identity'),
+              _SectionLabel(l.contactAndIdentity),
               const SizedBox(height: 12),
-              _field(_addressCtrl, 'Physical Address', maxLines: 2),
+              _field(_addressCtrl, l.physicalAddress, maxLines: 2),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: _field(_emailCtrl, 'Business Email', keyboardType: TextInputType.emailAddress)),
+                  Expanded(child: _field(_emailCtrl, l.businessEmail, keyboardType: TextInputType.emailAddress)),
                   const SizedBox(width: 12),
-                  Expanded(child: _field(_phoneCtrl, 'Phone Number', keyboardType: TextInputType.phone)),
+                  Expanded(child: _field(_phoneCtrl, l.phoneNumber, keyboardType: TextInputType.phone)),
                 ],
               ),
               const SizedBox(height: 12),
-              _field(_webCtrl, 'Website'),
+              _field(_webCtrl, l.website),
               
               const SizedBox(height: 24),
-              _SectionLabel('Localization'),
+              _SectionLabel(l.localization),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: _field(_countryCtrl, 'Country')),
+                  Expanded(child: _field(_countryCtrl, l.country)),
                   const SizedBox(width: 12),
-                  Expanded(child: _field(_currencyCtrl, 'Default Currency')),
+                  Expanded(child: _field(_currencyCtrl, l.defaultCurrency)),
                 ],
               ),
               
               const SizedBox(height: 24),
-              _SectionLabel('Branding'),
+              _SectionLabel(l.branding),
               const SizedBox(height: 12),
-              _field(_colorCtrl, 'Brand Colors (comma-separated hex)'),
+              _field(_colorCtrl, l.brandColors),
               const SizedBox(height: 12),
-              _field(_audienceCtrl, 'Target Audience'),
+              _field(_audienceCtrl, l.targetAudience),
               
               const SizedBox(height: 32),
               SizedBox(
@@ -179,7 +180,7 @@ class _EditPortfolioSheetState
                       ? const SizedBox(
                           height: 20, width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text('Update Portfolio', style: TextStyle(fontWeight: FontWeight.bold)),
+                      : Text(l.updatePortfolio, style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],

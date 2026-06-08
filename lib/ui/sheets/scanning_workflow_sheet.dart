@@ -146,9 +146,9 @@ class _ScanningWorkflowSheetState extends ConsumerState<ScanningWorkflowSheet> {
           ),
           const SizedBox(height: 24),
           if (_imageBytes == null) ...[
-            Text('Scan Document', style: Theme.of(context).textTheme.headlineMedium),
+            Text(context.l10n.scanDocument, style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 8),
-            Text('Take a photo or upload an existing document to digitize it with AI.', 
+            Text(context.l10n.scanPrompt, 
               textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 32),
             Row(
@@ -156,7 +156,7 @@ class _ScanningWorkflowSheetState extends ConsumerState<ScanningWorkflowSheet> {
                 Expanded(
                   child: _ActionCard(
                     icon: Icons.camera_alt_outlined,
-                    label: 'Camera',
+                    label: context.l10n.camera,
                     onTap: () => _pickImage(ImageSource.camera),
                   ),
                 ),
@@ -164,7 +164,7 @@ class _ScanningWorkflowSheetState extends ConsumerState<ScanningWorkflowSheet> {
                 Expanded(
                   child: _ActionCard(
                     icon: Icons.photo_library_outlined,
-                    label: 'Gallery',
+                    label: context.l10n.gallery,
                     onTap: () => _pickImage(ImageSource.gallery),
                   ),
                 ),
@@ -173,21 +173,21 @@ class _ScanningWorkflowSheetState extends ConsumerState<ScanningWorkflowSheet> {
           ] else if (_isAnalyzing) ...[
             const CircularProgressIndicator(),
             const SizedBox(height: 24),
-            Text('Analyzing document...', style: Theme.of(context).textTheme.titleLarge),
+            Text(context.l10n.analyzingDocument, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            const Text('AI is extracting data and merging with your brand...', textAlign: TextAlign.center),
+            Text(context.l10n.analyzingSub, textAlign: TextAlign.center),
           ] else if (_error != null) ...[
             const Icon(Icons.error_outline, color: Colors.red, size: 48),
             const SizedBox(height: 16),
-            Text('Analysis Failed', style: Theme.of(context).textTheme.titleLarge),
+            Text(context.l10n.analysisFailed, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(_error!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 24),
-            FilledButton(onPressed: () => setState(() => _imageBytes = null), child: const Text('Try Again')),
+            FilledButton(onPressed: () => setState(() => _imageBytes = null), child: Text(context.l10n.tryAgain)),
           ] else if (_analysisResult != null) ...[
             const Icon(Icons.check_circle_outline, color: Colors.green, size: 48),
             const SizedBox(height: 16),
-            Text('Scan Complete', style: Theme.of(context).textTheme.titleLarge),
+            Text(context.l10n.scanComplete, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             _ReviewCard(result: _analysisResult!),
             const SizedBox(height: 24),
@@ -196,14 +196,14 @@ class _ScanningWorkflowSheetState extends ConsumerState<ScanningWorkflowSheet> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => setState(() => _imageBytes = null), 
-                    child: const Text('Discard'),
+                    child: Text(context.l10n.discard),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: FilledButton(
                     onPressed: _saveDocument, 
-                    child: const Text('Save Document'),
+                    child: Text(context.l10n.saveDocument),
                   ),
                 ),
               ],
@@ -260,10 +260,10 @@ class _ReviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _Row(context, 'Type', meta['type']?.toString().toUpperCase() ?? 'OTHER'),
-          _Row(context, 'Client', meta['client']?.toString() ?? 'Unknown'),
-          _Row(context, 'Total', meta['total']?.toString() ?? 'N/A'),
-          _Row(context, 'Date', meta['date']?.toString() ?? 'N/A'),
+          _Row(context, context.l10n.type, meta['type']?.toString().toUpperCase() ?? 'OTHER'),
+          _Row(context, context.l10n.client, meta['client']?.toString() ?? context.l10n.unknownClient),
+          _Row(context, context.l10n.total, meta['total']?.toString() ?? 'N/A'),
+          _Row(context, context.l10n.date, meta['date']?.toString() ?? 'N/A'),
         ],
       ),
     );

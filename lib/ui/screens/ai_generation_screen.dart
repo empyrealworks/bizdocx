@@ -5,12 +5,14 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/templates/document_templates.dart';
 import '../../core/extensions/context_extensions.dart';
+import '../../core/utils/ui_utils.dart';
 import '../../models/document_asset.dart';
 import '../../models/document_template.dart';
 import '../../models/user_profile.dart';
 import '../../providers/document_generation_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../services/firebase_service.dart';
+import '../widgets/app_button.dart';
 import '../widgets/generation_state_overlay.dart';
 import '../widgets/template_thumbnails.dart';
 
@@ -63,9 +65,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
     FocusScope.of(context).unfocus();
 
     if (_promptCtrl.text.trim().isEmpty || _titleCtrl.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a title and prompt.')),
-      );
+      UiUtils.showErrorSnackBar(context, context.l10n.pleaseEnterTitleAndPrompt);
       return;
     }
 
@@ -73,7 +73,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
     final profile = await fb.fetchProfile();
     
     if (_selectedTemplate?.isPremium == true && profile.isFree) {
-      _showUpgradePrompt('Premium Template', 'This template is only available for Solopreneur and Agency users. Upgrade now to unlock professional designs and remove watermarks.');
+      _showUpgradePrompt(context.l10n.premiumTemplate, context.l10n.topUpMessage);
       return;
     }
 
@@ -101,19 +101,20 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
   }
 
   void _showUpgradePrompt(String title, String message) {
+    final l = context.l10n;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Maybe Later')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l.maybeLater)),
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
               context.push('/settings/subscription');
             },
-            child: const Text('View Plans'),
+            child: Text(l.viewPlans),
           ),
         ],
       ),
@@ -132,12 +133,13 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
   Widget build(BuildContext context) {
     final genState = ref.watch(documentGenerationProvider(widget.portfolioId));
     final profile = ref.watch(userProfileProvider).value;
+    final l = context.l10n;
 
     return Stack(
       children: [
         Scaffold(
           appBar: AppBar(
-            title: const Text('Generate Asset'),
+            title: Text(l.generateAsset),
             leading: BackButton(
               onPressed: () =>
                   context.go('/portfolio/${widget.portfolioId}'),
@@ -151,7 +153,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                 if (profile != null && profile.totalCredits < 150)
                    _LowBalanceWarning(balance: profile.totalCredits),
                 
-                _SectionLabel('Category'),
+                _SectionLabel(l.category),
                 const SizedBox(height: 12),
                 _TypeSelector(
                   selected: _selectedType,
@@ -167,7 +169,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                 ),
                 const SizedBox(height: 24),
                 
-                _SectionLabel('Style Template'),
+                _SectionLabel(l.styleTemplate),
                 const SizedBox(height: 12),
                 _TemplatePicker(
                   templates: DocumentTemplates.getByType(_selectedType),
@@ -184,7 +186,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                 const SizedBox(height: 24),
 
                 if (_selectedTemplate?.supportsOrientation ?? false) ...[
-                  _SectionLabel('Orientation'),
+                  _SectionLabel(l.orientation),
                   const SizedBox(height: 12),
                   _OrientationPicker(
                     selected: _selectedOrientation,
@@ -194,7 +196,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                 ],
 
                 if (_selectedPipeline == AssetPipeline.structural) ...[
-                  _SectionLabel('Document Format'),
+                  _SectionLabel(l.documentFormat),
                   const SizedBox(height: 12),
                   _PaperSizePicker(
                     selected: _selectedPaperSize,
@@ -204,7 +206,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                 ],
 
                 if (_selectedTemplate?.supportedAspectRatios.isNotEmpty ?? false) ...[
-                   _SectionLabel('Aspect Ratio'),
+                   _SectionLabel(l.aspectRatio),
                    const SizedBox(height: 12),
                    _AspectRatioPicker(
                      ratios: _selectedTemplate!.supportedAspectRatios,
@@ -214,7 +216,7 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                    const SizedBox(height: 24),
                 ],
 
-                _SectionLabel('Asset Title'),
+                _SectionLabel(l.assetTitle),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _titleCtrl,
@@ -223,10 +225,10 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _SectionLabel('Prompt'),
+                _SectionLabel(l.prompt),
                 const SizedBox(height: 8),
                 Text(
-                  'Describe specific details. The style and context are applied automatically.',
+                  l.promptDescription,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 12),
@@ -238,14 +240,11 @@ class _AiGenerationScreenState extends ConsumerState<AiGenerationScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: FilledButton.icon(
-                    onPressed: genState.isLoading ? null : _generate,
-                    icon: const Icon(Icons.auto_awesome, size: 18),
-                    label: Text('Generate ($_currentCost Credits)', style: const TextStyle(fontWeight: FontWeight.bold),),
-                  ),
+                AppButton(
+                  onPressed: _generate,
+                  loading: genState.isLoading,
+                  icon: Icons.auto_awesome,
+                  label: l.generateWithCredits(_currentCost),
                 ),
                 const SizedBox(height: 20),
                 if (_externalEditNote(_selectedType) != null)
@@ -342,13 +341,13 @@ class _LowBalanceWarning extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Running low! ($balance credits remaining). Top up to avoid interruptions.',
+              context.l10n.runningLow(balance),
               style: const TextStyle(color: Color(0xFFFF6B35), fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
           TextButton(
             onPressed: () => context.push('/settings/subscription'),
-            child: const Text('Top Up', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            child: Text(context.l10n.topUp, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
           )
         ],
       ),
@@ -371,7 +370,8 @@ class _TemplatePicker extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (templates.isEmpty) return const Text('No templates available for this category.');
+    final l = context.l10n;
+    if (templates.isEmpty) return Text(l.noTemplates);
     final c = context.colors;
 
     return SizedBox(
@@ -409,12 +409,12 @@ class _TemplatePicker extends ConsumerWidget {
                                 BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
                               ],
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.workspace_premium_rounded, size: 10, color: Colors.black),
-                                SizedBox(width: 2),
-                                Text('PREMIUM', style: TextStyle(color: Colors.black, fontSize: 8, fontWeight: FontWeight.w900)),
+                                const Icon(Icons.workspace_premium_rounded, size: 10, color: Colors.black),
+                                const SizedBox(width: 2),
+                                Text(context.l10n.premium, style: const TextStyle(color: Colors.black, fontSize: 8, fontWeight: FontWeight.w900)),
                               ],
                             ),
                           ),
@@ -450,6 +450,7 @@ class _OrientationPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     return Row(
       children: ['portrait', 'landscape'].map((o) {
         final active = selected == o;
@@ -465,7 +466,7 @@ class _OrientationPicker extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  o[0].toUpperCase() + o.substring(1),
+                  o == 'portrait' ? l.portrait : l.landscape,
                   style: TextStyle(
                     color: active ? c.filledButtonFg : c.textMuted,
                     fontWeight: FontWeight.w600,
@@ -503,7 +504,7 @@ class _PaperSizePicker extends StatelessWidget {
               border: Border.all(color: active ? c.filledButtonBg : c.border),
             ),
             child: Text(
-              _label(s),
+              _label(context, s),
               style: TextStyle(
                 color: active ? c.filledButtonFg : c.textBody,
                 fontSize: 12,
@@ -516,16 +517,17 @@ class _PaperSizePicker extends StatelessWidget {
     );
   }
 
-  String _label(PaperSize s) {
+  String _label(BuildContext context, PaperSize s) {
+    final l = context.l10n;
     switch (s) {
-      case PaperSize.a4: return 'A4 Standard';
-      case PaperSize.a3: return 'A3 Large';
-      case PaperSize.a5: return 'A5 Small';
-      case PaperSize.letter: return 'US Letter';
-      case PaperSize.legal: return 'US Legal';
-      case PaperSize.executive: return 'Executive';
-      case PaperSize.tabloid: return 'Tabloid';
-      case PaperSize.continuous: return 'Continuous (Long)';
+      case PaperSize.a4: return l.paperSizeA4;
+      case PaperSize.a3: return l.paperSizeA3;
+      case PaperSize.a5: return l.paperSizeA5;
+      case PaperSize.letter: return l.paperSizeLetter;
+      case PaperSize.legal: return l.paperSizeLegal;
+      case PaperSize.executive: return l.paperSizeExecutive;
+      case PaperSize.tabloid: return l.paperSizeTabloid;
+      case PaperSize.continuous: return l.paperSizeContinuous;
     }
   }
 }
@@ -671,6 +673,7 @@ class _DocumentHintsState extends State<_DocumentHints> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     final hints = _hints[widget.type] ?? [];
     if (hints.isEmpty) return const SizedBox.shrink();
 
@@ -694,7 +697,7 @@ class _DocumentHintsState extends State<_DocumentHints> {
                       size: 16, color: c.textSecondary),
                   const SizedBox(width: 8),
                   Text(
-                    'Suggested fields for ${_typeLabel(widget.type)}',
+                    l.suggestedFields(_typeLabel(context, widget.type)),
                     style: TextStyle(
                       color: c.textSecondary,
                       fontSize: 13,
@@ -737,16 +740,17 @@ class _DocumentHintsState extends State<_DocumentHints> {
     );
   }
 
-  String _typeLabel(DocumentType t) {
+  String _typeLabel(BuildContext context, DocumentType t) {
+    final l = context.l10n;
     switch (t) {
-      case DocumentType.invoice: return 'Invoice';
-      case DocumentType.proposal: return 'Proposal';
-      case DocumentType.letterhead: return 'Letterhead';
-      case DocumentType.businessCard: return 'Business Card';
-      case DocumentType.contract: return 'Contract';
-      case DocumentType.logo: return 'Logo';
-      case DocumentType.icon: return 'Icon';
-      case DocumentType.other: return 'Other';
+      case DocumentType.invoice: return l.docTypeInvoice;
+      case DocumentType.proposal: return l.docTypeProposal;
+      case DocumentType.letterhead: return l.docTypeLetterhead;
+      case DocumentType.businessCard: return l.docTypeBusinessCard;
+      case DocumentType.contract: return l.docTypeContract;
+      case DocumentType.logo: return l.docTypeLogo;
+      case DocumentType.icon: return l.docTypeIcon;
+      case DocumentType.other: return l.docTypeOther;
     }
   }
 }
@@ -794,6 +798,7 @@ class _TypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -825,8 +830,8 @@ class _TypeSelector extends StatelessWidget {
                   child: Center(
                     child: Text(
                       p == AssetPipeline.structural
-                          ? 'Structural'
-                          : 'Graphical',
+                          ? l.structural
+                          : l.graphical,
                       style: TextStyle(
                         color: active ? c.filledButtonFg : c.textMuted,
                         fontWeight: FontWeight.w600,
@@ -862,7 +867,7 @@ class _TypeSelector extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  _label(t),
+                  _label(context, t),
                   style: TextStyle(
                     color: active ? c.filledButtonFg : c.textBody,
                     fontSize: 13,
@@ -877,16 +882,17 @@ class _TypeSelector extends StatelessWidget {
     );
   }
 
-  String _label(DocumentType t) {
+  String _label(BuildContext context, DocumentType t) {
+    final l = context.l10n;
     switch (t) {
-      case DocumentType.invoice: return 'Invoice';
-      case DocumentType.proposal: return 'Proposal';
-      case DocumentType.letterhead: return 'Letterhead';
-      case DocumentType.businessCard: return 'Business Card';
-      case DocumentType.contract: return 'Contract';
-      case DocumentType.logo: return 'Logo';
-      case DocumentType.icon: return 'Icon';
-      case DocumentType.other: return 'Other';
+      case DocumentType.invoice: return l.docTypeInvoice;
+      case DocumentType.proposal: return l.docTypeProposal;
+      case DocumentType.letterhead: return l.docTypeLetterhead;
+      case DocumentType.businessCard: return l.docTypeBusinessCard;
+      case DocumentType.contract: return l.docTypeContract;
+      case DocumentType.logo: return l.docTypeLogo;
+      case DocumentType.icon: return l.docTypeIcon;
+      case DocumentType.other: return l.docTypeOther;
     }
   }
 }
@@ -905,6 +911,7 @@ class _SmartErrorOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     final isLimitError = error.contains('limit') || error.contains('credits');
     
     return Material(
@@ -929,7 +936,7 @@ class _SmartErrorOverlay extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  isLimitError ? 'Limit Reached' : 'Generation Failed',
+                  isLimitError ? l.limitReached : l.generationFailed,
                   style: Theme.of(context).textTheme.titleLarge
                 ),
                 const SizedBox(height: 12),
@@ -948,7 +955,7 @@ class _SmartErrorOverlay extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: onDismiss, 
-                        child: const Text('Dismiss')
+                        child: Text(l.maybeLater)
                       ),
                     ),
                     if (isLimitError) ...[
@@ -957,7 +964,7 @@ class _SmartErrorOverlay extends StatelessWidget {
                         child: FilledButton(
                           onPressed: onUpgrade, 
                           style: FilledButton.styleFrom(backgroundColor: const Color(0xFFFF6B35)),
-                          child: const Text('View Plans')
+                          child: Text(l.viewPlans)
                         ),
                       ),
                     ],
@@ -979,6 +986,7 @@ class _CancelledOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     return Material(
       type: MaterialType.transparency,
       child: GestureDetector(
@@ -999,15 +1007,15 @@ class _CancelledOverlay extends StatelessWidget {
                   Icon(Icons.cancel_outlined,
                       color: c.textMuted, size: 36),
                   const SizedBox(height: 16),
-                  Text('Generation Cancelled',
+                  Text(l.generationCancelled,
                       style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 8),
-                  Text('The operation was cancelled by the user.',
+                  Text(l.operationCancelled,
                       style: TextStyle(color: c.textMuted, fontSize: 14),
                       textAlign: TextAlign.center),
                   const SizedBox(height: 20),
                   FilledButton(
-                      onPressed: onDismiss, child: const Text('Dismiss')),
+                      onPressed: onDismiss, child: Text(l.done)),
                 ],
               ),
             ),

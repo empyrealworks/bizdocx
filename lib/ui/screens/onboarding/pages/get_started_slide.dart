@@ -32,6 +32,7 @@ class _GetStartedSlideState extends State<GetStartedSlide>
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
 
     final fadeAnim = CurvedAnimation(parent: widget.anim, curve: Curves.easeOut);
     final slideAnim = Tween<Offset>(
@@ -104,8 +105,8 @@ class _GetStartedSlideState extends State<GetStartedSlide>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'READY'.toUpperCase(),
-                        style: TextStyle(
+                        l.ready,
+                        style: const TextStyle(
                           color: AppColors.success,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -114,7 +115,7 @@ class _GetStartedSlideState extends State<GetStartedSlide>
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Let\'s build something\nbeautiful.',
+                        l.getStartedHeadline,
                         style: TextStyle(
                           color: c.textPrimary,
                           fontSize: 28,
@@ -125,7 +126,7 @@ class _GetStartedSlideState extends State<GetStartedSlide>
                       ),
                       const SizedBox(height: 14),
                       Text(
-                        'Sign in or create a free account to start generating documents for your business in seconds.',
+                        l.getStartedBody,
                         style: TextStyle(
                           color: c.textBody,
                           fontSize: 15,
@@ -146,9 +147,9 @@ class _GetStartedSlideState extends State<GetStartedSlide>
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: const Text(
-                            'Create Account',
-                            style: TextStyle(
+                          child: Text(
+                            l.createAccount,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               letterSpacing: -0.2,
@@ -161,7 +162,7 @@ class _GetStartedSlideState extends State<GetStartedSlide>
                         child: TextButton(
                           onPressed: widget.onTap,
                           child: Text(
-                            'I already have an account  →',
+                            l.alreadyHaveAccount,
                             style: TextStyle(
                               color: c.textMuted,
                               fontSize: 13,

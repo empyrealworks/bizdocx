@@ -8,12 +8,12 @@ class AssetsSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return OnboardingPageShell(
       anim: anim,
-      eyebrow: 'Brand Assets',
-      headline: 'Your logo,\nbuilt in.',
-      body:
-      'Upload your company logo once. BizDocx embeds it automatically into invoices, proposals, letterheads, and more — pixel-perfect every time.',
+      eyebrow: l.assetsTitle,
+      headline: l.assetsHeadline,
+      body: l.assetsBody,
       accentColor: const Color(0xFFFFBE0B),
       illustration: const _AssetsIllustration(),
     );
@@ -195,12 +195,12 @@ class _AssetsIllustrationState extends State<_AssetsIllustration>
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.upload_rounded,
+                    children: [
+                      const Icon(Icons.upload_rounded,
                           size: 14, color: Colors.black),
-                      SizedBox(width: 5),
-                      Text('Upload Logo',
-                          style: TextStyle(
+                      const SizedBox(width: 5),
+                      Text(context.l10n.uploadLogo,
+                          style: const TextStyle(
                             color: Colors.black, fontSize: 12,
                             fontWeight: FontWeight.w700,
                           )),

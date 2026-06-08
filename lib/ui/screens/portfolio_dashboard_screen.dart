@@ -40,9 +40,9 @@ class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScr
     showDialog(
       context: context,
       builder: (ctx) => ConfirmDialog(
-        title: 'Sign Out?',
-        message: 'Are you sure you want to sign out of your account?',
-        actionLabel: 'Sign Out',
+        title: context.l10n.signOutConfirm,
+        message: context.l10n.signOutMessage,
+        actionLabel: context.l10n.signOut,
         icon: Icons.logout_rounded,
         onConfirm: () => FirebaseService.instance.signOut(),
       ),
@@ -52,6 +52,7 @@ class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScr
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     final isDark = context.isDark;
     final portfoliosAsync = ref.watch(portfolioListProvider);
     final profileAsync = ref.watch(userProfileProvider);
@@ -69,7 +70,7 @@ class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScr
               colorBlendMode: isDark ? BlendMode.srcIn : null,
             ),
             const SizedBox(width: 12),
-            const Text('BizDocx'),
+            Text(l.appTitle),
           ],
         ),
         actions: [
@@ -80,12 +81,12 @@ class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScr
           ),
           IconButton(
             icon: Icon(Icons.settings_outlined, size: 20, color: c.iconPrimary),
-            tooltip: 'Settings',
+            tooltip: l.settings,
             onPressed: () => context.push('/settings'),
           ),
           IconButton(
             icon: Icon(Icons.logout_rounded, size: 20, color: c.iconPrimary),
-            tooltip: 'Sign out',
+            tooltip: l.signOut,
             onPressed: () => _confirmSignOut(context),
           ),
         ],
@@ -101,7 +102,7 @@ class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScr
             child: portfoliosAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(
-                child: Text('Error: $e',
+                child: Text('${l.error}: $e',
                     style: TextStyle(color: Theme.of(context).colorScheme.error)),
               ),
               data: (portfolios) => portfolios.isEmpty
@@ -116,7 +117,7 @@ class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScr
         backgroundColor: c.filledButtonBg,
         foregroundColor: c.filledButtonFg,
         icon: const Icon(Icons.add),
-        label: const Text('New Business'),
+        label: Text(l.newBusiness),
       ),
     );
   }
@@ -137,6 +138,7 @@ class _PlanBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     return Container(
       width: double.infinity,
       color: const Color(0xFFFFD60A).withValues(alpha: 0.1),
@@ -146,12 +148,12 @@ class _PlanBanner extends StatelessWidget {
           const Icon(Icons.stars_rounded, color: Color(0xFFC69C00), size: 16),
           const SizedBox(width: 8),
           Text(
-            'ACTIVE PLAN: ${profile.tier.name.toUpperCase()}',
+            l.activePlan(profile.tier.name.toUpperCase()),
             style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFFC69C00)),
           ),
           const Spacer(),
           Text(
-            '${profile.totalCredits} Credits Available',
+            l.creditsAvailable(profile.totalCredits),
             style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: c.textSecondary),
           ),
         ],
@@ -218,6 +220,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -236,11 +239,11 @@ class _EmptyState extends StatelessWidget {
                   color: c.iconSecondary, size: 36),
             ),
             const SizedBox(height: 24),
-            Text('No businesses yet',
+            Text(l.noBusinesses,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
-              'Create a portfolio to start generating AI-powered documents.',
+              l.createPortfolioPrompt,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -248,7 +251,7 @@ class _EmptyState extends StatelessWidget {
             FilledButton.icon(
               onPressed: onCreateTap,
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('Create First Business'),
+              label: Text(l.createFirstBusiness),
             ),
           ],
         ),

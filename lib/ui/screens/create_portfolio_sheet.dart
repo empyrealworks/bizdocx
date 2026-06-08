@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
+import '../../core/utils/ui_utils.dart';
 import '../../providers/portfolio_provider.dart';
+import '../widgets/app_button.dart';
 
 class CreatePortfolioSheet extends ConsumerStatefulWidget {
   const CreatePortfolioSheet({super.key});
@@ -88,20 +90,21 @@ class _CreatePortfolioSheetState
   }
 
   void _showUpgradePrompt(String message) {
+    final l = context.l10n;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Limit Reached'),
+        title: Text(l.limitReached),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Maybe Later')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l.maybeLater)),
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx); // Close dialog
               Navigator.pop(context); // Close sheet
               context.push('/settings/subscription');
             },
-            child: const Text('View Plans'),
+            child: Text(l.viewPlans),
           ),
         ],
       ),
@@ -111,6 +114,7 @@ class _CreatePortfolioSheetState
   @override
   Widget build(BuildContext context) {
     final c     = context.colors;
+    final l     = context.l10n;
     final state = ref.watch(portfolioNotifierProvider);
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
@@ -132,7 +136,7 @@ class _CreatePortfolioSheetState
             children: [
               Row(
                 children: [
-                  Text('New Business',
+                  Text(l.newBusiness,
                       style: Theme.of(context).textTheme.headlineMedium),
                   const Spacer(),
                   IconButton(
@@ -143,68 +147,58 @@ class _CreatePortfolioSheetState
               ),
               const SizedBox(height: 8),
               Text(
-                'Provide more details to help the AI generate smarter, localized documents.',
+                l.createPortfolioDescription,
                 style: TextStyle(color: c.textMuted, fontSize: 13),
               ),
               const SizedBox(height: 24),
               
-              _SectionLabel('Basic Info'),
+              _SectionLabel(l.basicInfo),
               const SizedBox(height: 12),
-              _field(_nameCtrl, 'Business Name *',
-                  validator: (v) => v!.isEmpty ? 'Required' : null),
+              _field(_nameCtrl, l.businessName,
+                  validator: (v) => v!.isEmpty ? l.required : null),
               const SizedBox(height: 12),
-              _field(_descCtrl, 'Short Description (e.g. Creative Design Agency)'),
+              _field(_descCtrl, l.shortDescription),
               const SizedBox(height: 12),
-              _field(_missionCtrl, 'Mission Statement', maxLines: 2),
+              _field(_missionCtrl, l.missionStatement, maxLines: 2),
               
               const SizedBox(height: 24),
-              _SectionLabel('Contact & Identity'),
+              _SectionLabel(l.contactAndIdentity),
               const SizedBox(height: 12),
-              _field(_addressCtrl, 'Physical Address', maxLines: 2),
+              _field(_addressCtrl, l.physicalAddress, maxLines: 2),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: _field(_emailCtrl, 'Business Email', keyboardType: TextInputType.emailAddress)),
+                  Expanded(child: _field(_emailCtrl, l.businessEmail, keyboardType: TextInputType.emailAddress)),
                   const SizedBox(width: 12),
-                  Expanded(child: _field(_phoneCtrl, 'Phone Number', keyboardType: TextInputType.phone)),
+                  Expanded(child: _field(_phoneCtrl, l.phoneNumber, keyboardType: TextInputType.phone)),
                 ],
               ),
               const SizedBox(height: 12),
-              _field(_webCtrl, 'Website (e.g. www.empyreal.works)'),
+              _field(_webCtrl, l.website),
               
               const SizedBox(height: 24),
-              _SectionLabel('Localization'),
+              _SectionLabel(l.localization),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: _field(_countryCtrl, 'Country')),
+                  Expanded(child: _field(_countryCtrl, l.country)),
                   const SizedBox(width: 12),
-                  Expanded(child: _field(_currencyCtrl, 'Default Currency (e.g. NGN)')),
+                  Expanded(child: _field(_currencyCtrl, l.defaultCurrency)),
                 ],
               ),
               
               const SizedBox(height: 24),
-              _SectionLabel('Branding'),
+              _SectionLabel(l.branding),
               const SizedBox(height: 12),
-              _field(_colorCtrl, 'Brand Colors (comma-separated hex, e.g. #FF6B35, #28A99E)'),
+              _field(_colorCtrl, l.brandColors),
               const SizedBox(height: 12),
-              _field(_audienceCtrl, 'Target Audience (e.g. Small business owners)'),
+              _field(_audienceCtrl, l.targetAudience),
               
               const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: FilledButton(
-                  onPressed: state.isLoading ? null : _create,
-                  child: state.isLoading
-                      ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: c.filledButtonFg),
-                  )
-                      : const Text('Create Portfolio', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
+              AppButton(
+                onPressed: _create,
+                loading: state.isLoading,
+                label: l.createPortfolio,
               ),
             ],
           ),

@@ -52,9 +52,8 @@ class _AssetManagerSheetState extends ConsumerState<AssetManagerSheet> {
       );
       if (mounted) {
         setState(() => _logoUrl = url);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Logo uploaded. New documents will include it automatically.'),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(context.l10n.logoUploaded),
         ));
       }
     } catch (e) {
@@ -68,18 +67,18 @@ class _AssetManagerSheetState extends ConsumerState<AssetManagerSheet> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Remove logo?'),
-        content: const Text(
-          'The logo will be removed from future documents. Existing documents are unaffected.',
-          style: TextStyle(fontSize: 14),
+        title: Text(context.l10n.removeLogo),
+        content: Text(
+          context.l10n.removeLogoConfirm,
+          style: const TextStyle(fontSize: 14),
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+              child: Text(context.l10n.cancel)),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: Text('Remove',
+              child: Text(context.l10n.remove,
                   style: const TextStyle(color: AppColors.error))),
         ],
       ),
@@ -100,13 +99,14 @@ class _AssetManagerSheetState extends ConsumerState<AssetManagerSheet> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottom),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Row(children: [
-          Text('Portfolio Assets',
+          Text(l.portfolioAssets,
               style: Theme.of(context).textTheme.headlineMedium),
           const Spacer(),
           IconButton(
@@ -116,7 +116,7 @@ class _AssetManagerSheetState extends ConsumerState<AssetManagerSheet> {
         ]),
         const SizedBox(height: 4),
         Text(
-          'Assets here are automatically included in relevant generated documents.',
+          l.assetsHelp,
           style: TextStyle(color: c.textMuted, fontSize: 13),
         ),
         const SizedBox(height: 24),
@@ -124,14 +124,14 @@ class _AssetManagerSheetState extends ConsumerState<AssetManagerSheet> {
         // Logo section
         Align(
           alignment: Alignment.centerLeft,
-          child: Text('COMPANY LOGO',
+          child: Text(l.companyLogo,
               style: TextStyle(
                   color: c.textMuted, fontSize: 10,
                   letterSpacing: 0.8, fontWeight: FontWeight.w500)),
         ),
         const SizedBox(height: 4),
         Text(
-          'Appears in invoices, proposals, letterheads, and business cards.',
+          l.logoHelp,
           style: TextStyle(color: c.textMuted, fontSize: 12),
         ),
         const SizedBox(height: 12),
@@ -236,7 +236,7 @@ class _LogoCard extends StatelessWidget {
                   icon: logoUrl != null
                       ? Icons.swap_horiz_rounded
                       : Icons.upload_rounded,
-                  label: logoUrl != null ? 'Replace' : 'Upload',
+                  label: logoUrl != null ? context.l10n.replace : context.l10n.upload,
                   onTap: onUpload,
                   color: c.iconSecondary,
                 ),
@@ -244,7 +244,7 @@ class _LogoCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   _Btn(
                       icon: Icons.delete_outline_rounded,
-                      label: 'Remove',
+                      label: context.l10n.remove,
                       onTap: onDelete!,
                       color: AppColors.error),
                 ],
@@ -271,7 +271,7 @@ class _Placeholder extends StatelessWidget {
           size: 32, color: c.textMuted,
         ),
         const SizedBox(height: 6),
-        Text(hasError ? 'Failed to load' : 'Tap to add logo',
+        Text(hasError ? context.l10n.failedToLoad : context.l10n.tapToAddLogo,
             style: TextStyle(color: c.textMuted, fontSize: 11)),
       ]),
     );

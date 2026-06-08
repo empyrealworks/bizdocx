@@ -8,32 +8,35 @@ class PortfoliosSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
+    final l = context.l10n;
     return OnboardingPageShell(
       anim: anim,
-      eyebrow: 'Portfolios',
-      headline: 'One hub for\nevery business.',
-      body:
-      'Create separate portfolios for each brand. Each one keeps its own documents, brand colours, mission, and AI context — all in one place.',
+      eyebrow: l.portfolioTitle,
+      headline: l.portfolioHeadline,
+      body: l.portfolioBody,
       accentColor: const Color(0xFF4ECDC4),
-      illustration: _PortfoliosIllustration(c: c),
+      illustration: _PortfoliosIllustration(),
     );
   }
 }
 
 class _PortfoliosIllustration extends StatelessWidget {
-  const _PortfoliosIllustration({required this.c});
-  final dynamic c;
+  const _PortfoliosIllustration();
 
-  static const _portfolios = [
-    (name: 'Acme Ceramics', colors: [Color(0xFF2C3E50), Color(0xFFE74C3C)]),
-    (name: 'Luxe Retail Co.', colors: [Color(0xFFFFBE0B), Color(0xFFFB5607)]),
-    (name: 'Nova Tech Ltd', colors: [Color(0xFF6C7FFF), Color(0xFF4ECDC4)]),
-  ];
+  List<_PortfolioData> _portfolios(BuildContext context) {
+    final l = context.l10n;
+    return [
+      _PortfolioData(name: l.myCreativeStudio, colors: [const Color(0xFF2C3E50), const Color(0xFFE74C3C)]),
+      _PortfolioData(name: l.luxeRetail, colors: [const Color(0xFFFFBE0B), const Color(0xFFFB5607)]),
+      _PortfolioData(name: 'Nova Tech Ltd', colors: [const Color(0xFF6C7FFF), const Color(0xFF4ECDC4)]),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final portfolios = _portfolios(context);
+
     return Container(
       color: c.card,
       child: Stack(
@@ -49,8 +52,8 @@ class _PortfoliosIllustration extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_portfolios.length, (i) {
-                final p = _portfolios[i];
+              children: List.generate(portfolios.length, (i) {
+                final p = portfolios[i];
                 final offset = (i - 1) * 0.5;
                 return Transform.translate(
                   offset: Offset(offset * 8, 0),
@@ -157,13 +160,19 @@ class _MiniPortfolioCard extends StatelessWidget {
               color: c.chipFill,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Text('$docCount docs',
+            child: Text(context.l10n.docsCount(docCount),
                 style: TextStyle(color: c.textMuted, fontSize: 11)),
           ),
         ],
       ),
     );
   }
+}
+
+class _PortfolioData {
+  final String name;
+  final List<Color> colors;
+  _PortfolioData({required this.name, required this.colors});
 }
 
 class _GridPainter extends CustomPainter {

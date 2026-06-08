@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
+import '../../core/utils/ui_utils.dart';
 import '../../services/firebase_service.dart';
+import '../widgets/app_button.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -40,18 +42,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   String _parseError(dynamic e) {
     final s = e.toString();
-    if (s.contains('user-not-found')) return 'Email not found.';
-    if (s.contains('invalid-email')) return 'Invalid email address.';
-    return 'An error occurred. Please try again.';
+    final l = context.l10n;
+    if (s.contains('user-not-found')) return l.errorUserNotFound;
+    if (s.contains('invalid-email')) return l.errorInvalidEmail;
+    return l.errorGeneric;
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reset Password'),
+        title: Text(l.resetPassword),
         leading: const BackButton(),
       ),
       body: SafeArea(
@@ -88,6 +92,7 @@ class _FormView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     return Form(
       key: formKey,
       child: Column(
@@ -95,26 +100,25 @@ class _FormView extends StatelessWidget {
         children: [
           const SizedBox(height: 20),
           Text(
-            'Enter your email address and we\'ll send you a link to reset your password.',
+            l.enterEmailForReset,
             style: TextStyle(color: c.textBody, fontSize: 15, height: 1.5),
           ),
           const SizedBox(height: 32),
           TextFormField(
             controller: emailCtrl,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(hintText: 'Email'),
-            validator: (v) => (v == null || !v.contains('@')) ? 'Invalid email' : null,
+            decoration: InputDecoration(hintText: l.email),
+            validator: (v) => (v == null || !v.contains('@')) ? l.errorInvalidEmail : null,
           ),
           if (error != null) ...[
             const SizedBox(height: 16),
             Text(error!, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.error, fontSize: 13)),
           ],
           const SizedBox(height: 32),
-          FilledButton(
-            onPressed: loading ? null : onSubmit,
-            child: loading
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Text('Send Reset Link'),
+          AppButton(
+            onPressed: onSubmit,
+            loading: loading,
+            label: l.sendResetLink,
           ),
         ],
       ),
@@ -129,15 +133,16 @@ class _SuccessView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     return Column(
       children: [
         const SizedBox(height: 40),
         const Icon(Icons.mark_email_read_outlined, size: 64, color: AppColors.success),
         const SizedBox(height: 24),
-        Text('Check your email', style: Theme.of(context).textTheme.headlineMedium),
+        Text(l.checkYourEmail, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 12),
         Text(
-          'We\'ve sent a password reset link to $email. Please check your inbox (and spam folder).',
+          l.resetLinkSent(email),
           textAlign: TextAlign.center,
           style: TextStyle(color: c.textBody, fontSize: 15, height: 1.5),
         ),
@@ -146,7 +151,7 @@ class _SuccessView extends StatelessWidget {
           width: double.infinity,
           child: OutlinedButton(
             onPressed: () => context.pop(),
-            child: const Text('Back to Sign In'),
+            child: Text(l.backToSignIn),
           ),
         ),
       ],

@@ -119,8 +119,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 6),
                   ),
-                  child: const Text('Skip',
-                      style: TextStyle(
+                  child: Text(context.l10n.skip,
+                      style: const TextStyle(
                           fontSize: 14, fontWeight: FontWeight.w500)),
                 ),
               ),

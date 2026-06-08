@@ -8,12 +8,12 @@ class AutonomousFilingSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return OnboardingPageShell(
       anim: anim,
-      eyebrow: 'Intelligent Workspace',
-      headline: 'Autonomous\nAI Filing.',
-      body:
-      'Sit back while AI categorizes and routes your documents into smart folders. Organized by default, always.',
+      eyebrow: l.filingTitle,
+      headline: l.filingHeadline,
+      body: l.filingBody,
       accentColor: const Color(0xFF4ECDC4),
       illustration: const _FilingIllustration(),
     );
@@ -25,13 +25,14 @@ class _FilingIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final l = context.l10n;
+    return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _FolderIcon(label: 'INVOICES', color: Color(0xFF4ECDC4), delay: 0),
-          SizedBox(width: 20),
-          _FolderIcon(label: 'PROPOSALS', color: Color(0xFFFFD166), delay: 400),
+          _FolderIcon(label: l.docTypeInvoice.toUpperCase(), color: const Color(0xFF4ECDC4), delay: 0),
+          const SizedBox(width: 20),
+          _FolderIcon(label: l.docTypeProposal.toUpperCase(), color: const Color(0xFFFFD166), delay: 400),
         ],
       ),
     );

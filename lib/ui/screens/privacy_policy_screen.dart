@@ -7,26 +7,22 @@ class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Privacy Policy')),
+      appBar: AppBar(title: Text(l.privacyPolicy)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _section(context, 'Introduction', 
-              'At BizDocx, we are committed to protecting your privacy. This policy explains how we collect, use, and safeguard your information when you use our AI-powered document hub.'),
-            _section(context, 'Data Collection', 
-              'We collect information necessary to provide our services, including account details (name, email) and the business context you provide (company name, mission, brand colors) to generate documents.'),
-            _section(context, 'AI and Your Content', 
-              'Your document prompts and business context are processed by our secure AI generation partners to create high-quality business assets. We do not use your data to train our own models without explicit consent.'),
-            _section(context, 'Data Security', 
-              'Your data is stored securely using enterprise-grade cloud infrastructure. We implement industry-standard security measures to protect against unauthorized access or disclosure.'),
-            _section(context, 'User Rights', 
-              'You have the right to access, correct, or delete your data at any time through the app settings. Deleting your account will remove all associated portfolios, documents, and profile information.'),
+            _section(context, l.privacyIntroTitle, l.privacyIntroBody),
+            _section(context, l.privacyCollectionTitle, l.privacyCollectionBody),
+            _section(context, l.privacyAiTitle, l.privacyAiBody),
+            _section(context, l.privacySecurityTitle, l.privacySecurityBody),
+            _section(context, l.privacyRightsTitle, l.privacyRightsBody),
             const SizedBox(height: 40),
-            Text('Last updated: July 2024', style: TextStyle(color: c.textMuted, fontSize: 12)),
+            Text(l.lastUpdated, style: TextStyle(color: c.textMuted, fontSize: 12)),
             const SizedBox(height: 24),
           ],
         ),

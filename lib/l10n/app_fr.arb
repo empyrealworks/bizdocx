@@ -45,6 +45,7 @@
   "deleteEverything": "Tout supprimer",
   "about": "À propos",
   "version": "Version",
+  "app": "Application",
   "aiEngine": "Moteur IA",
   "aiEngineSubtitle": "Structurel avancé + Image neurale",
 
@@ -80,6 +81,7 @@
   "viewPlans": "Voir les forfaits",
 
   "error": "Erreur",
+  "deletionFailed": "Échec de la suppression : {error}",
   "generationFailed": "Échec de la génération",
   "limitReached": "Limite atteinte",
   "generationCancelled": "Génération annulée",
@@ -371,6 +373,24 @@
   "french": "Français",
   "spanish": "Espagnol",
 
+  "security": "Sécurité",
+  "appLock": "Verrouillage de l'application",
+  "appLockDescription": "Nécessite un code PIN ou la biométrie pour ouvrir l'application.",
+  "lockTimeout": "Délai de verrouillage",
+  "immediate": "Immédiat",
+  "after1Min": "Après 1 minute",
+  "after30Min": "Après 30 minutes",
+  "changePin": "Changer le code PIN",
+  "setPin": "Définir le code PIN",
+  "enterPin": "Entrez le code PIN",
+  "confirmPin": "Confirmer le code PIN",
+  "pinsDoNotMatch": "Les codes PIN ne correspondent pas",
+  "authenticateToContinue": "Veuillez vous authentifier pour continuer",
+  "biometricAuth": "Authentification biométrique",
+  "pinAuth": "Authentification par code PIN",
+  "unlock": "Déverrouiller",
+  "wrongPin": "Code PIN incorrect. Veuillez réessayer.",
+
   "errorUserNotFound": "Utilisateur non trouvé.",
   "errorWrongPassword": "Mot de passe incorrect.",
   "errorEmailInUse": "E-mail déjà utilisé.",
@@ -378,6 +398,7 @@
   "errorInvalidEmail": "Adresse e-mail invalide.",
   "errorGeneric": "Une erreur est survenue. Veuillez réessayer.",
   "required": "Requis",
+  "min4Chars": "4 caractères minimum",
   "min6Chars": "6 caractères minimum",
   "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
 

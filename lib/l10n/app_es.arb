@@ -45,6 +45,7 @@
   "deleteEverything": "Eliminar todo",
   "about": "Acerca de",
   "version": "Versión",
+  "app": "Aplicación",
   "aiEngine": "Motor de IA",
   "aiEngineSubtitle": "Estructural avanzado + Imagen neuronal",
 
@@ -80,6 +81,7 @@
   "viewPlans": "Ver planes",
 
   "error": "Error",
+  "deletionFailed": "Error al eliminar: {error}",
   "generationFailed": "Error de generación",
   "limitReached": "Límite alcanzado",
   "generationCancelled": "Generación cancelada",
@@ -371,6 +373,24 @@
   "french": "Francés",
   "spanish": "Español",
 
+  "security": "Seguridad",
+  "appLock": "Bloqueo de aplicación",
+  "appLockDescription": "Requiere PIN o biometría para abrir la aplicación.",
+  "lockTimeout": "Tiempo de bloqueo",
+  "immediate": "Inmediato",
+  "after1Min": "Después de 1 minuto",
+  "after30Min": "Después de 30 minutos",
+  "changePin": "Cambiar PIN",
+  "setPin": "Establecer PIN",
+  "enterPin": "Introduce el PIN",
+  "confirmPin": "Confirmar PIN",
+  "pinsDoNotMatch": "Los PIN no coinciden",
+  "authenticateToContinue": "Por favor, autentícate para continuar",
+  "biometricAuth": "Autenticación biométrica",
+  "pinAuth": "Autenticación por PIN",
+  "unlock": "Desbloquear",
+  "wrongPin": "PIN incorrecto. Inténtalo de nuevo.",
+
   "errorUserNotFound": "Usuario no encontrado.",
   "errorWrongPassword": "Contraseña incorrecta.",
   "errorEmailInUse": "El correo electrónico ya está en uso.",
@@ -378,6 +398,7 @@
   "errorInvalidEmail": "Dirección de correo electrónico no válida.",
   "errorGeneric": "Ocurrió un error. Por favor, inténtelo de nuevo.",
   "required": "Requerido",
+  "min4Chars": "Mínimo 4 caracteres",
   "min6Chars": "Mínimo 6 caracteres",
   "passwordsDoNotMatch": "Las contraseñas no coinciden",
 

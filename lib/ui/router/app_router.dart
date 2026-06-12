@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../models/document_asset.dart';
@@ -17,6 +16,8 @@ import '../screens/forgot_password_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../screens/contact_us_screen.dart';
 import '../screens/subscription_screen.dart';
+import '../screens/lock_screen.dart';
+import '../../providers/app_lock_provider.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshListenable = ValueNotifier<int>(0);
@@ -56,58 +57,71 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/onboarding',
-        builder: (_, __) => const OnboardingScreen(),
-      ),
-      GoRoute(
-        path: '/auth',
-        builder: (_, __) => const AuthGateScreen(),
+      ShellRoute(
+        builder: (context, state, child) {
+          final appLock = ref.watch(appLockProvider);
+          return Stack(
+            children: [
+              child,
+              if (appLock.isLocked) const LockScreen(),
+            ],
+          );
+        },
         routes: [
           GoRoute(
-            path: 'forgot-password',
-            builder: (_, __) => const ForgotPasswordScreen(),
+            path: '/onboarding',
+            builder: (_, __) => const OnboardingScreen(),
           ),
-        ],
-      ),
-      GoRoute(
-        path: '/',
-        builder: (_, __) => const PortfolioDashboardScreen(),
-        routes: [
           GoRoute(
-            path: 'settings',
-            builder: (_, __) => const SettingsScreen(),
+            path: '/auth',
+            builder: (_, __) => const AuthGateScreen(),
             routes: [
               GoRoute(
-                path: 'privacy',
-                builder: (_, __) => const PrivacyPolicyScreen(),
-              ),
-              GoRoute(
-                path: 'contact',
-                builder: (_, __) => const ContactUsScreen(),
-              ),
-              GoRoute(
-                path: 'subscription',
-                builder: (_, __) => const SubscriptionScreen(),
+                path: 'forgot-password',
+                builder: (_, __) => const ForgotPasswordScreen(),
               ),
             ],
           ),
           GoRoute(
-            path: 'portfolio/:portfolioId',
-            builder: (_, state) => PortfolioDetailScreen(
-              portfolioId: state.pathParameters['portfolioId']!,
-            ),
+            path: '/',
+            builder: (_, __) => const PortfolioDashboardScreen(),
             routes: [
               GoRoute(
-                path: 'generate',
-                builder: (_, state) => AiGenerationScreen(
-                  portfolioId: state.pathParameters['portfolioId']!,
-                ),
+                path: 'settings',
+                builder: (_, __) => const SettingsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'privacy',
+                    builder: (_, __) => const PrivacyPolicyScreen(),
+                  ),
+                  GoRoute(
+                    path: 'contact',
+                    builder: (_, __) => const ContactUsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'subscription',
+                    builder: (_, __) => const SubscriptionScreen(),
+                  ),
+                ],
               ),
               GoRoute(
-                path: 'doc/:docId',
-                builder: (_, state) =>
-                    DocumentViewerScreen(asset: state.extra as DocumentAsset),
+                path: 'portfolio/:portfolioId',
+                builder: (_, state) => PortfolioDetailScreen(
+                  portfolioId: state.pathParameters['portfolioId']!,
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'generate',
+                    builder: (_, state) => AiGenerationScreen(
+                      portfolioId: state.pathParameters['portfolioId']!,
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'doc/:docId',
+                    builder: (_, state) =>
+                        DocumentViewerScreen(asset: state.extra as DocumentAsset),
+                  ),
+                ],
               ),
             ],
           ),

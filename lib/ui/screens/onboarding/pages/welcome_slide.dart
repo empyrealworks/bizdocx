@@ -101,13 +101,19 @@ class _WelcomeIllustrationState extends State<_WelcomeIllustration>
                         colorBlendMode: isDark ? BlendMode.srcIn : null,
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        context.l10n.appTitle,
-                        style: TextStyle(
-                          color: c.textPrimary,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -1.0,
+                      SizedBox(
+                        width: 200,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            context.l10n.appTitle,
+                            style: TextStyle(
+                              color: c.textPrimary,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -1.0,
+                            ),
+                          ),
                         ),
                       ),
                     ],

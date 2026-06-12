@@ -13,6 +13,7 @@ import 'providers/theme_provider.dart';
 import 'providers/locale_provider.dart';
 import 'services/firebase_service.dart';
 import 'services/prefs_service.dart';
+import 'services/security_service.dart';
 import 'services/iap_service.dart';
 import 'services/update_service.dart';
 import 'ui/router/app_router.dart';
@@ -36,6 +37,7 @@ Future<void> main() async {
 
   await FirebaseService.initOfflinePersistence();
   await PrefsService.instance.init();
+  await SecurityService.instance.init();
   
   // Trigger Android In-App Update check
   UpdateService.instance.checkForUpdates();

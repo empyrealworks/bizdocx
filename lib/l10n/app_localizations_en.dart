@@ -138,6 +138,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get version => 'Version';
 
   @override
+  String get app => 'App';
+
+  @override
   String get aiEngine => 'AI Engine';
 
   @override
@@ -195,6 +198,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get error => 'Error';
+
+  @override
+  String deletionFailed(Object error) {
+    return 'Deletion failed: $error';
+  }
 
   @override
   String get generationFailed => 'Generation Failed';
@@ -838,6 +846,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spanish => 'Spanish';
 
   @override
+  String get security => 'Security';
+
+  @override
+  String get appLock => 'App Lock';
+
+  @override
+  String get appLockDescription => 'Require PIN or Biometrics to open the app.';
+
+  @override
+  String get lockTimeout => 'Lock Timeout';
+
+  @override
+  String get immediate => 'Immediate';
+
+  @override
+  String get after1Min => 'After 1 minute';
+
+  @override
+  String get after30Min => 'After 30 minutes';
+
+  @override
+  String get changePin => 'Change PIN';
+
+  @override
+  String get setPin => 'Set PIN';
+
+  @override
+  String get enterPin => 'Enter PIN';
+
+  @override
+  String get confirmPin => 'Confirm PIN';
+
+  @override
+  String get pinsDoNotMatch => 'PINs do not match';
+
+  @override
+  String get authenticateToContinue => 'Please authenticate to continue';
+
+  @override
+  String get biometricAuth => 'Biometric Authentication';
+
+  @override
+  String get pinAuth => 'PIN Authentication';
+
+  @override
+  String get unlock => 'Unlock';
+
+  @override
+  String get wrongPin => 'Incorrect PIN. Please try again.';
+
+  @override
   String get errorUserNotFound => 'User not found.';
 
   @override
@@ -857,6 +916,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get required => 'Required';
+
+  @override
+  String get min4Chars => 'Min 4 characters';
 
   @override
   String get min6Chars => 'Min 6 characters';

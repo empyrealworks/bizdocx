@@ -45,6 +45,7 @@
   "deleteEverything": "Delete Everything",
   "about": "About",
   "version": "Version",
+  "app": "App",
   "aiEngine": "AI Engine",
   "aiEngineSubtitle": "Advanced Structural + Neural Image",
 
@@ -80,6 +81,7 @@
   "viewPlans": "View Plans",
 
   "error": "Error",
+  "deletionFailed": "Deletion failed: {error}",
   "generationFailed": "Generation Failed",
   "limitReached": "Limit Reached",
   "generationCancelled": "Generation Cancelled",
@@ -371,6 +373,24 @@
   "french": "French",
   "spanish": "Spanish",
 
+  "security": "Security",
+  "appLock": "App Lock",
+  "appLockDescription": "Require PIN or Biometrics to open the app.",
+  "lockTimeout": "Lock Timeout",
+  "immediate": "Immediate",
+  "after1Min": "After 1 minute",
+  "after30Min": "After 30 minutes",
+  "changePin": "Change PIN",
+  "setPin": "Set PIN",
+  "enterPin": "Enter PIN",
+  "confirmPin": "Confirm PIN",
+  "pinsDoNotMatch": "PINs do not match",
+  "authenticateToContinue": "Please authenticate to continue",
+  "biometricAuth": "Biometric Authentication",
+  "pinAuth": "PIN Authentication",
+  "unlock": "Unlock",
+  "wrongPin": "Incorrect PIN. Please try again.",
+
   "errorUserNotFound": "User not found.",
   "errorWrongPassword": "Incorrect password.",
   "errorEmailInUse": "Email already in use.",
@@ -378,6 +398,7 @@
   "errorInvalidEmail": "Invalid email address.",
   "errorGeneric": "An error occurred. Please try again.",
   "required": "Required",
+  "min4Chars": "Min 4 characters",
   "min6Chars": "Min 6 characters",
   "passwordsDoNotMatch": "Passwords do not match",
 

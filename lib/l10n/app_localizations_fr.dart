@@ -138,6 +138,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get version => 'Version';
 
   @override
+  String get app => 'Application';
+
+  @override
   String get aiEngine => 'Moteur IA';
 
   @override
@@ -195,6 +198,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get error => 'Erreur';
+
+  @override
+  String deletionFailed(Object error) {
+    return 'Échec de la suppression : $error';
+  }
 
   @override
   String get generationFailed => 'Échec de la génération';
@@ -849,6 +857,59 @@ class AppLocalizationsFr extends AppLocalizations {
   String get spanish => 'Espagnol';
 
   @override
+  String get security => 'Sécurité';
+
+  @override
+  String get appLock => 'Verrouillage de l\'application';
+
+  @override
+  String get appLockDescription =>
+      'Nécessite un code PIN ou la biométrie pour ouvrir l\'application.';
+
+  @override
+  String get lockTimeout => 'Délai de verrouillage';
+
+  @override
+  String get immediate => 'Immédiat';
+
+  @override
+  String get after1Min => 'Après 1 minute';
+
+  @override
+  String get after30Min => 'Après 30 minutes';
+
+  @override
+  String get changePin => 'Changer le code PIN';
+
+  @override
+  String get setPin => 'Définir le code PIN';
+
+  @override
+  String get enterPin => 'Entrez le code PIN';
+
+  @override
+  String get confirmPin => 'Confirmer le code PIN';
+
+  @override
+  String get pinsDoNotMatch => 'Les codes PIN ne correspondent pas';
+
+  @override
+  String get authenticateToContinue =>
+      'Veuillez vous authentifier pour continuer';
+
+  @override
+  String get biometricAuth => 'Authentification biométrique';
+
+  @override
+  String get pinAuth => 'Authentification par code PIN';
+
+  @override
+  String get unlock => 'Déverrouiller';
+
+  @override
+  String get wrongPin => 'Code PIN incorrect. Veuillez réessayer.';
+
+  @override
   String get errorUserNotFound => 'Utilisateur non trouvé.';
 
   @override
@@ -868,6 +929,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get required => 'Requis';
+
+  @override
+  String get min4Chars => '4 caractères minimum';
 
   @override
   String get min6Chars => '6 caractères minimum';

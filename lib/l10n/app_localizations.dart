@@ -352,6 +352,12 @@ abstract class AppLocalizations {
   /// **'Version'**
   String get version;
 
+  /// No description provided for @app.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get app;
+
   /// No description provided for @aiEngine.
   ///
   /// In en, this message translates to:
@@ -459,6 +465,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error'**
   String get error;
+
+  /// No description provided for @deletionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion failed: {error}'**
+  String deletionFailed(Object error);
 
   /// No description provided for @generationFailed.
   ///
@@ -1648,6 +1660,108 @@ abstract class AppLocalizations {
   /// **'Spanish'**
   String get spanish;
 
+  /// No description provided for @security.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get security;
+
+  /// No description provided for @appLock.
+  ///
+  /// In en, this message translates to:
+  /// **'App Lock'**
+  String get appLock;
+
+  /// No description provided for @appLockDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Require PIN or Biometrics to open the app.'**
+  String get appLockDescription;
+
+  /// No description provided for @lockTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock Timeout'**
+  String get lockTimeout;
+
+  /// No description provided for @immediate.
+  ///
+  /// In en, this message translates to:
+  /// **'Immediate'**
+  String get immediate;
+
+  /// No description provided for @after1Min.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 minute'**
+  String get after1Min;
+
+  /// No description provided for @after30Min.
+  ///
+  /// In en, this message translates to:
+  /// **'After 30 minutes'**
+  String get after30Min;
+
+  /// No description provided for @changePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get changePin;
+
+  /// No description provided for @setPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Set PIN'**
+  String get setPin;
+
+  /// No description provided for @enterPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PIN'**
+  String get enterPin;
+
+  /// No description provided for @confirmPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm PIN'**
+  String get confirmPin;
+
+  /// No description provided for @pinsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'PINs do not match'**
+  String get pinsDoNotMatch;
+
+  /// No description provided for @authenticateToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to continue'**
+  String get authenticateToContinue;
+
+  /// No description provided for @biometricAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric Authentication'**
+  String get biometricAuth;
+
+  /// No description provided for @pinAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN Authentication'**
+  String get pinAuth;
+
+  /// No description provided for @unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlock;
+
+  /// No description provided for @wrongPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect PIN. Please try again.'**
+  String get wrongPin;
+
   /// No description provided for @errorUserNotFound.
   ///
   /// In en, this message translates to:
@@ -1689,6 +1803,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Required'**
   String get required;
+
+  /// No description provided for @min4Chars.
+  ///
+  /// In en, this message translates to:
+  /// **'Min 4 characters'**
+  String get min4Chars;
 
   /// No description provided for @min6Chars.
   ///

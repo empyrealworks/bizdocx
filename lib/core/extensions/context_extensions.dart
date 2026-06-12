@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../constants/app_color_tokens.dart';
 
 extension AppColorsX on BuildContext {
@@ -9,4 +10,7 @@ extension AppColorsX on BuildContext {
       Theme.of(this).extension<AppColorTokens>()!;
 
   bool get isDark => Theme.of(this).brightness == Brightness.dark;
+
+  /// Shorthand for AppLocalizations
+  AppLocalizations get l10n => AppLocalizations.of(this)!;
 }

@@ -5,8 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../providers/theme_provider.dart';
+import '../../providers/locale_provider.dart';
+import '../../providers/app_lock_provider.dart';
 import '../../services/firebase_service.dart';
 import '../../services/local_cache_service.dart';
+import '../../services/auth_security_service.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/confirm_dialog.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -27,38 +31,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _loadCacheSize() async {
     try {
-      final uid = FirebaseService.instance.currentUid;
-      final bytes = await LocalCacheService.instance.getCacheSizeBytes(uid);
+      final bytes = await LocalCacheService.instance.getCacheSizeBytes(FirebaseService.instance.currentUid);
       if (mounted) {
         setState(() {
           _cacheSize = '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
         });
       }
     } catch (_) {
-      if (mounted) setState(() => _cacheSize = 'Error');
+      if (mounted) setState(() => _cacheSize = context.l10n.error);
     }
   }
 
   Future<void> _clearCache() async {
-    final uid = FirebaseService.instance.currentUid;
-    // Clearing all portfolio caches for this user
-    // We can loop through portfolios or just clear the uid directory
-    // For simplicity, we'll use a broad clear if we had that method, 
-    // but we have evictPortfolioCache. Let's add a clearAll for UID if needed.
-    // For now, let's assume clearing cache means starting fresh.
-    
-    // Actually, let's just use a snackbar for now or a confirm dialog.
     showDialog(
       context: context,
       builder: (ctx) => ConfirmDialog(
-        title: 'Clear Local Cache?',
-        message: 'This will remove all locally stored PDF and image previews. They will be re-downloaded or re-generated as needed.',
-        actionLabel: 'Clear Cache',
+        title: context.l10n.clearCacheConfirm,
+        message: context.l10n.clearCacheMessage,
+        actionLabel: context.l10n.clearCache,
         icon: Icons.delete_sweep_outlined,
         onConfirm: () async {
-           // Basic implementation: we'd need a clearAll method in LocalCacheService
-           // For now, we'll just show a success message as a placeholder if we can't implement clearAll yet.
-           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cache cleared successfully.')));
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.done)));
            _loadCacheSize();
         },
       ),
@@ -68,25 +61,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     final themeMode = ref.watch(themeModeProvider);
+    final currentLocale = ref.watch(localeProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l.settings),
         leading: BackButton(onPressed: () => context.go('/')),
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          _SectionHeader(context, 'Appearance'),
+          _SectionHeader(context, l.appearance),
           const SizedBox(height: 8),
           _card(
             context,
             children: [
               _ThemeTile(
                 context: context,
-                label: 'System',
-                subtitle: 'Follow device setting',
+                label: l.system,
+                subtitle: l.systemSubtitle,
                 icon: Icons.brightness_auto_outlined,
                 selected: themeMode == ThemeMode.system,
                 onTap: () =>
@@ -96,8 +91,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Divider(height: 1, color: c.border),
               _ThemeTile(
                 context: context,
-                label: 'Light',
-                subtitle: 'Always light',
+                label: l.light,
+                subtitle: l.lightSubtitle,
                 icon: Icons.light_mode_outlined,
                 selected: themeMode == ThemeMode.light,
                 onTap: () =>
@@ -106,8 +101,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Divider(height: 1, color: c.border),
               _ThemeTile(
                 context: context,
-                label: 'Dark',
-                subtitle: 'Always dark',
+                label: l.dark,
+                subtitle: l.darkSubtitle,
                 icon: Icons.dark_mode_outlined,
                 selected: themeMode == ThemeMode.dark,
                 onTap: () =>
@@ -118,13 +113,72 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
 
           const SizedBox(height: 32),
-          _SectionHeader(context, 'Subscription'),
+          _SectionHeader(context, l.language),
+          const SizedBox(height: 8),
+          _card(
+            context,
+            children: [
+              _LanguageTile(
+                label: l.english,
+                selected: currentLocale.languageCode == 'en',
+                onTap: () => ref.read(localeProvider.notifier).setLocale(const Locale('en')),
+                isFirst: true,
+              ),
+              Divider(height: 1, color: c.border),
+              _LanguageTile(
+                label: l.french,
+                selected: currentLocale.languageCode == 'fr',
+                onTap: () => ref.read(localeProvider.notifier).setLocale(const Locale('fr')),
+              ),
+              Divider(height: 1, color: c.border),
+              _LanguageTile(
+                label: l.spanish,
+                selected: currentLocale.languageCode == 'es',
+                onTap: () => ref.read(localeProvider.notifier).setLocale(const Locale('es')),
+                isLast: true,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 32),
+          _SectionHeader(context, l.security),
+          const SizedBox(height: 8),
+          _card(
+            context,
+            children: [
+              _SwitchTile(
+                label: l.appLock,
+                subtitle: l.appLockDescription,
+                value: ref.watch(appLockProvider).isEnabled,
+                onChanged: (val) => _toggleAppLock(context, ref, val),
+                isFirst: true,
+                isLast: !ref.watch(appLockProvider).isEnabled,
+              ),
+              if (ref.watch(appLockProvider).isEnabled) ...[
+                Divider(height: 1, color: c.border),
+                _ActionTile(
+                  label: l.lockTimeout,
+                  value: _getTimeoutLabel(l, ref.watch(appLockProvider).timeout),
+                  onTap: () => _showTimeoutPicker(context, ref),
+                ),
+                Divider(height: 1, color: c.border),
+                _ActionTile(
+                  label: l.changePin,
+                  onTap: () => _showPinSetup(context, ref),
+                  isLast: true,
+                ),
+              ],
+            ],
+          ),
+
+          const SizedBox(height: 32),
+          _SectionHeader(context, l.subscription),
           const SizedBox(height: 8),
           _card(
             context,
             children: [
               _ActionTile(
-                label: 'Plans & Credits',
+                label: l.plansAndCredits,
                 icon: Icons.star_outline_rounded,
                 onTap: () => context.push('/settings/subscription'),
                 isFirst: true,
@@ -134,33 +188,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
 
           const SizedBox(height: 32),
-          _SectionHeader(context, 'Storage'),
+          _SectionHeader(context, l.storage),
           const SizedBox(height: 8),
           _card(
             context,
             children: [
-              _InfoRow(context, 'Local Cache', _cacheSize, trailing: TextButton(
+              _InfoRow(context, l.localCache, _cacheSize, trailing: TextButton(
                 onPressed: _clearCache,
-                child: const Text('Clear'),
+                child: Text(l.clear),
               )),
             ],
           ),
 
           const SizedBox(height: 32),
-          _SectionHeader(context, 'Support & Legal'),
+          _SectionHeader(context, l.supportAndLegal),
           const SizedBox(height: 8),
           _card(
             context,
             children: [
               _ActionTile(
-                label: 'Contact Us',
+                label: l.contactUs,
                 icon: Icons.support_agent_rounded,
                 onTap: () => context.push('/settings/contact'),
                 isFirst: true,
               ),
               Divider(height: 1, color: c.border),
               _ActionTile(
-                label: 'Privacy Policy',
+                label: l.privacyPolicy,
                 icon: Icons.privacy_tip_outlined,
                 onTap: () => context.push('/settings/privacy'),
                 isLast: true,
@@ -169,13 +223,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
 
           const SizedBox(height: 32),
-          _SectionHeader(context, 'Account'),
+          _SectionHeader(context, l.account),
           const SizedBox(height: 8),
           _card(
             context,
             children: [
               _ActionTile(
-                label: 'Delete My Data',
+                label: l.deleteMyData,
                 icon: Icons.delete_forever_outlined,
                 color: AppColors.error,
                 onTap: () => _confirmDeleteAccount(context),
@@ -186,16 +240,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
 
           const SizedBox(height: 32),
-          _SectionHeader(context, 'About'),
+          _SectionHeader(context, l.about),
           const SizedBox(height: 8),
           _card(
             context,
             children: [
-              _InfoRow(context, 'App', 'BizDocx'),
+              _InfoRow(context, l.app, l.appTitle),
               Divider(height: 1, color: c.border),
-              _InfoRow(context, 'Version', '1.0.0'),
+              _InfoRow(context, l.version, '1.0.0'),
               Divider(height: 1, color: c.border),
-              _InfoRow(context, 'AI Engine', 'Advanced Structural + Neural Image'),
+              _InfoRow(context, l.aiEngine, l.aiEngineSubtitle),
             ],
           ),
           const SizedBox(height: 40),
@@ -208,9 +262,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => ConfirmDialog(
-        title: 'Delete Account?',
-        message: 'This will permanently delete your account and all associated portfolios and documents. This action cannot be undone.',
-        actionLabel: 'Delete Everything',
+        title: context.l10n.deleteAccount,
+        message: context.l10n.deleteAccountMessage,
+        actionLabel: context.l10n.deleteEverything,
         isDestructive: true,
         icon: Icons.delete_forever_outlined,
         onConfirm: () async {
@@ -219,12 +273,108 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           } catch (e) {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('Deletion failed. You may need to re-authenticate: $e'),
+                content: Text(context.l10n.deletionFailed(e.toString())),
                 backgroundColor: AppColors.error,
               ));
             }
           }
         },
+      ),
+    );
+  }
+
+  Future<void> _toggleAppLock(BuildContext context, WidgetRef ref, bool enabled) async {
+    if (!enabled) {
+      await ref.read(appLockProvider.notifier).setEnabled(false);
+      return;
+    }
+
+    final l = context.l10n;
+    final canBio = await AuthSecurityService.instance.canCheckBiometrics();
+    if (!context.mounted) return;
+
+    final method = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.appLock),
+        content: Text(l.authenticateToContinue),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, 'pin'),
+            child: Text(l.pinAuth),
+          ),
+          if (canBio)
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, 'bio'),
+              child: Text(l.biometricAuth),
+            ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l.cancel),
+          ),
+        ],
+      ),
+    );
+
+    if (method == 'pin') {
+      if (!context.mounted) return;
+      final success = await _showPinSetup(context, ref);
+      if (success) {
+        await ref.read(appLockProvider.notifier).setEnabled(true);
+      }
+    } else if (method == 'bio') {
+      if (!context.mounted) return;
+      final success = await AuthSecurityService.instance.authenticateWithBiometrics(
+        localizedReason: context.l10n.authenticateToContinue,
+      );
+      if (success) {
+        await AuthSecurityService.instance.setBiometricsEnabled(true);
+        await ref.read(appLockProvider.notifier).setEnabled(true);
+      }
+    }
+  }
+
+  Future<bool> _showPinSetup(BuildContext context, WidgetRef ref) async {
+    final pin = await showDialog<String>(
+      context: context,
+      builder: (ctx) => const _PinSetupDialog(),
+    );
+
+    if (pin != null) {
+      await AuthSecurityService.instance.setPin(pin);
+      return true;
+    }
+    return false;
+  }
+
+  String _getTimeoutLabel(AppLocalizations l, AppLockTimeout timeout) {
+    switch (timeout) {
+      case AppLockTimeout.immediate:
+        return l.immediate;
+      case AppLockTimeout.oneMinute:
+        return l.after1Min;
+      case AppLockTimeout.thirtyMinutes:
+        return l.after30Min;
+    }
+  }
+
+  void _showTimeoutPicker(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: AppLockTimeout.values.map((t) {
+            return ListTile(
+              title: Text(_getTimeoutLabel(l, t)),
+              onTap: () {
+                ref.read(appLockProvider.notifier).setTimeout(t);
+                Navigator.pop(ctx);
+              },
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -312,10 +462,55 @@ class _ThemeTile extends StatelessWidget {
   }
 }
 
+class _LanguageTile extends StatelessWidget {
+  const _LanguageTile({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.isFirst = false,
+    this.isLast = false,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final bool isFirst;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.vertical(
+        top: isFirst ? const Radius.circular(12) : Radius.zero,
+        bottom: isLast ? const Radius.circular(12) : Radius.zero,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(label,
+                  style: TextStyle(
+                    color: selected ? c.textPrimary : c.textBody,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  )),
+            ),
+            if (selected) const Icon(Icons.check_circle_rounded, size: 20, color: AppColors.success),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ActionTile extends StatelessWidget {
   const _ActionTile({
     required this.label,
-    required this.icon,
+    this.value,
+    this.icon,
     required this.onTap,
     this.color,
     this.isFirst = false,
@@ -323,7 +518,8 @@ class _ActionTile extends StatelessWidget {
   });
 
   final String label;
-  final IconData icon;
+  final String? value;
+  final IconData? icon;
   final VoidCallback onTap;
   final Color? color;
   final bool isFirst;
@@ -344,8 +540,10 @@ class _ActionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: tileColor),
-            const SizedBox(width: 14),
+            if (icon != null) ...[
+              Icon(icon, size: 20, color: tileColor),
+              const SizedBox(width: 14),
+            ],
             Expanded(
               child: Text(label,
                   style: TextStyle(
@@ -354,10 +552,147 @@ class _ActionTile extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   )),
             ),
+            if (value != null)
+              Text(value!, style: TextStyle(color: c.textMuted, fontSize: 14)),
+            const SizedBox(width: 8),
             Icon(Icons.arrow_forward_ios_rounded, color: c.borderStrong, size: 14),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SwitchTile extends StatelessWidget {
+  const _SwitchTile({
+    required this.label,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+    this.isFirst = false,
+    this.isLast = false,
+  });
+
+  final String label;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final bool isFirst;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return InkWell(
+      onTap: () => onChanged(!value),
+      borderRadius: BorderRadius.vertical(
+        top: isFirst ? const Radius.circular(12) : Radius.zero,
+        bottom: isLast ? const Radius.circular(12) : Radius.zero,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: TextStyle(
+                        color: c.textPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      )),
+                  Text(subtitle, style: TextStyle(color: c.textMuted, fontSize: 12)),
+                ],
+              ),
+            ),
+            Switch.adaptive(
+              value: value,
+              onChanged: onChanged,
+              activeTrackColor: AppColors.success,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PinSetupDialog extends StatefulWidget {
+  const _PinSetupDialog();
+
+  @override
+  State<_PinSetupDialog> createState() => _PinSetupDialogState();
+}
+
+class _PinSetupDialogState extends State<_PinSetupDialog> {
+  final TextEditingController _controller = TextEditingController();
+  String _pin = '';
+  String _confirmPin = '';
+  bool _isConfirming = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleContinue() {
+    if (_controller.text.length < 4) {
+      setState(() => _error = context.l10n.min4Chars);
+      return;
+    }
+
+    setState(() {
+      if (!_isConfirming) {
+        _pin = _controller.text;
+        _controller.clear();
+        _isConfirming = true;
+        _error = null;
+      } else {
+        _confirmPin = _controller.text;
+        if (_pin == _confirmPin) {
+          Navigator.pop(context, _pin);
+        } else {
+          _error = context.l10n.pinsDoNotMatch;
+          _controller.clear();
+        }
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return AlertDialog(
+      title: Text(_isConfirming ? l.confirmPin : l.setPin),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _controller,
+            obscureText: true,
+            keyboardType: TextInputType.number,
+            maxLength: 4,
+            textAlign: TextAlign.center,
+            style: const TextStyle(letterSpacing: 16, fontSize: 24),
+            decoration: InputDecoration(
+              counterText: '',
+              errorText: _error,
+            ),
+            onChanged: (_) => setState(() => _error = null),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l.cancel)),
+        TextButton(
+          onPressed: _handleContinue,
+          child: Text(_isConfirming ? l.done : l.next),
+        ),
+      ],
     );
   }
 }

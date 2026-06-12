@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'security_service.dart';
 
 /// Manages all local file caching for PDFs, PNGs, and HTML snapshots.
 /// Structure: <appDocDir>/bizdocx/<uid>/<pid>/documents/<filename>
@@ -27,15 +28,37 @@ class LocalCacheService {
   Future<File?> getCachedPdf(String uid, String pid, String docId) async {
     final path = await pdfPath(uid, pid, docId);
     final file = File(path);
-    return file.existsSync() ? file : null;
+    if (!file.existsSync()) return null;
+
+    try {
+      final encryptedBytes = await file.readAsBytes();
+      final decryptedBytes = SecurityService.instance.decryptBytes(encryptedBytes);
+      // We return a temporary file or handle decryption on the fly elsewhere?
+      // Actually, if we want to return a File object that other things (like PDF viewer) can use,
+      // it might need to be a decrypted temp file.
+      // But the requirement is data encryption.
+      // For now, let's return the file, but provide a way to read decrypted bytes.
+      // Wait, if I return the File, the PDF viewer will fail because it's encrypted.
+      // Better to return the decrypted bytes or a decrypted temp file.
+      
+      // Let's create a temp decrypted file for viewing.
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File(p.join(tempDir.path, 'decrypted_$docId.pdf'));
+      await tempFile.writeAsBytes(decryptedBytes, flush: true);
+      return tempFile;
+    } catch (e) {
+      debugPrint('[Cache] PDF decryption failed: $e');
+      return null;
+    }
   }
 
   Future<File> cachePdfBytes(
       Uint8List bytes, String uid, String pid, String docId) async {
     final path = await pdfPath(uid, pid, docId);
     final file = File(path);
-    await file.writeAsBytes(bytes, flush: true);
-    debugPrint('[Cache] PDF saved: $path');
+    final encryptedBytes = SecurityService.instance.encryptBytes(bytes);
+    await file.writeAsBytes(encryptedBytes, flush: true);
+    debugPrint('[Cache] PDF saved (encrypted): $path');
     return file;
   }
 
@@ -48,15 +71,28 @@ class LocalCacheService {
   Future<File?> getCachedImage(String uid, String pid, String assetId) async {
     final path = await imagePath(uid, pid, assetId);
     final file = File(path);
-    return file.existsSync() ? file : null;
+    if (!file.existsSync()) return null;
+
+    try {
+      final encryptedBytes = await file.readAsBytes();
+      final decryptedBytes = SecurityService.instance.decryptBytes(encryptedBytes);
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File(p.join(tempDir.path, 'decrypted_$assetId.png'));
+      await tempFile.writeAsBytes(decryptedBytes, flush: true);
+      return tempFile;
+    } catch (e) {
+      debugPrint('[Cache] Image decryption failed: $e');
+      return null;
+    }
   }
 
   Future<File> cacheImageBytes(
       Uint8List bytes, String uid, String pid, String assetId) async {
     final path = await imagePath(uid, pid, assetId);
     final file = File(path);
-    await file.writeAsBytes(bytes, flush: true);
-    debugPrint('[Cache] Image saved: $path');
+    final encryptedBytes = SecurityService.instance.encryptBytes(bytes);
+    await file.writeAsBytes(encryptedBytes, flush: true);
+    debugPrint('[Cache] Image saved (encrypted): $path');
     return file;
   }
 
@@ -70,7 +106,8 @@ class LocalCacheService {
       String html, String uid, String pid, String docId) async {
     final path = await htmlPath(uid, pid, docId);
     final file = File(path);
-    await file.writeAsString(html, flush: true);
+    final encrypted = SecurityService.instance.encryptString(html);
+    await file.writeAsString(encrypted, flush: true);
     return file;
   }
 
@@ -78,7 +115,13 @@ class LocalCacheService {
     final path = await htmlPath(uid, pid, docId);
     final file = File(path);
     if (!file.existsSync()) return null;
-    return file.readAsString();
+    try {
+      final encrypted = await file.readAsString();
+      return SecurityService.instance.decryptString(encrypted);
+    } catch (e) {
+      debugPrint('[Cache] HTML decryption failed: $e');
+      return null;
+    }
   }
 
   // ── Utilities ──────────────────────────────────────────────────────────────

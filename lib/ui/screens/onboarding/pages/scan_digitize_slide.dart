@@ -8,12 +8,12 @@ class ScanDigitizeSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return OnboardingPageShell(
       anim: anim,
-      eyebrow: 'Multimodal Bridge',
-      headline: 'Scan. Extract.\nDigitize.',
-      body:
-      'Turn paper invoices and receipts into brand-aligned digital documents instantly. Powered by Gemini 3.1 Vision.',
+      eyebrow: l.scanTitle,
+      headline: l.scanHeadline,
+      body: l.scanBody,
       accentColor: const Color(0xFFFF6B35),
       illustration: const _ScanIllustration(),
     );

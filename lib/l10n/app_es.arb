@@ -1,0 +1,492 @@
+{
+  "@@locale": "es",
+  "appTitle": "BizDocx",
+  "appSubtitle": "Tu centro de documentos con IA.",
+
+  "signIn": "Iniciar sesión",
+  "signUp": "Registrarse",
+  "createAccount": "Crear cuenta",
+  "forgotPassword": "¿Olvidaste tu contraseña?",
+  "email": "Correo electrónico",
+  "password": "Contraseña",
+  "confirmPassword": "Confirmar contraseña",
+  "fullName": "Nombre completo",
+  "continueWithGoogle": "Continuar con Google",
+  "noAccount": "¿No tienes una cuenta? Regístrate",
+  "haveAccount": "¿Ya tienes una cuenta? Inicia sesión",
+
+  "signOut": "Cerrar sesión",
+  "signOutConfirm": "¿Cerrar sesión?",
+  "signOutMessage": "¿Estás seguro de que quieres cerrar sesión en tu cuenta?",
+
+  "settings": "Ajustes",
+  "appearance": "Apariencia",
+  "system": "Sistema",
+  "systemSubtitle": "Seguir ajustes del dispositivo",
+  "light": "Claro",
+  "lightSubtitle": "Siempre claro",
+  "dark": "Oscuro",
+  "darkSubtitle": "Siempre oscuro",
+  "subscription": "Suscripción",
+  "plansAndCredits": "Planes y créditos",
+  "storage": "Almacenamiento",
+  "localCache": "Caché local",
+  "clear": "Borrar",
+  "clearCache": "Borrar caché",
+  "clearCacheConfirm": "¿Borrar caché local?",
+  "clearCacheMessage": "Esto eliminará todas las vistas previas de PDF e imágenes almacenadas localmente. Se volverán a descargar o generar según sea necesario.",
+  "supportAndLegal": "Soporte y legal",
+  "contactUs": "Contáctanos",
+  "privacyPolicy": "Política de privacidad",
+  "account": "Cuenta",
+  "deleteMyData": "Eliminar mis datos",
+  "deleteAccount": "¿Eliminar cuenta?",
+  "deleteAccountMessage": "Esto eliminará permanentemente tu cuenta y todos los portafolios y documentos asociados. Esta acción no se puede deshacer.",
+  "deleteEverything": "Eliminar todo",
+  "about": "Acerca de",
+  "version": "Versión",
+  "app": "Aplicación",
+  "aiEngine": "Motor de IA",
+  "aiEngineSubtitle": "Estructural avanzado + Imagen neuronal",
+
+  "generate": "Generar",
+  "generateAsset": "Generar activo",
+  "category": "Categoría",
+  "styleTemplate": "Plantilla de estilo",
+  "orientation": "Orientación",
+  "documentFormat": "Formato de documento",
+  "aspectRatio": "Relación de aspecto",
+  "assetTitle": "Título del activo",
+  "prompt": "Indicación (Prompt)",
+  "promptDescription": "Describe detalles específicos. El estilo y el contexto se aplican automáticamente.",
+  "generateWithCredits": "Generar ({cost} créditos)",
+  "@generateWithCredits": {
+    "placeholders": {
+      "cost": {
+        "type": "int"
+      }
+    }
+  },
+
+  "runningLow": "¡Saldo bajo! (quedan {balance} créditos). Recarga para evitar interrupciones.",
+  "@runningLow": {
+    "placeholders": {
+      "balance": {
+        "type": "int"
+      }
+    }
+  },
+  "topUp": "Recargar",
+  "maybeLater": "Quizás más tarde",
+  "viewPlans": "Ver planes",
+
+  "error": "Error",
+  "deletionFailed": "Error al eliminar: {error}",
+  "generationFailed": "Error de generación",
+  "limitReached": "Límite alcanzado",
+  "generationCancelled": "Generación cancelada",
+  "operationCancelled": "La operación fue cancelada por el usuario.",
+
+  "newBusiness": "Nuevo negocio",
+  "noBusinesses": "Aún no hay negocios",
+  "createPortfolioPrompt": "Crea un portafolio para empezar a generar documentos con IA.",
+  "createFirstBusiness": "Crear primer negocio",
+  "activePlan": "PLAN ACTIVO: {tier}",
+  "@activePlan": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "creditsAvailable": "{credits} créditos disponibles",
+  "@creditsAvailable": {
+    "placeholders": {
+      "credits": {
+        "type": "int"
+      }
+    }
+  },
+
+  "offlineBanner": "Actualmente estás sin conexión",
+  "cancel": "Cancelar",
+  "ok": "Aceptar",
+  "delete": "Eliminar",
+  "restore": "Restaurar",
+  "save": "Guardar",
+  "edit": "Editar",
+  "done": "Hecho",
+
+  "skip": "Omitir",
+  "next": "Siguiente",
+  "getStarted": "Empezar",
+  "welcomeTitle": "Bienvenido a BizDocx",
+  "welcomeHeadline": "Documentos de negocio,\nbellamente diseñados.",
+  "welcomeBody": "Genera facturas profesionales, propuestas, logotipos y más, con el poder de la IA y adaptado a tu marca.",
+  "invoice": "Factura",
+  "proposal": "Propuesta",
+  "logo": "Logotipo",
+  "contract": "Contrato",
+
+  "portfolioTitle": "Portafolios de negocio",
+  "portfolioHeadline": "Gestión multi-entidad.",
+  "portfolioBody": "¿Diriges varios negocios? Crea portafolios dedicados para cada uno para mantener tus documentos y contextos de marca separados.",
+  "myCreativeStudio": "Mi Estudio Creativo",
+  "studioSubtitle": "Diseño y Branding",
+  "luxeRetail": "Luxe Retail Ltd",
+  "retailSubtitle": "E-commerce",
+  "docsCount": "{count} docs",
+  "@docsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "scanTitle": "Escanear y digitalizar",
+  "scanHeadline": "De papel a digital en segundos.",
+  "scanBody": "Escanea facturas o recibos físicos. Nuestra IA extrae los datos y los digitaliza en tu carpeta de negocio al instante.",
+  "scanning": "Escaneando...",
+  "extractingData": "Extrayendo datos...",
+
+  "genTitle": "Generación con IA",
+  "genHeadline": "Plantillas inteligentes, cero esfuerzo.",
+  "genBody": "Simplemente describe lo que necesitas. La IA se encarga del diseño, los cálculos y el estilo basándose en tu perfil de negocio.",
+  "docEngine": "Motor de documentos",
+  "visualEngine": "Motor visual",
+  "illustration": "Ilustración",
+  "badge": "Insignia",
+
+  "filingTitle": "Archivado autónomo",
+  "filingHeadline": "Organización en piloto automático.",
+  "filingBody": "BizDocx dirige automáticamente los documentos a las carpetas correctas, identifica clientes y etiqueta versiones sin que tengas que mover un dedo.",
+
+  "assetsTitle": "Identidad de marca",
+  "assetsHeadline": "Tu marca, en todas partes.",
+  "assetsBody": "Sube tu logotipo una vez. La IA lo coloca de forma inteligente y aplica tus colores de marca a cada documento que generes.",
+  "uploadLogo": "Subir logotipo",
+
+  "refineTitle": "Refinamiento iterativo",
+  "refineHeadline": "Perfecciona cada detalle.",
+  "refineBody": "¿No es del todo correcto? Pídele a la IA que «añada una línea de firma» o «lo haga más formal». Refina hasta que sea perfecto.",
+
+  "smartTitle": "Campos inteligentes",
+  "smartHeadline": "Datos de documentos accionables.",
+  "smartBody": "La IA detecta automáticamente totales, impuestos, clientes y fechas. Obtén información de todo tu portafolio de negocios.",
+  "totalDue": "TOTAL DEUDO",
+  "client": "CLIENTE",
+
+  "finalTitle": "¿Listo para escalar?",
+  "finalHeadline": "Eleva tu flujo de trabajo.",
+  "finalBody": "Únete a miles de negocios que usan BizDocx para ahorrar horas en administración y enfocarse en lo que importa.",
+
+  "ready": "LISTO",
+  "getStartedHeadline": "Construyamos algo\nhermoso.",
+  "getStartedBody": "Inicia sesión o crea una cuenta gratuita para empezar a generar documentos para tu negocio en segundos.",
+  "alreadyHaveAccount": "Ya tengo una cuenta  →",
+
+  "phaseLoadingContext": "Cargando contexto",
+  "phaseGenerating": "Generando documento",
+  "phaseRendering": "Renderizando activo",
+  "phaseSaving": "Guardando en la nube",
+  "phaseSavingVersion": "Guardando versión",
+  "phaseWorking": "Trabajando...",
+
+  "phaseLoadingContextSub": "Recuperando el contexto de tu negocio para la personalización.",
+  "phaseGeneratingSub": "Creando tu documento usando tu perfil de negocio.",
+  "phaseRenderingSub": "Procesando y guardando en caché el activo generado.",
+  "phaseSavingSub": "Guardando en la nube y en caché localmente.",
+  "phaseSavingVersionSub": "Archivando esta versión en tu historial.",
+
+  "success": "Éxito",
+  "pleaseEnterTitleAndPrompt": "Por favor, introduce un título y una indicación.",
+  "topUpMessage": "Actualiza ahora para desbloquear diseños profesionales y eliminar marcas de agua.",
+  "premiumTemplate": "Plantilla Premium",
+
+  "basicInfo": "Información básica",
+  "businessName": "Nombre del negocio *",
+  "shortDescription": "Descripción corta (ej. Agencia de diseño creativo)",
+  "missionStatement": "Declaración de misión",
+  "contactAndIdentity": "Contacto e identidad",
+  "physicalAddress": "Dirección física",
+  "businessEmail": "Correo electrónico del negocio",
+  "phoneNumber": "Número de teléfono",
+  "website": "Sitio web (ej. www.empyreal.works)",
+  "localization": "Localización",
+  "country": "País",
+  "defaultCurrency": "Moneda predeterminada (ej. MXN)",
+  "branding": "Marca",
+  "brandColors": "Colores de marca (hex separados por comas)",
+  "targetAudience": "Público objetivo (ej. Dueños de pequeños negocios)",
+  "createPortfolio": "Crear portafolio",
+  "createPortfolioDescription": "Proporciona más detalles para ayudar a la IA a generar documentos más inteligentes y localizados.",
+  "editBusiness": "Editar negocio",
+  "updatePortfolio": "Actualizar portafolio",
+
+  "resetPassword": "Restablecer contraseña",
+  "enterEmailForReset": "Introduce tu dirección de correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
+  "sendResetLink": "Enviar enlace de restablecimiento",
+  "checkYourEmail": "Revisa tu correo electrónico",
+  "resetLinkSent": "Hemos enviado un enlace para restablecer la contraseña a {email}. Por favor, revisa tu bandeja de entrada (y la carpeta de spam).",
+  "@resetLinkSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "backToSignIn": "Volver al inicio de sesión",
+
+  "all": "Todos",
+  "allTypes": "Todos los tipos",
+  "sortByDate": "Ordenar por fecha",
+  "groupByClient": "Agrupar por cliente",
+  "groupByType": "Agrupar por tipo",
+  "moveToFolder": "Mover a carpeta",
+  "rootNoFolder": "Raíz / Sin carpeta",
+  "newFolder": "Nueva carpeta",
+  "folderName": "Nombre de la carpeta",
+  "create": "Crear",
+  "deleteSelected": "¿Eliminar seleccionados?",
+  "deleteSelectedMessage": "¿Estás seguro de que quieres eliminar todos los documentos seleccionados? Esta acción no se puede deshacer.",
+  "deleteFolder": "¿Eliminar carpeta?",
+  "deleteFolderMessage": "Eliminar una carpeta no eliminará los documentos de su interior; se moverán a la raíz.",
+  "noMatchingDocuments": "No hay documentos coincidentes",
+  "noDocumentsYet": "Aún no hay documentos",
+  "clearFilters": "Borrar filtros",
+  "clearFiltersPrompt": "Intenta borrar los filtros para ver todos los documentos.",
+  "generatePrompt": "Toca Generar para crear tu primer documento con IA.",
+  "scan": "Escanear",
+  "unknownClient": "Cliente desconocido",
+  "files": "Archivos",
+  "aiOrganizationMode": "Modo de organización por IA activado",
+  "manualOrganizationMode": "Modo de organización manual activado",
+  "aiRoutingEnabled": "Enrutamiento por IA activado",
+  "manualModeEnabled": "Modo manual activado",
+  "sortOptions": "Opciones de ordenación",
+  "manageAssets": "Gestionar activos y logotipo",
+  "editBusinessInfo": "Editar información del negocio",
+
+  "scanDocument": "Escanear documento",
+  "scanPrompt": "Toma una foto o sube un documento existente para digitalizarlo con IA.",
+  "analyzingDocument": "Analizando documento...",
+  "analyzingSub": "La IA está extrayendo datos y fusionándolos con tu marca...",
+  "analysisFailed": "Error de análisis",
+  "tryAgain": "Intentar de nuevo",
+  "scanComplete": "Escaneo completado",
+  "discard": "Descartar",
+  "saveDocument": "Guardar documento",
+  "camera": "Cámara",
+  "gallery": "Galería",
+  "type": "Tipo",
+  "total": "Total",
+  "date": "Fecha",
+  "portfolioAssets": "Activos del portafolio",
+  "removeLogo": "¿Eliminar logotipo?",
+  "remove": "Eliminar",
+  "replace": "Reemplazar",
+  "upload": "Subir",
+  "failedToLoad": "Error al cargar",
+  "tapToAddLogo": "Toca para añadir logotipo",
+  "companyLogo": "LOGOTIPO DE LA EMPRESA",
+  "logoHelp": "Aparece en facturas, propuestas, membretes y tarjetas de presentación.",
+  "assetsHelp": "Los activos aquí se incluyen automáticamente en los documentos generados relevantes.",
+  "logoUploaded": "Logotipo subido. Los nuevos documentos lo incluirán automáticamente.",
+  "removeLogoConfirm": "El logotipo se eliminará de futuros documentos. Los documentos existentes no se verán afectados.",
+
+  "signedAndLocked": "DOCUMENTO FIRMADO Y BLOQUEADO",
+  "lowBalance": "Saldo bajo: quedan {balance} créditos.",
+  "@lowBalance": {
+    "placeholders": {
+      "balance": {
+        "type": "int"
+      }
+    }
+  },
+  "preparingPdf": "Preparando tu PDF...",
+  "convertingLayout": "Convirtiendo diseño de alta fidelidad",
+  "freeRevision": "REVISIÓN GRATUITA {count}/3",
+  "@freeRevision": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "describeAChange": "Describe un cambio...",
+  "free": "GRATIS",
+  "couldNotLoad": "No se pudo cargar: {error}",
+  "@couldNotLoad": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noPreviewAvailable": "No hay vista previa disponible.",
+  "edited": "editado el {date}",
+  "@edited": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "operationFailed": "Operación fallida",
+  "dismiss": "Descartar",
+
+  "newDocumentDetails": "Detalles del nuevo documento",
+  "quickLocalEdit": "Edición local rápida",
+  "smartFieldsHelp": "Modifica los campos inteligentes a continuación para actualizar el diseño del documento localmente.",
+  "noSmartFields": "No se encontraron campos inteligentes en este documento.",
+  "saveAndPreview": "Guardar y previsualizar",
+  "newDocumentCreated": "Nuevo documento creado correctamente.",
+  "documentUpdated": "Documento actualizado correctamente.",
+  "errorSaving": "Error al guardar: {error}",
+  "@errorSaving": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "enterField": "Introduce {key}",
+  "@enterField": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "howCanWeHelp": "¿Cómo podemos ayudarte?",
+  "contactHelp": "¿Tienes alguna pregunta, comentario o necesitas ayuda con un documento? Ponte en contacto con nuestro equipo.",
+  "emailSupport": "Soporte por correo electrónico",
+  "feedback": "Comentarios",
+  "sendFeedback": "Envíanos tus ideas",
+  "lastUpdated": "Última actualización: julio de 2024",
+  "noTemplates": "No hay plantillas disponibles para esta categoría.",
+  "premium": "PREMIUM",
+
+  "language": "Idioma",
+  "english": "Inglés",
+  "french": "Francés",
+  "spanish": "Español",
+
+  "security": "Seguridad",
+  "appLock": "Bloqueo de aplicación",
+  "appLockDescription": "Requiere PIN o biometría para abrir la aplicación.",
+  "lockTimeout": "Tiempo de bloqueo",
+  "immediate": "Inmediato",
+  "after1Min": "Después de 1 minuto",
+  "after30Min": "Después de 30 minutos",
+  "changePin": "Cambiar PIN",
+  "setPin": "Establecer PIN",
+  "enterPin": "Introduce el PIN",
+  "confirmPin": "Confirmar PIN",
+  "pinsDoNotMatch": "Los PIN no coinciden",
+  "authenticateToContinue": "Por favor, autentícate para continuar",
+  "biometricAuth": "Autenticación biométrica",
+  "pinAuth": "Autenticación por PIN",
+  "unlock": "Desbloquear",
+  "wrongPin": "PIN incorrecto. Inténtalo de nuevo.",
+
+  "errorUserNotFound": "Usuario no encontrado.",
+  "errorWrongPassword": "Contraseña incorrecta.",
+  "errorEmailInUse": "El correo electrónico ya está en uso.",
+  "errorWeakPassword": "La contraseña es demasiado débil.",
+  "errorInvalidEmail": "Dirección de correo electrónico no válida.",
+  "errorGeneric": "Ocurrió un error. Por favor, inténtelo de nuevo.",
+  "required": "Requerido",
+  "min4Chars": "Mínimo 4 caracteres",
+  "min6Chars": "Mínimo 6 caracteres",
+  "passwordsDoNotMatch": "Las contraseñas no coinciden",
+
+  "paperSizeA4": "A4 Estándar",
+  "paperSizeA3": "A3 Grande",
+  "paperSizeA5": "A5 Pequeño",
+  "paperSizeLetter": "Carta US",
+  "paperSizeLegal": "Legal US",
+  "paperSizeExecutive": "Ejecutivo",
+  "paperSizeTabloid": "Tabloide",
+  "paperSizeContinuous": "Continuo (Largo)",
+
+  "docTypeInvoice": "Factura",
+  "docTypeProposal": "Propuesta",
+  "docTypeLetterhead": "Membrete",
+  "docTypeBusinessCard": "Tarjeta de presentación",
+  "docTypeContract": "Contrato",
+  "docTypeLogo": "Logo",
+  "docTypeIcon": "Icono",
+  "docTypeOther": "Otro",
+
+  "structural": "Estructural",
+  "graphical": "Gráfico",
+  "portrait": "Retrato",
+  "landscape": "Paisaje",
+
+  "suggestedFields": "Campos sugeridos para {type}",
+  "@suggestedFields": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+
+  "exportFailed": "Error al exportar: {error}",
+  "@exportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "original": "Original",
+  "refined": "Refinado",
+  "signed": "Firmado",
+  "versionHistory": "Historial de versiones",
+  "restoreVersion": "¿Restaurar versión?",
+  "restoreVersionMessage": "Esto establecerá el documento actual en la Versión {number}.",
+  "@restoreVersionMessage": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "current": "ACTUAL",
+  "noPreviousVersions": "No hay versiones anteriores disponibles.",
+  "signDocument": "Firmar documento",
+  "documentSigned": "Documento firmado correctamente.",
+  "errorSigning": "Error al firmar: {error}",
+  "@errorSigning": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "signatureInstructions": "Dibuja tu firma a continuación. Una vez aplicada, este documento quedará bloqueado para futuras ediciones de la IA.",
+  "applySignature": "Aplicar firma",
+  "versionNumber": "Versión {number}",
+  "@versionNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "originalGeneration": "Generación original",
+
+  "privacyIntroTitle": "Introducción",
+  "privacyIntroBody": "En BizDocx, nos comprometemos a proteger tu privacidad. Esta política explica cómo recopilamos, usamos y protegemos tu información cuando utilizas nuestro centro de documentos con IA.",
+  "privacyCollectionTitle": "Recopilación de datos",
+  "privacyCollectionBody": "Recopilamos la información necesaria para proporcionar nuestros servicios, incluidos los detalles de la cuenta (nombre, correo electrónico) y el contexto de negocio que proporcionas (nombre de la empresa, misión, colores de marca) para generar documentos.",
+  "privacyAiTitle": "La IA y tu contenido",
+  "privacyAiBody": "Tus indicaciones de documentos y el contexto de negocio son procesados por nuestros socios seguros de generación de IA para crear activos de negocio de alta calidad. No utilizamos tus datos para entrenar nuestros propios modelos sin tu consentimiento explícito.",
+  "privacySecurityTitle": "Seguridad de los datos",
+  "privacySecurityBody": "Tus datos se almacenan de forma segura utilizando una infraestructura en la nube de clase empresarial. Implementamos medidas de seguridad estándar de la industria para proteger contra el acceso o la divulgación no autorizados.",
+  "privacyRightsTitle": "Derechos del usuario",
+  "privacyRightsBody": "Tienes derecho a acceder, corregir o eliminar tus datos en cualquier momento a través de los ajustes de la aplicación. Eliminar tu cuenta eliminará todos los portafolios, documentos e información de perfil asociados."
+}

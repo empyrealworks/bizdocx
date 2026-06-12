@@ -9,6 +9,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/utils/html_to_pdf_pipeline.dart';
+import '../../core/utils/ui_utils.dart';
 import '../../models/document_asset.dart';
 import '../../models/user_profile.dart';
 import '../../providers/auth_provider.dart';
@@ -140,10 +141,7 @@ class _DocumentViewerScreenState
         );
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Export failed: $e'),
-            backgroundColor: AppColors.error,
-          ));
+          UiUtils.showErrorSnackBar(context, context.l10n.exportFailed(e.toString()));
         }
       } finally {
         if (mounted) setState(() => _exporting = false);
@@ -198,6 +196,7 @@ class _DocumentViewerScreenState
 
   Widget _buildScaffold(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     final genState = ref.watch(documentGenerationProvider(_asset.portfolioId));
     final profile = ref.watch(userProfileProvider).value;
     final busy = genState.isLoading || _exporting;
@@ -218,7 +217,7 @@ class _DocumentViewerScreenState
                 description: 'Capture a secure, hand-drawn e-signature to finalize and lock this document.',
                 child: IconButton(
                   icon: const Icon(Icons.draw_rounded, size: 22),
-                  tooltip: 'Sign Document',
+                  tooltip: l.signDocument,
                   onPressed: busy ? null : _showSignature,
                 ),
               ),
@@ -227,7 +226,7 @@ class _DocumentViewerScreenState
               description: 'Travel back in time and restore any previous version of your document.',
               child: IconButton(
                 icon: const Icon(Icons.history_rounded, size: 22),
-                tooltip: 'Version history',
+                tooltip: l.versionHistory,
                 onPressed: busy ? null : _showHistory,
               ),
             ),
@@ -354,13 +353,13 @@ class _SignedBadge extends StatelessWidget {
       width: double.infinity,
       color: AppColors.success.withValues(alpha: 0.1),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.verified_rounded, color: AppColors.success, size: 14),
-          SizedBox(width: 8),
+          const Icon(Icons.verified_rounded, color: AppColors.success, size: 14),
+          const SizedBox(width: 8),
           Text(
-            'DOCUMENT SIGNED & LOCKED',
-            style: TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+            context.l10n.signedAndLocked,
+            style: const TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
           ),
         ],
       ),
@@ -382,10 +381,10 @@ class _LowBalanceBanner extends StatelessWidget {
         children: [
           const Icon(Icons.warning_amber_rounded, color: Color(0xFFFF6B35), size: 14),
           const SizedBox(width: 8),
-          Expanded(child: Text('Low balance: $balance credits remaining.', style: const TextStyle(color: Color(0xFFFF6B35), fontSize: 11, fontWeight: FontWeight.w600))),
+          Expanded(child: Text(context.l10n.lowBalance(balance), style: const TextStyle(color: Color(0xFFFF6B35), fontSize: 11, fontWeight: FontWeight.w600))),
           GestureDetector(
             onTap: () => context.push('/settings/subscription'),
-            child: const Text('Top Up', style: TextStyle(color: Color(0xFFFF6B35), fontSize: 11, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
+            child: Text(context.l10n.topUp, style: const TextStyle(color: Color(0xFFFF6B35), fontSize: 11, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
           )
         ],
       ),
@@ -425,15 +424,15 @@ class _ExportOverlay extends StatelessWidget {
                 const CircularProgressIndicator(strokeWidth: 3),
                 const SizedBox(height: 20),
                 Text(
-                  'Preparing your PDF...',
+                  context.l10n.preparingPdf,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Converting high-fidelity layout',
-                  style: TextStyle(color: c.textMuted, fontSize: 13),
+                  context.l10n.convertingLayout,
+                  style: TextStyle(color: context.colors.textMuted, fontSize: 13),
                 ),
               ],
             ),
@@ -480,7 +479,7 @@ class _RefinementBar extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0, left: 4),
               child: Text(
-                'FREE REVISION ${revisionCount! + 1}/3',
+                context.l10n.freeRevision(revisionCount! + 1),
                 style: const TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
               ),
             ),
@@ -491,11 +490,11 @@ class _RefinementBar extends StatelessWidget {
                 maxLines: 3, minLines: 1,
                 autofocus: true,
                 style: const TextStyle(fontSize: 14),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText:
-                  'Describe a change…',
+                  context.l10n.describeAChange,
                   contentPadding:
-                  EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 ),
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => onSubmit?.call(),
@@ -522,7 +521,7 @@ class _RefinementBar extends StatelessWidget {
                       if (onSubmit != null) ...[
                         const SizedBox(width: 6),
                         Text(
-                          cost == 0 ? 'FREE' : '$cost',
+                          cost == 0 ? context.l10n.free : '$cost',
                           style: TextStyle(
                             color: btnFg,
                             fontSize: 11,
@@ -573,10 +572,11 @@ class _GraphicalViewer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     return ref.watch(offlineFileProvider(asset)).when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
-        child: Text('Could not load: $e',
+        child: Text(l.couldNotLoad(e.toString()),
             style: TextStyle(
                 color: Theme.of(context).colorScheme.error)),
       ),
@@ -595,7 +595,7 @@ class _GraphicalViewer extends ConsumerWidget {
                 errorWidget: (context, url, error) => const Icon(Icons.error),
               )));
         }
-        return Center(child: Text('No preview available.',
+        return Center(child: Text(l.noPreviewAvailable,
             style: TextStyle(color: context.colors.textMuted)));
       },
     );
@@ -611,6 +611,7 @@ class _DocInfoBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       decoration: BoxDecoration(
@@ -622,7 +623,7 @@ class _DocInfoBar extends StatelessWidget {
         _Chip(asset.pipeline.name),
         if (asset.updatedAt != null) ...[
           const SizedBox(width: 8),
-          _Chip('edited ${_fmt(asset.updatedAt!)}'),
+          _Chip(l.edited(_fmt(asset.updatedAt!))),
         ],
         const Spacer(),
         Text(_fmt(asset.createdAt),
@@ -674,6 +675,7 @@ class _SmartErrorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     final isLimitError = error.contains('limit') || error.contains('credits');
 
     return Material(
@@ -698,7 +700,7 @@ class _SmartErrorBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  isLimitError ? 'Limit Reached' : 'Operation Failed',
+                  isLimitError ? l.limitReached : l.operationFailed,
                   style: Theme.of(context).textTheme.titleLarge
                 ),
                 const SizedBox(height: 12),
@@ -717,7 +719,7 @@ class _SmartErrorBanner extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: onDismiss, 
-                        child: const Text('Dismiss')
+                        child: Text(l.dismiss)
                       ),
                     ),
                     if (isLimitError) ...[
@@ -726,7 +728,7 @@ class _SmartErrorBanner extends StatelessWidget {
                         child: FilledButton(
                           onPressed: onUpgrade, 
                           style: FilledButton.styleFrom(backgroundColor: const Color(0xFFFF6B35)),
-                          child: const Text('View Plans')
+                          child: Text(l.viewPlans)
                         ),
                       ),
                     ],

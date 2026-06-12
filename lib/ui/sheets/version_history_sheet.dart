@@ -41,7 +41,7 @@ class VersionHistorySheet extends ConsumerWidget {
               children: [
                 const Icon(Icons.history_rounded, size: 22),
                 const SizedBox(width: 12),
-                Text('Version History',
+                Text(context.l10n.versionHistory,
                     style: Theme.of(context).textTheme.titleLarge),
               ],
             ),
@@ -81,14 +81,15 @@ class VersionHistorySheet extends ConsumerWidget {
   }
 
   Future<void> _handleRestore(BuildContext context, DocumentVersion version) async {
+    final l = context.l10n;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Restore Version?'),
-        content: Text('This will set the current document to Version ${version.versionNumber}.'),
+        title: Text(l.restoreVersion),
+        content: Text(l.restoreVersionMessage(version.versionNumber)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Restore')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l.restore)),
         ],
       ),
     );
@@ -163,7 +164,7 @@ class _VersionTile extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text('Version ${version.versionNumber}',
+                        Text(context.l10n.versionNumber(version.versionNumber),
                             style: const TextStyle(fontWeight: FontWeight.bold)),
                         if (isCurrent) ...[
                           const SizedBox(width: 8),
@@ -173,15 +174,15 @@ class _VersionTile extends StatelessWidget {
                               color: Colors.green.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text('CURRENT',
-                                style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.w900)),
+                            child: Text(context.l10n.current,
+                                style: const TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.w900)),
                           ),
                         ],
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      version.refinementPrompt ?? version.label ?? 'Original Generation',
+                      version.refinementPrompt ?? version.label ?? context.l10n.originalGeneration,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: c.textMuted, fontSize: 12),
@@ -220,7 +221,7 @@ class _EmptyHistory extends StatelessWidget {
       children: [
         Icon(Icons.history_toggle_off_rounded, size: 48, color: c.borderStrong),
         const SizedBox(height: 16),
-        const Text('No previous versions available.', style: TextStyle(color: Colors.grey)),
+        Text(context.l10n.noPreviousVersions, style: const TextStyle(color: Colors.grey)),
       ],
     ),
   );

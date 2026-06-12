@@ -72,13 +72,13 @@ class _SmartFieldEditorSheetState extends ConsumerState<SmartFieldEditorSheet> {
       if (mounted) {
         Navigator.pop(context, result);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.isDuplicating ? 'New document created successfully.' : 'Document updated successfully.')),
+          SnackBar(content: Text(widget.isDuplicating ? context.l10n.newDocumentCreated : context.l10n.documentUpdated)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving: $e')),
+          SnackBar(content: Text(context.l10n.errorSaving(e.toString()))),
         );
       }
     } finally {
@@ -106,7 +106,7 @@ class _SmartFieldEditorSheetState extends ConsumerState<SmartFieldEditorSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  widget.isDuplicating ? 'New Document Details' : 'Quick Local Edit',
+                  widget.isDuplicating ? context.l10n.newDocumentDetails : context.l10n.quickLocalEdit,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 IconButton(
@@ -117,16 +117,16 @@ class _SmartFieldEditorSheetState extends ConsumerState<SmartFieldEditorSheet> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Modify the smart fields below to update the document layout locally.',
+              context.l10n.smartFieldsHelp,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
             
             if (_fields.isEmpty)
-              const Center(
+              Center(
                 child: Padding(
-                  padding: EdgeInsets.all(32.0),
-                  child: Text('No smart fields found in this document.', textAlign: TextAlign.center),
+                  padding: const EdgeInsets.all(32.0),
+                  child: Text(context.l10n.noSmartFields, textAlign: TextAlign.center),
                 ),
               )
             else
@@ -141,7 +141,7 @@ class _SmartFieldEditorSheetState extends ConsumerState<SmartFieldEditorSheet> {
                       controller: _controllers[field.key],
                       decoration: InputDecoration(
                         labelText: _formatKey(field.key),
-                        hintText: 'Enter ${field.key}',
+                        hintText: context.l10n.enterField(field.key),
                       ),
                     );
                   },
@@ -153,7 +153,7 @@ class _SmartFieldEditorSheetState extends ConsumerState<SmartFieldEditorSheet> {
               onPressed: _isSaving ? null : _save,
               child: _isSaving 
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                : const Text('Save & Preview'),
+                : Text(context.l10n.saveAndPreview),
             ),
             const SizedBox(height: 16),
           ],

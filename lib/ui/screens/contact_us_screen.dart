@@ -7,9 +7,10 @@ class ContactUsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Contact Us')),
+      appBar: AppBar(title: Text(l.contactUs)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -24,10 +25,10 @@ class ContactUsScreen extends StatelessWidget {
               child: Icon(Icons.support_agent_rounded, size: 40, color: c.textPrimary),
             ),
             const SizedBox(height: 24),
-            Text('How can we help?', style: Theme.of(context).textTheme.headlineMedium),
+            Text(l.howCanWeHelp, style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 12),
             Text(
-              'Have a question, feedback, or need help with a document? Reach out to our team.',
+              l.contactHelp,
               textAlign: TextAlign.center,
               style: TextStyle(color: c.textBody, fontSize: 15, height: 1.5),
             ),
@@ -35,7 +36,7 @@ class ContactUsScreen extends StatelessWidget {
             _contactCard(
               context,
               icon: Icons.email_outlined,
-              title: 'Email Support',
+              title: l.emailSupport,
               value: 'support@bizdocx.com',
               onTap: () {
                 // In a real app, use url_launcher to open email client
@@ -45,8 +46,8 @@ class ContactUsScreen extends StatelessWidget {
             _contactCard(
               context,
               icon: Icons.chat_bubble_outline_rounded,
-              title: 'Feedback',
-              value: 'Send us your thoughts',
+              title: l.feedback,
+              value: l.sendFeedback,
               onTap: () {
                 // Open feedback form
               },

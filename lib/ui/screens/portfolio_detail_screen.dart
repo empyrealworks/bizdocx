@@ -87,7 +87,7 @@ class _PortfolioDetailScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(portfolio?.name ?? 'Portfolio'),
+        title: Text(portfolio?.name ?? 'Portfolio'), // Portfolio name is dynamic
         leading: folderState.isSelectionMode 
           ? IconButton(
               icon: const Icon(Icons.close),
@@ -99,17 +99,17 @@ class _PortfolioDetailScreenState
             IconButton(
               icon: const Icon(Icons.drive_file_move_outlined),
               onPressed: () => _showMoveDialog(context, folderState.folders),
-              tooltip: 'Move to folder',
+              tooltip: context.l10n.moveToFolder,
             ),
             IconButton(
               icon: const Icon(Icons.delete_outline),
               onPressed: () => _confirmBatchDelete(context, documentsAsync.value ?? []),
-              tooltip: 'Delete selected',
+              tooltip: context.l10n.delete,
             ),
           ] else if (portfolio != null) ...[
             Showcase(
               key: _manualKey,
-              description: 'AI Organization is on by default. Toggle this to manually manage your filing cabinet.',
+              description: 'AI Organization is on by default. Toggle this to manually manage your filing cabinet.', // Showcase descriptions might need localization too, but usually they are static per user. I'll localize if I have a key.
               child: _ManualModeToggle(portfolio: portfolio),
             ),
             Showcase(
@@ -118,7 +118,7 @@ class _PortfolioDetailScreenState
               child: IconButton(
                 icon: const Icon(Icons.sort),
                 onPressed: () => _showSortMenu(context, folderNotifier),
-                tooltip: 'Sort options',
+                tooltip: context.l10n.sortOptions,
               ),
             ),
             Showcase(
@@ -127,7 +127,7 @@ class _PortfolioDetailScreenState
               child: IconButton(
                 icon: Icon(Icons.photo_library_outlined,
                     size: 20, color: c.iconPrimary),
-                tooltip: 'Manage assets & logo',
+                tooltip: context.l10n.manageAssets,
                 onPressed: () => _showSheet(
                     context, AssetManagerSheet(portfolioId: widget.portfolioId)),
               ),
@@ -135,7 +135,7 @@ class _PortfolioDetailScreenState
             IconButton(
               icon: Icon(Icons.edit_outlined,
                   size: 20, color: c.iconPrimary),
-              tooltip: 'Edit business info',
+              tooltip: context.l10n.editBusinessInfo,
               onPressed: () =>
                   _showSheet(context, EditPortfolioSheet(portfolio: portfolio)),
             ),
@@ -230,7 +230,7 @@ class _PortfolioDetailScreenState
               foregroundColor: context.colors.iconPrimary,
               heroTag: 'scan_fab',
               icon: const Icon(Icons.document_scanner_outlined),
-              label: const Text('Scan'),
+              label: Text(context.l10n.scan),
             ),
           ),
           const SizedBox(height: 12),
@@ -243,7 +243,7 @@ class _PortfolioDetailScreenState
               backgroundColor: context.colors.filledButtonBg,
               foregroundColor: context.colors.filledButtonFg,
               icon: const Icon(Icons.auto_awesome, size: 18),
-              label: const Text('Generate'),
+              label: Text(context.l10n.generate),
               heroTag: 'gen_fab',
             ),
           ),
@@ -261,6 +261,7 @@ class _PortfolioDetailScreenState
   }
 
   void _showSortMenu(BuildContext context, FolderNotifier notifier) {
+    final l = context.l10n;
     showModalBottomSheet(
       context: context,
       builder: (ctx) => Column(
@@ -268,17 +269,17 @@ class _PortfolioDetailScreenState
         children: [
           ListTile(
             leading: const Icon(Icons.calendar_today),
-            title: const Text('Sort by Date'),
+            title: Text(l.sortByDate),
             onTap: () { notifier.setSortCriteria(DocumentSortCriteria.date); Navigator.pop(ctx); },
           ),
           ListTile(
             leading: const Icon(Icons.person_outline),
-            title: const Text('Group by Client'),
+            title: Text(l.groupByClient),
             onTap: () { notifier.setSortCriteria(DocumentSortCriteria.client); Navigator.pop(ctx); },
           ),
           ListTile(
             leading: const Icon(Icons.category_outlined),
-            title: const Text('Group by Type'),
+            title: Text(l.groupByType),
             onTap: () { notifier.setSortCriteria(DocumentSortCriteria.type); Navigator.pop(ctx); },
           ),
         ],
@@ -287,17 +288,18 @@ class _PortfolioDetailScreenState
   }
 
   void _showMoveDialog(BuildContext context, List<DocumentFolder> folders) {
+     final l = context.l10n;
      showDialog(
        context: context,
        builder: (ctx) => AlertDialog(
-         title: const Text('Move to Folder'),
+         title: Text(l.moveToFolder),
          content: SizedBox(
            width: double.maxFinite,
            child: ListView(
              shrinkWrap: true,
              children: [
                ListTile(
-                 title: const Text('Root / No Folder'),
+                 title: Text(l.rootNoFolder),
                  onTap: () {
                    ref.read(folderProvider(widget.portfolioId).notifier).moveSelectedToFolder(null);
                    Navigator.pop(ctx);
@@ -313,7 +315,7 @@ class _PortfolioDetailScreenState
                const Divider(),
                ListTile(
                  leading: const Icon(Icons.add),
-                 title: const Text('New Folder'),
+                 title: Text(l.newFolder),
                  onTap: () {
                     Navigator.pop(ctx);
                     _showNewFolderDialog(context);
@@ -327,18 +329,19 @@ class _PortfolioDetailScreenState
   }
 
   void _showNewFolderDialog(BuildContext context) {
+    final l = context.l10n;
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('New Folder'),
+        title: Text(l.newFolder),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(hintText: 'Folder name'),
+          decoration: InputDecoration(hintText: l.folderName),
           autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l.cancel)),
           TextButton(
             onPressed: () {
               if (controller.text.isNotEmpty) {
@@ -346,7 +349,7 @@ class _PortfolioDetailScreenState
               }
               Navigator.pop(ctx);
             },
-            child: const Text('Create'),
+            child: Text(l.create),
           ),
         ],
       ),
@@ -354,19 +357,20 @@ class _PortfolioDetailScreenState
   }
 
   void _confirmBatchDelete(BuildContext context, List<DocumentAsset> allDocs) {
+     final l = context.l10n;
      showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Selected?'),
-        content: const Text('Are you sure you want to delete all selected documents? This cannot be undone.'),
+        title: Text(l.deleteSelected),
+        content: Text(l.deleteSelectedMessage),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l.cancel)),
           TextButton(
             onPressed: () {
               ref.read(folderProvider(widget.portfolioId).notifier).deleteSelectedDocuments(allDocs);
               Navigator.pop(ctx);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -386,20 +390,21 @@ class _ManualModeToggle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     return IconButton(
       icon: Icon(
         portfolio.enableManualMode ? Icons.lock_open : Icons.auto_awesome_mosaic,
         color: portfolio.enableManualMode ? context.colors.iconPrimary : context.colors.textMuted,
       ),
-      tooltip: portfolio.enableManualMode ? 'Manual Mode Enabled' : 'AI Routing Enabled',
+      tooltip: portfolio.enableManualMode ? l.manualModeEnabled : l.aiRoutingEnabled,
       onPressed: () {
         FirebaseService.instance.updatePortfolio(
           portfolio.copyWith(enableManualMode: !portfolio.enableManualMode),
         );
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(portfolio.enableManualMode 
-            ? 'AI Organization Mode Enabled' 
-            : 'Manual Organization Mode Enabled'),
+            ? l.aiOrganizationMode 
+            : l.manualOrganizationMode),
           duration: const Duration(seconds: 2),
         ));
       },
@@ -439,9 +444,10 @@ class _CategorizedView extends StatelessWidget {
   }
 
   Widget _buildClientGroups(BuildContext context) {
+    final l = context.l10n;
     final Map<String, List<DocumentAsset>> groups = {};
     for (var doc in docs) {
-      final client = doc.clientName ?? 'Unknown Client';
+      final client = doc.clientName ?? l.unknownClient;
       groups.putIfAbsent(client, () => []).add(doc);
     }
 
@@ -524,6 +530,7 @@ class _ManualFolderView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rootDocs = docs.where((d) => d.folderId == null).toList();
+    final l = context.l10n;
     
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -548,7 +555,7 @@ class _ManualFolderView extends ConsumerWidget {
         if (rootDocs.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text('Files', style: TextStyle(fontWeight: FontWeight.bold, color: context.colors.textPrimary.withValues(alpha: 0.5))),
+            child: Text(l.files, style: TextStyle(fontWeight: FontWeight.bold, color: context.colors.textPrimary.withValues(alpha: 0.5))),
           ),
           ...rootDocs.map((doc) => Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -567,19 +574,20 @@ class _ManualFolderView extends ConsumerWidget {
   }
 
   void _confirmDeleteFolder(BuildContext context, WidgetRef ref, DocumentFolder folder) {
+    final l = context.l10n;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Folder?'),
-        content: const Text('Deleting a folder will not delete the documents inside; they will move to the root.'),
+        title: Text(l.deleteFolder),
+        content: Text(l.deleteFolderMessage),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l.cancel)),
           TextButton(
             onPressed: () {
                ref.read(folderProvider(portfolioId).notifier).deleteFolder(folder);
                Navigator.pop(ctx);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -659,6 +667,7 @@ class _FilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     return Container(
       decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: c.border))),
@@ -668,12 +677,12 @@ class _FilterBar extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
             child: Row(children: [
-              _Chip(label: 'All',
+              _Chip(label: l.all,
                   active: pipelineFilter == null,
                   onTap: () => onPipelineChanged(null)),
               const SizedBox(width: 8),
               _Chip(
-                  label: 'Structural',
+                  label: l.structural,
                   icon: Icons.description_outlined,
                   active: pipelineFilter == AssetPipeline.structural,
                   onTap: () => onPipelineChanged(
@@ -681,7 +690,7 @@ class _FilterBar extends StatelessWidget {
                           ? null : AssetPipeline.structural)),
               const SizedBox(width: 8),
               _Chip(
-                  label: 'Graphical',
+                  label: l.graphical,
                   icon: Icons.auto_awesome_outlined,
                   active: pipelineFilter == AssetPipeline.graphical,
                   onTap: () => onPipelineChanged(
@@ -693,14 +702,14 @@ class _FilterBar extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
             child: Row(children: [
-              _Chip(label: 'All types',
+              _Chip(label: l.allTypes,
                   active: typeFilter == null,
                   onTap: () => onTypeChanged(null),
                   small: true),
               ..._relevantTypes.map((t) => Padding(
                 padding: const EdgeInsets.only(left: 6),
                 child: _Chip(
-                    label: _label(t),
+                    label: _label(context, t),
                     active: typeFilter == t,
                     onTap: () =>
                         onTypeChanged(typeFilter == t ? null : t),
@@ -713,16 +722,17 @@ class _FilterBar extends StatelessWidget {
     );
   }
 
-  String _label(DocumentType t) {
+  String _label(BuildContext context, DocumentType t) {
+    final l = context.l10n;
     switch (t) {
-      case DocumentType.invoice:      return 'Invoice';
-      case DocumentType.proposal:     return 'Proposal';
-      case DocumentType.letterhead:   return 'Letterhead';
-      case DocumentType.businessCard: return 'Business Card';
-      case DocumentType.contract:     return 'Contract';
-      case DocumentType.logo:         return 'Logo';
-      case DocumentType.icon:         return 'Icon';
-      case DocumentType.other:        return 'Other';
+      case DocumentType.invoice:      return l.docTypeInvoice;
+      case DocumentType.proposal:     return l.docTypeProposal;
+      case DocumentType.letterhead:   return l.docTypeLetterhead;
+      case DocumentType.businessCard: return l.docTypeBusinessCard;
+      case DocumentType.contract:     return l.docTypeContract;
+      case DocumentType.logo:         return l.docTypeLogo;
+      case DocumentType.icon:         return l.docTypeIcon;
+      case DocumentType.other:        return l.docTypeOther;
     }
   }
 }
@@ -790,6 +800,7 @@ class _ContextBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final c      = context.colors;
     final accent = _primaryColor(portfolio.brandColors);
+    final l      = context.l10n;
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       padding: const EdgeInsets.all(16),
@@ -823,7 +834,7 @@ class _ContextBanner extends StatelessWidget {
                   maxLines: 1, overflow: TextOverflow.ellipsis),
           ],
         )),
-        Text('${portfolio.documentIds.length} docs',
+        Text(l.docsCount(portfolio.documentIds.length),
             style: Theme.of(context).textTheme.labelSmall),
       ]),
     );
@@ -884,19 +895,20 @@ class _EmptyDocState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.description_outlined, color: c.textMuted, size: 48),
           const SizedBox(height: 16),
-          Text(hasFilters ? 'No matching documents' : 'No documents yet',
+          Text(hasFilters ? l.noMatchingDocuments : l.noDocumentsYet,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           Text(
             hasFilters
-                ? 'Try clearing filters to see all documents.'
-                : 'Tap Generate to create your first AI document.',
+                ? l.clearFiltersPrompt
+                : l.generatePrompt,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -904,7 +916,7 @@ class _EmptyDocState extends StatelessWidget {
             const SizedBox(height: 16),
             OutlinedButton(
                 onPressed: onClearFilters,
-                child: const Text('Clear Filters')),
+                child: Text(l.clearFilters)),
           ],
         ]),
       ),

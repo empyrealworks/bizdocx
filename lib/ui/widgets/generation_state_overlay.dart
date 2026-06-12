@@ -37,7 +37,7 @@ class GenerationStateOverlay extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                _title,
+                _title(context),
                 style: TextStyle(
                   color: c.textPrimary,
                   fontSize: 17,
@@ -47,7 +47,7 @@ class GenerationStateOverlay extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                _subtitle,
+                _subtitle(context),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: c.textMuted, fontSize: 14, height: 1.4),
               ),
@@ -61,7 +61,7 @@ class GenerationStateOverlay extends StatelessWidget {
                   side: BorderSide(color: c.border),
                   minimumSize: const Size(120, 40),
                 ),
-                child: const Text('Cancel'),
+                child: Text(context.l10n.cancel),
               ),
             ],
           ),
@@ -70,29 +70,31 @@ class GenerationStateOverlay extends StatelessWidget {
     );
   }
 
-  String get _title {
+  String _title(BuildContext context) {
+    final l = context.l10n;
     switch (phase) {
-      case GenerationPhase.fetchingContext: return 'Loading Context';
-      case GenerationPhase.generating:     return 'Generating Document';
-      case GenerationPhase.converting:     return 'Rendering Asset';
-      case GenerationPhase.saving:         return 'Saving to Cloud';
-      case GenerationPhase.savingVersion:  return 'Saving Version';
-      default:                             return 'Working…';
+      case GenerationPhase.fetchingContext: return l.phaseLoadingContext;
+      case GenerationPhase.generating:     return l.phaseGenerating;
+      case GenerationPhase.converting:     return l.phaseRendering;
+      case GenerationPhase.saving:         return l.phaseSaving;
+      case GenerationPhase.savingVersion:  return l.phaseSavingVersion;
+      default:                             return l.phaseWorking;
     }
   }
 
-  String get _subtitle {
+  String _subtitle(BuildContext context) {
+    final l = context.l10n;
     switch (phase) {
       case GenerationPhase.fetchingContext:
-        return 'Retrieving your business context for personalisation.';
+        return l.phaseLoadingContextSub;
       case GenerationPhase.generating:
-        return 'Crafting your document using your business profile.';
+        return l.phaseGeneratingSub;
       case GenerationPhase.converting:
-        return 'Processing and caching the generated asset.';
+        return l.phaseRenderingSub;
       case GenerationPhase.saving:
-        return 'Saving to Cloud and caching locally.';
+        return l.phaseSavingSub;
       case GenerationPhase.savingVersion:
-        return 'Archiving this version in your history.';
+        return l.phaseSavingVersionSub;
       default:
         return '';
     }

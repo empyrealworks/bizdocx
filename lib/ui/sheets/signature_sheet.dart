@@ -69,13 +69,13 @@ class _SignatureSheetState extends ConsumerState<SignatureSheet> {
       if (mounted) {
         Navigator.pop(context, updated);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Document signed successfully.')),
+          SnackBar(content: Text(context.l10n.documentSigned)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error signing: $e')),
+          SnackBar(content: Text(context.l10n.errorSigning(e.toString()))),
         );
       }
     } finally {
@@ -100,7 +100,7 @@ class _SignatureSheetState extends ConsumerState<SignatureSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Sign Document', style: Theme.of(context).textTheme.headlineSmall),
+              Text(context.l10n.signDocument, style: Theme.of(context).textTheme.headlineSmall),
               IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.pop(context),
@@ -109,7 +109,7 @@ class _SignatureSheetState extends ConsumerState<SignatureSheet> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Draw your signature below. Once applied, this document will be locked for further AI edits.',
+            context.l10n.signatureInstructions,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 24),
@@ -157,7 +157,7 @@ class _SignatureSheetState extends ConsumerState<SignatureSheet> {
                   _repaintNotifier.notifyListeners();
                 },
                 icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('Clear'),
+                label: Text(context.l10n.clear),
               ),
               const Spacer(),
               FilledButton(
@@ -167,7 +167,7 @@ class _SignatureSheetState extends ConsumerState<SignatureSheet> {
                 ),
                 child: _isSaving
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                    : const Text('Apply Signature'),
+                    : Text(context.l10n.applySignature),
               ),
             ],
           ),

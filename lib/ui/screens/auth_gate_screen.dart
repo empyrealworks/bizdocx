@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
+import '../../core/utils/ui_utils.dart';
 import '../../services/firebase_service.dart';
+import '../widgets/app_button.dart';
 
 class AuthGateScreen extends ConsumerStatefulWidget {
   const AuthGateScreen({super.key});
@@ -69,17 +71,19 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
 
   String _parseError(dynamic e) {
     final s = e.toString();
-    if (s.contains('user-not-found'))    return 'User not found.';
-    if (s.contains('wrong-password'))    return 'Incorrect password.';
-    if (s.contains('email-already-in-use')) return 'Email already in use.';
-    if (s.contains('weak-password'))     return 'Password is too weak.';
-    if (s.contains('invalid-email'))     return 'Invalid email address.';
-    return 'An error occurred. Please try again.';
+    final l = context.l10n;
+    if (s.contains('user-not-found'))    return l.errorUserNotFound;
+    if (s.contains('wrong-password'))    return l.errorWrongPassword;
+    if (s.contains('email-already-in-use')) return l.errorEmailInUse;
+    if (s.contains('weak-password'))     return l.errorWeakPassword;
+    if (s.contains('invalid-email'))     return l.errorInvalidEmail;
+    return l.errorGeneric;
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     final isDark = context.isDark;
 
     return Scaffold(
@@ -104,12 +108,12 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text('BizDocx',
+                Text(l.appTitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.displayLarge),
                 const SizedBox(height: 8),
                 Text(
-                  'Your AI document hub.',
+                  l.appSubtitle,
                   textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
@@ -122,9 +126,9 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                   TextFormField(
                     controller: _nameCtrl,
                     decoration:
-                    const InputDecoration(hintText: 'Full Name'),
+                    InputDecoration(hintText: l.fullName),
                     validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Required' : null,
+                    (v == null || v.isEmpty) ? l.required : null,
                   ),
                   const SizedBox(height: 12),
                 ],
@@ -132,10 +136,10 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                 TextFormField(
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(hintText: 'Email'),
+                  decoration: InputDecoration(hintText: l.email),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Required';
-                    if (!v.contains('@')) return 'Invalid email';
+                    if (v == null || v.isEmpty) return l.required;
+                    if (!v.contains('@')) return l.errorInvalidEmail;
                     return null;
                   },
                 ),
@@ -145,7 +149,7 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                   controller: _passCtrl,
                   obscureText: _obscure,
                   decoration: InputDecoration(
-                    hintText: 'Password',
+                    hintText: l.password,
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscure
@@ -158,7 +162,7 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                     ),
                   ),
                   validator: (v) => (v == null || v.length < 6)
-                      ? 'Min 6 characters'
+                      ? l.min6Chars
                       : null,
                 ),
 
@@ -167,10 +171,10 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                   TextFormField(
                     controller: _confirmCtrl,
                     obscureText: _obscure,
-                    decoration: const InputDecoration(
-                        hintText: 'Confirm Password'),
+                    decoration: InputDecoration(
+                        hintText: l.confirmPassword),
                     validator: (v) => v != _passCtrl.text
-                        ? 'Passwords do not match'
+                        ? l.passwordsDoNotMatch
                         : null,
                   ),
                 ] else ...[
@@ -178,7 +182,7 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => context.push('/auth/forgot-password'),
-                      child: Text('Forgot Password?', 
+                      child: Text(l.forgotPassword, 
                         style: TextStyle(color: c.textMuted, fontSize: 13)),
                     ),
                   ),
@@ -195,28 +199,19 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                 ],
 
                 const SizedBox(height: 32),
-                FilledButton(
-                  onPressed: _loading ? null : _submit,
-                  child: _loading
-                      ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: c.filledButtonFg),
-                  )
-                      : Text(_isLogin ? 'Sign In' : 'Create Account'),
+                AppButton(
+                  onPressed: _submit,
+                  loading: _loading,
+                  label: _isLogin ? l.signIn : l.signUp,
                 ),
 
                 const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  onPressed: _loading ? null : _googleSignIn,
-                  icon: CachedNetworkImage(
-                    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
-                    height: 18,
-                    errorWidget: (_, __, ___) =>
-                        const Icon(Icons.login, size: 18),
-                  ),
-                  label: const Text('Continue with Google'),
+                AppButton(
+                  onPressed: _googleSignIn,
+                  loading: _loading,
+                  style: AppButtonStyle.outlined,
+                  icon: Icons.login, // Google icon from URL was a bit much
+                  label: l.continueWithGoogle,
                 ),
 
                 const SizedBox(height: 24),
@@ -228,8 +223,8 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                     }),
                     child: Text(
                       _isLogin
-                          ? "Don't have an account? Sign up"
-                          : 'Already have an account? Sign in',
+                          ? l.noAccount
+                          : l.haveAccount,
                       style: TextStyle(color: c.textBody),
                     ),
                   ),

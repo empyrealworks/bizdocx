@@ -1,0 +1,492 @@
+{
+  "@@locale": "fr",
+  "appTitle": "BizDocx",
+  "appSubtitle": "Votre plateforme de documents IA.",
+
+  "signIn": "Se connecter",
+  "signUp": "S'inscrire",
+  "createAccount": "Créer un compte",
+  "forgotPassword": "Mot de passe oublié ?",
+  "email": "E-mail",
+  "password": "Mot de passe",
+  "confirmPassword": "Confirmer le mot de passe",
+  "fullName": "Nom complet",
+  "continueWithGoogle": "Continuer avec Google",
+  "noAccount": "Vous n'avez pas de compte ? Inscrivez-vous",
+  "haveAccount": "Vous avez déjà un compte ? Connectez-vous",
+
+  "signOut": "Déconnexion",
+  "signOutConfirm": "Déconnexion ?",
+  "signOutMessage": "Êtes-vous sûr de vouloir vous déconnecter de votre compte ?",
+
+  "settings": "Paramètres",
+  "appearance": "Apparence",
+  "system": "Système",
+  "systemSubtitle": "Suivre les paramètres de l'appareil",
+  "light": "Clair",
+  "lightSubtitle": "Toujours clair",
+  "dark": "Sombre",
+  "darkSubtitle": "Toujours sombre",
+  "subscription": "Abonnement",
+  "plansAndCredits": "Forfaits et crédits",
+  "storage": "Stockage",
+  "localCache": "Cache local",
+  "clear": "Effacer",
+  "clearCache": "Effacer le cache",
+  "clearCacheConfirm": "Effacer le cache local ?",
+  "clearCacheMessage": "Cela supprimera tous les aperçus PDF et images stockés localement. Ils seront re-téléchargés ou re-générés si nécessaire.",
+  "supportAndLegal": "Assistance et mentions légales",
+  "contactUs": "Contactez-nous",
+  "privacyPolicy": "Politique de confidentialité",
+  "account": "Compte",
+  "deleteMyData": "Supprimer mes données",
+  "deleteAccount": "Supprimer le compte ?",
+  "deleteAccountMessage": "Cela supprimera définitivement votre compte ainsi que tous les portfolios et documents associés. Cette action est irréversible.",
+  "deleteEverything": "Tout supprimer",
+  "about": "À propos",
+  "version": "Version",
+  "app": "Application",
+  "aiEngine": "Moteur IA",
+  "aiEngineSubtitle": "Structurel avancé + Image neurale",
+
+  "generate": "Générer",
+  "generateAsset": "Générer un actif",
+  "category": "Catégorie",
+  "styleTemplate": "Modèle de style",
+  "orientation": "Orientation",
+  "documentFormat": "Format du document",
+  "aspectRatio": "Ratio d'aspect",
+  "assetTitle": "Titre de l'actif",
+  "prompt": "Invite (Prompt)",
+  "promptDescription": "Décrivez les détails spécifiques. Le style et le contexte sont appliqués automatiquement.",
+  "generateWithCredits": "Générer ({cost} crédits)",
+  "@generateWithCredits": {
+    "placeholders": {
+      "cost": {
+        "type": "int"
+      }
+    }
+  },
+
+  "runningLow": "Solde faible ! ({balance} crédits restants). Rechargez pour éviter les interruptions.",
+  "@runningLow": {
+    "placeholders": {
+      "balance": {
+        "type": "int"
+      }
+    }
+  },
+  "topUp": "Recharger",
+  "maybeLater": "Plus tard",
+  "viewPlans": "Voir les forfaits",
+
+  "error": "Erreur",
+  "deletionFailed": "Échec de la suppression : {error}",
+  "generationFailed": "Échec de la génération",
+  "limitReached": "Limite atteinte",
+  "generationCancelled": "Génération annulée",
+  "operationCancelled": "L'opération a été annulée par l'utilisateur.",
+
+  "newBusiness": "Nouvelle entreprise",
+  "noBusinesses": "Aucune entreprise pour le moment",
+  "createPortfolioPrompt": "Créez un portfolio pour commencer à générer des documents alimentés par l'IA.",
+  "createFirstBusiness": "Créer la première entreprise",
+  "activePlan": "FORFAIT ACTIF : {tier}",
+  "@activePlan": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "creditsAvailable": "{credits} crédits disponibles",
+  "@creditsAvailable": {
+    "placeholders": {
+      "credits": {
+        "type": "int"
+      }
+    }
+  },
+
+  "offlineBanner": "Vous êtes actuellement hors ligne",
+  "cancel": "Annuler",
+  "ok": "OK",
+  "delete": "Supprimer",
+  "restore": "Restaurer",
+  "save": "Enregistrer",
+  "edit": "Modifier",
+  "done": "Terminé",
+
+  "skip": "Passer",
+  "next": "Suivant",
+  "getStarted": "Commencer",
+  "welcomeTitle": "Bienvenue sur BizDocx",
+  "welcomeHeadline": "Des documents professionnels,\nmagnifiquement conçus.",
+  "welcomeBody": "Générez des factures professionnelles, des propositions, des logos et bien plus encore — propulsé par l'IA et adapté à votre marque.",
+  "invoice": "Facture",
+  "proposal": "Proposition",
+  "logo": "Logo",
+  "contract": "Contrat",
+
+  "portfolioTitle": "Portfolios d'entreprise",
+  "portfolioHeadline": "Gestion multi-entités.",
+  "portfolioBody": "Vous gérez plusieurs entreprises ? Créez des portfolios dédiés pour chacune afin de séparer vos documents et contextes de marque.",
+  "myCreativeStudio": "Mon Studio Créatif",
+  "studioSubtitle": "Design & Branding",
+  "luxeRetail": "Luxe Retail Ltd",
+  "retailSubtitle": "E-commerce",
+  "docsCount": "{count} docs",
+  "@docsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "scanTitle": "Scanner et numériser",
+  "scanHeadline": "Du papier au numérique en quelques secondes.",
+  "scanBody": "Scannez des factures ou des reçus physiques. Notre IA extrait les données et les numérise instantanément dans votre dossier d'entreprise.",
+  "scanning": "Numérisation...",
+  "extractingData": "Extraction des données...",
+
+  "genTitle": "Génération IA",
+  "genHeadline": "Modèles intelligents, effort zéro.",
+  "genBody": "Décrivez simplement ce dont vous avez besoin. L'IA s'occupe de la mise en page, des calculs et du style en fonction de votre profil d'entreprise.",
+  "docEngine": "Moteur de documents",
+  "visualEngine": "Moteur visuel",
+  "illustration": "Illustration",
+  "badge": "Badge",
+
+  "filingTitle": "Classement autonome",
+  "filingHeadline": "Organisation en pilote automatique.",
+  "filingBody": "BizDocx achemine automatiquement les documents vers les bons dossiers, identifie les clients et marque les versions sans que vous ayez à lever le petit doigt.",
+
+  "assetsTitle": "Identité de marque",
+  "assetsHeadline": "Votre marque, partout.",
+  "assetsBody": "Téléchargez votre logo une seule fois. L'IA le place intelligemment et applique vos couleurs de marque à chaque document que vous générez.",
+  "uploadLogo": "Télécharger le logo",
+
+  "refineTitle": "Affinage itératif",
+  "refineHeadline": "Perfectionnez chaque détail.",
+  "refineBody": "Ce n'est pas tout à fait ça ? Demandez à l'IA d'« ajouter une ligne de signature » ou de « rendre le document plus formel ». Affinez jusqu'à la perfection.",
+
+  "smartTitle": "Champs intelligents",
+  "smartHeadline": "Données documentaires exploitables.",
+  "smartBody": "L'IA détecte automatiquement les totaux, les taxes, les clients et les dates. Obtenez des informations sur l'ensemble de votre portfolio d'activités.",
+  "totalDue": "TOTAL DÛ",
+  "client": "CLIENT",
+
+  "finalTitle": "Prêt à passer à l'échelle ?",
+  "finalHeadline": "Améliorez votre flux de travail.",
+  "finalBody": "Rejoignez des milliers d'entreprises utilisant BizDocx pour gagner des heures sur l'administration et se concentrer sur l'essentiel.",
+
+  "ready": "PRÊT",
+  "getStartedHeadline": "Créons quelque chose\nde magnifique.",
+  "getStartedBody": "Connectez-vous ou créez un compte gratuit pour commencer à générer des documents pour votre entreprise en quelques secondes.",
+  "alreadyHaveAccount": "J'ai déjà un compte  →",
+
+  "phaseLoadingContext": "Chargement du contexte",
+  "phaseGenerating": "Génération du document",
+  "phaseRendering": "Rendu de l'actif",
+  "phaseSaving": "Enregistrement sur le Cloud",
+  "phaseSavingVersion": "Enregistrement de la version",
+  "phaseWorking": "Travail en cours...",
+
+  "phaseLoadingContextSub": "Récupération de votre contexte d'entreprise pour la personnalisation.",
+  "phaseGeneratingSub": "Conception de votre document à l'aide de votre profil d'entreprise.",
+  "phaseRenderingSub": "Traitement et mise en cache de l'actif généré.",
+  "phaseSavingSub": "Enregistrement sur le Cloud et mise en cache locale.",
+  "phaseSavingVersionSub": "Archivage de cette version dans votre historique.",
+
+  "success": "Succès",
+  "pleaseEnterTitleAndPrompt": "Veuillez saisir un titre et une invite.",
+  "topUpMessage": "Passez au forfait supérieur pour débloquer des designs professionnels et supprimer les filigranes.",
+  "premiumTemplate": "Modèle Premium",
+
+  "basicInfo": "Informations de base",
+  "businessName": "Nom de l'entreprise *",
+  "shortDescription": "Courte description (ex: Agence de design créatif)",
+  "missionStatement": "Énoncé de mission",
+  "contactAndIdentity": "Contact et identité",
+  "physicalAddress": "Adresse physique",
+  "businessEmail": "E-mail de l'entreprise",
+  "phoneNumber": "Numéro de téléphone",
+  "website": "Site web (ex: www.empyreal.works)",
+  "localization": "Localisation",
+  "country": "Pays",
+  "defaultCurrency": "Devise par défaut (ex: EUR)",
+  "branding": "Marque",
+  "brandColors": "Couleurs de la marque (hex séparés par des virgules)",
+  "targetAudience": "Public cible (ex: Propriétaires de petites entreprises)",
+  "createPortfolio": "Créer le portfolio",
+  "createPortfolioDescription": "Fournissez plus de détails pour aider l'IA à générer des documents plus intelligents et localisés.",
+  "editBusiness": "Modifier l'entreprise",
+  "updatePortfolio": "Mettre à jour le portfolio",
+
+  "resetPassword": "Réinitialiser le mot de passe",
+  "enterEmailForReset": "Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+  "sendResetLink": "Envoyer le lien de réinitialisation",
+  "checkYourEmail": "Vérifiez votre boîte mail",
+  "resetLinkSent": "Nous avons envoyé un lien de réinitialisation du mot de passe à {email}. Veuillez vérifier votre boîte de réception (et vos spams).",
+  "@resetLinkSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "backToSignIn": "Retour à la connexion",
+
+  "all": "Tous",
+  "allTypes": "Tous les types",
+  "sortByDate": "Trier par date",
+  "groupByClient": "Grouper par client",
+  "groupByType": "Grouper par type",
+  "moveToFolder": "Déplacer vers le dossier",
+  "rootNoFolder": "Racine / Aucun dossier",
+  "newFolder": "Nouveau dossier",
+  "folderName": "Nom du dossier",
+  "create": "Créer",
+  "deleteSelected": "Supprimer la sélection ?",
+  "deleteSelectedMessage": "Êtes-vous sûr de vouloir supprimer tous les documents sélectionnés ? Cette action est irréversible.",
+  "deleteFolder": "Supprimer le dossier ?",
+  "deleteFolderMessage": "La suppression d'un dossier ne supprimera pas les documents qu'il contient ; ils seront déplacés à la racine.",
+  "noMatchingDocuments": "Aucun document correspondant",
+  "noDocumentsYet": "Aucun document pour le moment",
+  "clearFilters": "Effacer les filtres",
+  "clearFiltersPrompt": "Essayez d'effacer les filtres pour voir tous les documents.",
+  "generatePrompt": "Appuyez sur Générer pour créer votre premier document IA.",
+  "scan": "Scanner",
+  "unknownClient": "Client inconnu",
+  "files": "Fichiers",
+  "aiOrganizationMode": "Mode d'organisation IA activé",
+  "manualOrganizationMode": "Mode d'organisation manuel activé",
+  "aiRoutingEnabled": "Routage IA activé",
+  "manualModeEnabled": "Mode manuel activé",
+  "sortOptions": "Options de tri",
+  "manageAssets": "Gérer les actifs et le logo",
+  "editBusinessInfo": "Modifier les infos de l'entreprise",
+
+  "scanDocument": "Scanner un document",
+  "scanPrompt": "Prenez une photo ou téléchargez un document existant pour le numériser avec l'IA.",
+  "analyzingDocument": "Analyse du document...",
+  "analyzingSub": "L'IA extrait les données et les fusionne avec votre marque...",
+  "analysisFailed": "Échec de l'analyse",
+  "tryAgain": "Réessayer",
+  "scanComplete": "Numérisation terminée",
+  "discard": "Ignorer",
+  "saveDocument": "Enregistrer le document",
+  "camera": "Appareil photo",
+  "gallery": "Galerie",
+  "type": "Type",
+  "total": "Total",
+  "date": "Date",
+  "portfolioAssets": "Actifs du portfolio",
+  "removeLogo": "Supprimer le logo ?",
+  "remove": "Supprimer",
+  "replace": "Remplacer",
+  "upload": "Télécharger",
+  "failedToLoad": "Échec du chargement",
+  "tapToAddLogo": "Appuyez pour ajouter un logo",
+  "companyLogo": "LOGO DE L'ENTREPRISE",
+  "logoHelp": "Apparaît dans les factures, les propositions, les en-têtes de lettre et les cartes de visite.",
+  "assetsHelp": "Les actifs ici sont automatiquement inclus dans les documents générés pertinents.",
+  "logoUploaded": "Logo téléchargé. Les nouveaux documents l'incluront automatiquement.",
+  "removeLogoConfirm": "Le logo sera supprimé des futurs documents. Les documents existants ne sont pas affectés.",
+
+  "signedAndLocked": "DOCUMENT SIGNÉ ET VERROUILLÉ",
+  "lowBalance": "Solde faible : {balance} crédits restants.",
+  "@lowBalance": {
+    "placeholders": {
+      "balance": {
+        "type": "int"
+      }
+    }
+  },
+  "preparingPdf": "Préparation de votre PDF...",
+  "convertingLayout": "Conversion de la mise en page haute fidélité",
+  "freeRevision": "RÉVISION GRATUITE {count}/3",
+  "@freeRevision": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "describeAChange": "Décrivez un changement...",
+  "free": "GRATUIT",
+  "couldNotLoad": "Impossible de charger : {error}",
+  "@couldNotLoad": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noPreviewAvailable": "Aucun aperçu disponible.",
+  "edited": "modifié le {date}",
+  "@edited": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "operationFailed": "Échec de l'opération",
+  "dismiss": "Ignorer",
+
+  "newDocumentDetails": "Détails du nouveau document",
+  "quickLocalEdit": "Modification locale rapide",
+  "smartFieldsHelp": "Modifiez les champs intelligents ci-dessous pour mettre à jour la mise en page du document localement.",
+  "noSmartFields": "Aucun champ intelligent trouvé dans ce document.",
+  "saveAndPreview": "Enregistrer et prévisualiser",
+  "newDocumentCreated": "Nouveau document créé avec succès.",
+  "documentUpdated": "Document mis à jour avec succès.",
+  "errorSaving": "Erreur lors de l'enregistrement : {error}",
+  "@errorSaving": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "enterField": "Saisir {key}",
+  "@enterField": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "howCanWeHelp": "Comment pouvons-nous vous aider ?",
+  "contactHelp": "Vous avez une question, un commentaire ou besoin d'aide pour un document ? Contactez notre équipe.",
+  "emailSupport": "Support par e-mail",
+  "feedback": "Commentaires",
+  "sendFeedback": "Envoyez-nous vos réflexions",
+  "lastUpdated": "Dernière mise à jour : juillet 2024",
+  "noTemplates": "Aucun modèle disponible pour cette catégorie.",
+  "premium": "PREMIUM",
+
+  "language": "Langue",
+  "english": "Anglais",
+  "french": "Français",
+  "spanish": "Espagnol",
+
+  "security": "Sécurité",
+  "appLock": "Verrouillage de l'application",
+  "appLockDescription": "Nécessite un code PIN ou la biométrie pour ouvrir l'application.",
+  "lockTimeout": "Délai de verrouillage",
+  "immediate": "Immédiat",
+  "after1Min": "Après 1 minute",
+  "after30Min": "Après 30 minutes",
+  "changePin": "Changer le code PIN",
+  "setPin": "Définir le code PIN",
+  "enterPin": "Entrez le code PIN",
+  "confirmPin": "Confirmer le code PIN",
+  "pinsDoNotMatch": "Les codes PIN ne correspondent pas",
+  "authenticateToContinue": "Veuillez vous authentifier pour continuer",
+  "biometricAuth": "Authentification biométrique",
+  "pinAuth": "Authentification par code PIN",
+  "unlock": "Déverrouiller",
+  "wrongPin": "Code PIN incorrect. Veuillez réessayer.",
+
+  "errorUserNotFound": "Utilisateur non trouvé.",
+  "errorWrongPassword": "Mot de passe incorrect.",
+  "errorEmailInUse": "E-mail déjà utilisé.",
+  "errorWeakPassword": "Le mot de passe est trop faible.",
+  "errorInvalidEmail": "Adresse e-mail invalide.",
+  "errorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+  "required": "Requis",
+  "min4Chars": "4 caractères minimum",
+  "min6Chars": "6 caractères minimum",
+  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+
+  "paperSizeA4": "A4 Standard",
+  "paperSizeA3": "A3 Grand",
+  "paperSizeA5": "A5 Petit",
+  "paperSizeLetter": "Lettre US",
+  "paperSizeLegal": "Légal US",
+  "paperSizeExecutive": "Exécutif",
+  "paperSizeTabloid": "Tabloïde",
+  "paperSizeContinuous": "Continu (Long)",
+
+  "docTypeInvoice": "Facture",
+  "docTypeProposal": "Proposition",
+  "docTypeLetterhead": "En-tête de lettre",
+  "docTypeBusinessCard": "Carte de visite",
+  "docTypeContract": "Contrat",
+  "docTypeLogo": "Logo",
+  "docTypeIcon": "Icône",
+  "docTypeOther": "Autre",
+
+  "structural": "Structurel",
+  "graphical": "Graphique",
+  "portrait": "Portrait",
+  "landscape": "Paysage",
+
+  "suggestedFields": "Champs suggérés pour {type}",
+  "@suggestedFields": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+
+  "exportFailed": "Échec de l'exportation : {error}",
+  "@exportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "original": "Original",
+  "refined": "Affiné",
+  "signed": "Signé",
+  "versionHistory": "Historique des versions",
+  "restoreVersion": "Restaurer la version ?",
+  "restoreVersionMessage": "Cela définira le document actuel sur la Version {number}.",
+  "@restoreVersionMessage": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "current": "ACTUELLE",
+  "noPreviousVersions": "Aucune version précédente disponible.",
+  "signDocument": "Signer le document",
+  "documentSigned": "Document signé avec succès.",
+  "errorSigning": "Erreur lors de la signature : {error}",
+  "@errorSigning": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "signatureInstructions": "Dessinez votre signature ci-dessous. Une fois appliquée, ce document sera verrouillé pour toute modification ultérieure par l'IA.",
+  "applySignature": "Appliquer la signature",
+  "versionNumber": "Version {number}",
+  "@versionNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "originalGeneration": "Génération originale",
+
+  "privacyIntroTitle": "Introduction",
+  "privacyIntroBody": "Chez BizDocx, nous nous engageons à protéger votre vie privée. Cette politique explique comment nous collectons, utilisons et protégeons vos informations lorsque vous utilisez notre plateforme de documents alimentée par l'IA.",
+  "privacyCollectionTitle": "Collecte de données",
+  "privacyCollectionBody": "Nous collectons les informations nécessaires pour fournir nos services, y compris les détails du compte (nom, e-mail) et le contexte d'entreprise que vous fournissez (nom de l'entreprise, mission, couleurs de marque) pour générer des documents.",
+  "privacyAiTitle": "L'IA et votre contenu",
+  "privacyAiBody": "Vos invites de documents et votre contexte d'entreprise sont traités par nos partenaires de génération d'IA sécurisés pour créer des actifs commerciaux de haute qualité. Nous n'utilisons pas vos données pour entraîner nos propres modèles sans votre consentement explicite.",
+  "privacySecurityTitle": "Sécurité des données",
+  "privacySecurityBody": "Vos données sont stockées en toute sécurité à l'aide d'une infrastructure cloud de classe entreprise. Nous mettons en œuvre des mesures de sécurité conformes aux normes de l'industrie pour nous protéger contre tout accès ou divulgation non autorisé.",
+  "privacyRightsTitle": "Droits de l'utilisateur",
+  "privacyRightsBody": "Vous avez le droit d'accéder, de corriger ou de supprimer vos données à tout moment via les paramètres de l'application. La suppression de votre compte supprimera tous les portfolios, documents et informations de profil associés."
+}

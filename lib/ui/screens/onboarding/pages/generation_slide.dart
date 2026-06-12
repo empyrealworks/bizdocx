@@ -9,12 +9,12 @@ class GenerationSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return OnboardingPageShell(
       anim: anim,
-      eyebrow: 'AI Generation',
-      headline: 'From a prompt\nto a document.',
-      body:
-      'Describe what you need. BizDocx generates print-ready HTML documents, or high-quality visuals like logos and icons.',
+      eyebrow: l.genTitle,
+      headline: l.genHeadline,
+      body: l.genBody,
       accentColor: const Color(0xFF6C7FFF),
       illustration: const _GenerationIllustration(),
     );
@@ -50,6 +50,7 @@ class _GenerationIllustrationState extends State<_GenerationIllustration>
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l = context.l10n;
     return Container(
       color: c.surface,
       child: Stack(children: [
@@ -64,12 +65,12 @@ class _GenerationIllustrationState extends State<_GenerationIllustration>
           left: 0, top: 0, bottom: 0,
           width: MediaQuery.of(context).size.width * 0.5 - 1,
           child: _GenerationPanel(
-            label: 'Structural',
-            sublabel: 'Document Engine',
+            label: l.structural,
+            sublabel: l.docEngine,
             icon: Icons.description_outlined,
             accent: const Color(0xFF6C7FFF),
             ctrl: _ctrl,
-            items: const ['Invoice', 'Proposal', 'Contract', 'Letterhead'],
+            items: [l.docTypeInvoice, l.docTypeProposal, l.docTypeContract, l.docTypeLetterhead],
           ),
         ),
 
@@ -78,12 +79,12 @@ class _GenerationIllustrationState extends State<_GenerationIllustration>
           right: 0, top: 0, bottom: 0,
           width: MediaQuery.of(context).size.width * 0.5 - 1,
           child: _GenerationPanel(
-            label: 'Graphical',
-            sublabel: 'Visual Engine',
+            label: l.graphical,
+            sublabel: l.visualEngine,
             icon: Icons.auto_awesome_outlined,
             accent: const Color(0xFFFF6B6B),
             ctrl: _ctrl,
-            items: const ['Logo', 'Icon', 'Illustration', 'Badge'],
+            items: [l.docTypeLogo, l.docTypeIcon, l.illustration, l.badge],
             reversed: true,
           ),
         ),

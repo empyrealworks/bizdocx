@@ -78,7 +78,7 @@ class ConfirmDialog extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                    child: Text(context.l10n.cancel),
                   ),
                 ),
                 const SizedBox(width: 12),

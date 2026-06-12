@@ -1,0 +1,492 @@
+{
+  "@@locale": "en",
+  "appTitle": "BizDocx",
+  "appSubtitle": "Your AI document hub.",
+
+  "signIn": "Sign In",
+  "signUp": "Sign Up",
+  "createAccount": "Create Account",
+  "forgotPassword": "Forgot Password?",
+  "email": "Email",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "fullName": "Full Name",
+  "continueWithGoogle": "Continue with Google",
+  "noAccount": "Don't have an account? Sign up",
+  "haveAccount": "Already have an account? Sign in",
+
+  "signOut": "Sign out",
+  "signOutConfirm": "Sign Out?",
+  "signOutMessage": "Are you sure you want to sign out of your account?",
+
+  "settings": "Settings",
+  "appearance": "Appearance",
+  "system": "System",
+  "systemSubtitle": "Follow device setting",
+  "light": "Light",
+  "lightSubtitle": "Always light",
+  "dark": "Dark",
+  "darkSubtitle": "Always dark",
+  "subscription": "Subscription",
+  "plansAndCredits": "Plans & Credits",
+  "storage": "Storage",
+  "localCache": "Local Cache",
+  "clear": "Clear",
+  "clearCache": "Clear Cache",
+  "clearCacheConfirm": "Clear Local Cache?",
+  "clearCacheMessage": "This will remove all locally stored PDF and image previews. They will be re-downloaded or re-generated as needed.",
+  "supportAndLegal": "Support & Legal",
+  "contactUs": "Contact Us",
+  "privacyPolicy": "Privacy Policy",
+  "account": "Account",
+  "deleteMyData": "Delete My Data",
+  "deleteAccount": "Delete Account?",
+  "deleteAccountMessage": "This will permanently delete your account and all associated portfolios and documents. This action cannot be undone.",
+  "deleteEverything": "Delete Everything",
+  "about": "About",
+  "version": "Version",
+  "app": "App",
+  "aiEngine": "AI Engine",
+  "aiEngineSubtitle": "Advanced Structural + Neural Image",
+
+  "generate": "Generate",
+  "generateAsset": "Generate Asset",
+  "category": "Category",
+  "styleTemplate": "Style Template",
+  "orientation": "Orientation",
+  "documentFormat": "Document Format",
+  "aspectRatio": "Aspect Ratio",
+  "assetTitle": "Asset Title",
+  "prompt": "Prompt",
+  "promptDescription": "Describe specific details. The style and context are applied automatically.",
+  "generateWithCredits": "Generate ({cost} Credits)",
+  "@generateWithCredits": {
+    "placeholders": {
+      "cost": {
+        "type": "int"
+      }
+    }
+  },
+
+  "runningLow": "Running low! ({balance} credits remaining). Top up to avoid interruptions.",
+  "@runningLow": {
+    "placeholders": {
+      "balance": {
+        "type": "int"
+      }
+    }
+  },
+  "topUp": "Top Up",
+  "maybeLater": "Maybe Later",
+  "viewPlans": "View Plans",
+
+  "error": "Error",
+  "deletionFailed": "Deletion failed: {error}",
+  "generationFailed": "Generation Failed",
+  "limitReached": "Limit Reached",
+  "generationCancelled": "Generation Cancelled",
+  "operationCancelled": "The operation was cancelled by the user.",
+
+  "newBusiness": "New Business",
+  "noBusinesses": "No businesses yet",
+  "createPortfolioPrompt": "Create a portfolio to start generating AI-powered documents.",
+  "createFirstBusiness": "Create First Business",
+  "activePlan": "ACTIVE PLAN: {tier}",
+  "@activePlan": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "creditsAvailable": "{credits} Credits Available",
+  "@creditsAvailable": {
+    "placeholders": {
+      "credits": {
+        "type": "int"
+      }
+    }
+  },
+
+  "offlineBanner": "You are currently offline",
+  "cancel": "Cancel",
+  "ok": "OK",
+  "delete": "Delete",
+  "restore": "Restore",
+  "save": "Save",
+  "edit": "Edit",
+  "done": "Done",
+
+  "skip": "Skip",
+  "next": "Next",
+  "getStarted": "Get Started",
+  "welcomeTitle": "Welcome to BizDocx",
+  "welcomeHeadline": "Business documents,\nbeautifully made.",
+  "welcomeBody": "Generate professional invoices, proposals, logos, and more — powered by AI and tailored to your brand.",
+  "invoice": "Invoice",
+  "proposal": "Proposal",
+  "logo": "Logo",
+  "contract": "Contract",
+
+  "portfolioTitle": "Business Portfolios",
+  "portfolioHeadline": "Multi-entity management.",
+  "portfolioBody": "Run multiple businesses? Create dedicated portfolios for each to keep your documents and brand contexts separate.",
+  "myCreativeStudio": "My Creative Studio",
+  "studioSubtitle": "Design & Branding",
+  "luxeRetail": "Luxe Retail Ltd",
+  "retailSubtitle": "E-commerce",
+  "docsCount": "{count} docs",
+  "@docsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "scanTitle": "Scan & Digitize",
+  "scanHeadline": "Paper to Digital in seconds.",
+  "scanBody": "Scan physical invoices or receipts. Our AI extracts the data and digitizes them into your business folder instantly.",
+  "scanning": "Scanning...",
+  "extractingData": "Extracting Data...",
+
+  "genTitle": "AI Generation",
+  "genHeadline": "Smart templates, zero effort.",
+  "genBody": "Just describe what you need. AI handles the layout, calculations, and styling based on your business profile.",
+  "docEngine": "Document Engine",
+  "visualEngine": "Visual Engine",
+  "illustration": "Illustration",
+  "badge": "Badge",
+
+  "filingTitle": "Autonomous Filing",
+  "filingHeadline": "Organization on autopilot.",
+  "filingBody": "BizDocx automatically routes documents to the right folders, identifies clients, and tags versions without you lifting a finger.",
+
+  "assetsTitle": "Brand Identity",
+  "assetsHeadline": "Your brand, everywhere.",
+  "assetsBody": "Upload your logo once. AI intelligently places it and applies your brand colors to every document you generate.",
+  "uploadLogo": "Upload Logo",
+
+  "refineTitle": "Iterative Refinement",
+  "refineHeadline": "Perfect every detail.",
+  "refineBody": "Not quite right? Ask the AI to 'add a signature line' or 'make it more formal'. Refine until it's perfect.",
+
+  "smartTitle": "Smart Fields",
+  "smartHeadline": "Actionable document data.",
+  "smartBody": "AI automatically detects totals, tax, clients, and dates. Get insights across your entire business portfolio.",
+  "totalDue": "TOTAL DUE",
+  "client": "CLIENT",
+
+  "finalTitle": "Ready to Scale?",
+  "finalHeadline": "Level up your workflow.",
+  "finalBody": "Join thousands of businesses using BizDocx to save hours on administration and focus on what matters.",
+
+  "ready": "READY",
+  "getStartedHeadline": "Let's build something\nbeautiful.",
+  "getStartedBody": "Sign in or create a free account to start generating documents for your business in seconds.",
+  "alreadyHaveAccount": "I already have an account  →",
+
+  "phaseLoadingContext": "Loading Context",
+  "phaseGenerating": "Generating Document",
+  "phaseRendering": "Rendering Asset",
+  "phaseSaving": "Saving to Cloud",
+  "phaseSavingVersion": "Saving Version",
+  "phaseWorking": "Working...",
+
+  "phaseLoadingContextSub": "Retrieving your business context for personalisation.",
+  "phaseGeneratingSub": "Crafting your document using your business profile.",
+  "phaseRenderingSub": "Processing and caching the generated asset.",
+  "phaseSavingSub": "Saving to Cloud and caching locally.",
+  "phaseSavingVersionSub": "Archiving this version in your history.",
+
+  "success": "Success",
+  "pleaseEnterTitleAndPrompt": "Please enter a title and prompt.",
+  "topUpMessage": "Upgrade now to unlock professional designs and remove watermarks.",
+  "premiumTemplate": "Premium Template",
+
+  "basicInfo": "Basic Info",
+  "businessName": "Business Name *",
+  "shortDescription": "Short Description (e.g. Creative Design Agency)",
+  "missionStatement": "Mission Statement",
+  "contactAndIdentity": "Contact & Identity",
+  "physicalAddress": "Physical Address",
+  "businessEmail": "Business Email",
+  "phoneNumber": "Phone Number",
+  "website": "Website (e.g. www.empyreal.works)",
+  "localization": "Localization",
+  "country": "Country",
+  "defaultCurrency": "Default Currency (e.g. NGN)",
+  "branding": "Branding",
+  "brandColors": "Brand Colors (comma-separated hex)",
+  "targetAudience": "Target Audience (e.g. Small business owners)",
+  "createPortfolio": "Create Portfolio",
+  "createPortfolioDescription": "Provide more details to help the AI generate smarter, localized documents.",
+  "editBusiness": "Edit Business",
+  "updatePortfolio": "Update Portfolio",
+
+  "resetPassword": "Reset Password",
+  "enterEmailForReset": "Enter your email address and we'll send you a link to reset your password.",
+  "sendResetLink": "Send Reset Link",
+  "checkYourEmail": "Check your email",
+  "resetLinkSent": "We've sent a password reset link to {email}. Please check your inbox (and spam folder).",
+  "@resetLinkSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "backToSignIn": "Back to Sign In",
+
+  "all": "All",
+  "allTypes": "All types",
+  "sortByDate": "Sort by Date",
+  "groupByClient": "Group by Client",
+  "groupByType": "Group by Type",
+  "moveToFolder": "Move to Folder",
+  "rootNoFolder": "Root / No Folder",
+  "newFolder": "New Folder",
+  "folderName": "Folder name",
+  "create": "Create",
+  "deleteSelected": "Delete Selected?",
+  "deleteSelectedMessage": "Are you sure you want to delete all selected documents? This cannot be undone.",
+  "deleteFolder": "Delete Folder?",
+  "deleteFolderMessage": "Deleting a folder will not delete the documents inside; they will move to the root.",
+  "noMatchingDocuments": "No matching documents",
+  "noDocumentsYet": "No documents yet",
+  "clearFilters": "Clear Filters",
+  "clearFiltersPrompt": "Try clearing filters to see all documents.",
+  "generatePrompt": "Tap Generate to create your first AI document.",
+  "scan": "Scan",
+  "unknownClient": "Unknown Client",
+  "files": "Files",
+  "aiOrganizationMode": "AI Organization Mode Enabled",
+  "manualOrganizationMode": "Manual Organization Mode Enabled",
+  "aiRoutingEnabled": "AI Routing Enabled",
+  "manualModeEnabled": "Manual Mode Enabled",
+  "sortOptions": "Sort options",
+  "manageAssets": "Manage assets & logo",
+  "editBusinessInfo": "Edit business info",
+
+  "scanDocument": "Scan Document",
+  "scanPrompt": "Take a photo or upload an existing document to digitize it with AI.",
+  "analyzingDocument": "Analyzing document...",
+  "analyzingSub": "AI is extracting data and merging with your brand...",
+  "analysisFailed": "Analysis Failed",
+  "tryAgain": "Try Again",
+  "scanComplete": "Scan Complete",
+  "discard": "Discard",
+  "saveDocument": "Save Document",
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "type": "Type",
+  "total": "Total",
+  "date": "Date",
+  "portfolioAssets": "Portfolio Assets",
+  "removeLogo": "Remove logo?",
+  "remove": "Remove",
+  "replace": "Replace",
+  "upload": "Upload",
+  "failedToLoad": "Failed to load",
+  "tapToAddLogo": "Tap to add logo",
+  "companyLogo": "COMPANY LOGO",
+  "logoHelp": "Appears in invoices, proposals, letterheads, and business cards.",
+  "assetsHelp": "Assets here are automatically included in relevant generated documents.",
+  "logoUploaded": "Logo uploaded. New documents will include it automatically.",
+  "removeLogoConfirm": "The logo will be removed from future documents. Existing documents are unaffected.",
+
+  "signedAndLocked": "DOCUMENT SIGNED & LOCKED",
+  "lowBalance": "Low balance: {balance} credits remaining.",
+  "@lowBalance": {
+    "placeholders": {
+      "balance": {
+        "type": "int"
+      }
+    }
+  },
+  "preparingPdf": "Preparing your PDF...",
+  "convertingLayout": "Converting high-fidelity layout",
+  "freeRevision": "FREE REVISION {count}/3",
+  "@freeRevision": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "describeAChange": "Describe a change...",
+  "free": "FREE",
+  "couldNotLoad": "Could not load: {error}",
+  "@couldNotLoad": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noPreviewAvailable": "No preview available.",
+  "edited": "edited {date}",
+  "@edited": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "operationFailed": "Operation Failed",
+  "dismiss": "Dismiss",
+
+  "newDocumentDetails": "New Document Details",
+  "quickLocalEdit": "Quick Local Edit",
+  "smartFieldsHelp": "Modify the smart fields below to update the document layout locally.",
+  "noSmartFields": "No smart fields found in this document.",
+  "saveAndPreview": "Save & Preview",
+  "newDocumentCreated": "New document created successfully.",
+  "documentUpdated": "Document updated successfully.",
+  "errorSaving": "Error saving: {error}",
+  "@errorSaving": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "enterField": "Enter {key}",
+  "@enterField": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "howCanWeHelp": "How can we help?",
+  "contactHelp": "Have a question, feedback, or need help with a document? Reach out to our team.",
+  "emailSupport": "Email Support",
+  "feedback": "Feedback",
+  "sendFeedback": "Send us your thoughts",
+  "lastUpdated": "Last updated: July 2024",
+  "noTemplates": "No templates available for this category.",
+  "premium": "PREMIUM",
+
+  "language": "Language",
+  "english": "English",
+  "french": "French",
+  "spanish": "Spanish",
+
+  "security": "Security",
+  "appLock": "App Lock",
+  "appLockDescription": "Require PIN or Biometrics to open the app.",
+  "lockTimeout": "Lock Timeout",
+  "immediate": "Immediate",
+  "after1Min": "After 1 minute",
+  "after30Min": "After 30 minutes",
+  "changePin": "Change PIN",
+  "setPin": "Set PIN",
+  "enterPin": "Enter PIN",
+  "confirmPin": "Confirm PIN",
+  "pinsDoNotMatch": "PINs do not match",
+  "authenticateToContinue": "Please authenticate to continue",
+  "biometricAuth": "Biometric Authentication",
+  "pinAuth": "PIN Authentication",
+  "unlock": "Unlock",
+  "wrongPin": "Incorrect PIN. Please try again.",
+
+  "errorUserNotFound": "User not found.",
+  "errorWrongPassword": "Incorrect password.",
+  "errorEmailInUse": "Email already in use.",
+  "errorWeakPassword": "Password is too weak.",
+  "errorInvalidEmail": "Invalid email address.",
+  "errorGeneric": "An error occurred. Please try again.",
+  "required": "Required",
+  "min4Chars": "Min 4 characters",
+  "min6Chars": "Min 6 characters",
+  "passwordsDoNotMatch": "Passwords do not match",
+
+  "paperSizeA4": "A4 Standard",
+  "paperSizeA3": "A3 Large",
+  "paperSizeA5": "A5 Small",
+  "paperSizeLetter": "US Letter",
+  "paperSizeLegal": "US Legal",
+  "paperSizeExecutive": "Executive",
+  "paperSizeTabloid": "Tabloid",
+  "paperSizeContinuous": "Continuous (Long)",
+
+  "docTypeInvoice": "Invoice",
+  "docTypeProposal": "Proposal",
+  "docTypeLetterhead": "Letterhead",
+  "docTypeBusinessCard": "Business Card",
+  "docTypeContract": "Contract",
+  "docTypeLogo": "Logo",
+  "docTypeIcon": "Icon",
+  "docTypeOther": "Other",
+
+  "structural": "Structural",
+  "graphical": "Graphical",
+  "portrait": "Portrait",
+  "landscape": "Landscape",
+
+  "suggestedFields": "Suggested fields for {type}",
+  "@suggestedFields": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+
+  "exportFailed": "Export failed: {error}",
+  "@exportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "original": "Original",
+  "refined": "Refined",
+  "signed": "Signed",
+  "versionHistory": "Version History",
+  "restoreVersion": "Restore Version?",
+  "restoreVersionMessage": "This will set the current document to Version {number}.",
+  "@restoreVersionMessage": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "current": "CURRENT",
+  "noPreviousVersions": "No previous versions available.",
+  "signDocument": "Sign Document",
+  "documentSigned": "Document signed successfully.",
+  "errorSigning": "Error signing: {error}",
+  "@errorSigning": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "signatureInstructions": "Draw your signature below. Once applied, this document will be locked for further AI edits.",
+  "applySignature": "Apply Signature",
+  "versionNumber": "Version {number}",
+  "@versionNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "originalGeneration": "Original Generation",
+
+  "privacyIntroTitle": "Introduction",
+  "privacyIntroBody": "At BizDocx, we are committed to protecting your privacy. This policy explains how we collect, use, and safeguard your information when you use our AI-powered document hub.",
+  "privacyCollectionTitle": "Data Collection",
+  "privacyCollectionBody": "We collect information necessary to provide our services, including account details (name, email) and the business context you provide (company name, mission, brand colors) to generate documents.",
+  "privacyAiTitle": "AI and Your Content",
+  "privacyAiBody": "Your document prompts and business context are processed by our secure AI generation partners to create high-quality business assets. We do not use your data to train our own models without explicit consent.",
+  "privacySecurityTitle": "Data Security",
+  "privacySecurityBody": "Your data is stored securely using enterprise-grade cloud infrastructure. We implement industry-standard security measures to protect against unauthorized access or disclosure.",
+  "privacyRightsTitle": "User Rights",
+  "privacyRightsBody": "You have the right to access, correct, or delete your data at any time through the app settings. Deleting your account will remove all associated portfolios, documents, and profile information."
+}

@@ -4,15 +4,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'firebase_options.dart';
+import 'l10n/app_localizations.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/locale_provider.dart';
 import 'services/firebase_service.dart';
 import 'services/prefs_service.dart';
+import 'services/security_service.dart';
 import 'services/iap_service.dart';
+import 'services/update_service.dart';
 import 'ui/router/app_router.dart';
+import 'ui/widgets/connectivity_wrapper.dart';
 import 'core/theme/app_theme.dart';
+import 'package:upgrader/upgrader.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +37,10 @@ Future<void> main() async {
 
   await FirebaseService.initOfflinePersistence();
   await PrefsService.instance.init();
+  await SecurityService.instance.init();
+  
+  // Trigger Android In-App Update check
+  UpdateService.instance.checkForUpdates();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -48,6 +59,7 @@ class BizDocxApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
 
     // Initialize IAP when user logs in
     ref.listen(currentUserProvider, (previous, next) {
@@ -61,8 +73,27 @@ class BizDocxApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
+      locale: locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('fr'),
+        Locale('es'),
+      ],
       routerConfig: router,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return ConnectivityWrapper(
+          child: UpgradeAlert(
+            child: child!,
+          ),
+        );
+      },
     );
   }
 }

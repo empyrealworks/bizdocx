@@ -13,7 +13,6 @@ import '../screens/portfolio_dashboard_screen.dart';
 import '../screens/portfolio_detail_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/forgot_password_screen.dart';
-import '../screens/privacy_policy_screen.dart';
 import '../screens/contact_us_screen.dart';
 import '../screens/subscription_screen.dart';
 import '../screens/lock_screen.dart';
@@ -90,10 +89,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: 'settings',
                 builder: (_, __) => const SettingsScreen(),
                 routes: [
-                  GoRoute(
-                    path: 'privacy',
-                    builder: (_, __) => const PrivacyPolicyScreen(),
-                  ),
                   GoRoute(
                     path: 'contact',
                     builder: (_, __) => const ContactUsScreen(),

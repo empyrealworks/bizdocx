@@ -511,7 +511,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get phoneNumber => 'Numéro de téléphone';
 
   @override
-  String get website => 'Site web (ex: www.empyreal.works)';
+  String get website => 'Site Web';
 
   @override
   String get localization => 'Localisation';
@@ -834,6 +834,18 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sendFeedback => 'Envoyez-nous vos réflexions';
+
+  @override
+  String get visitWebsite => 'Visitez notre site Web';
+
+  @override
+  String get helpCenter => 'Centre d\'aide';
+
+  @override
+  String get browseFaqs => 'Parcourir les FAQ et guides';
+
+  @override
+  String get followUs => 'Suivez-nous';
 
   @override
   String get lastUpdated => 'Dernière mise à jour : juillet 2024';

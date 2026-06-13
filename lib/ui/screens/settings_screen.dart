@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
@@ -216,7 +217,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _ActionTile(
                 label: l.privacyPolicy,
                 icon: Icons.privacy_tip_outlined,
-                onTap: () => context.push('/settings/privacy'),
+                onTap: () => launchUrl(
+                  Uri.parse('https://bizdocx.empyrealworks.com/privacy-policy.html'),
+                  mode: LaunchMode.externalApplication,
+                ),
                 isLast: true,
               ),
             ],
@@ -247,7 +251,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: [
               _InfoRow(context, l.app, l.appTitle),
               Divider(height: 1, color: c.border),
-              _InfoRow(context, l.version, '1.0.0'),
+              _InfoRow(context, l.version, '0.8.0'),
               Divider(height: 1, color: c.border),
               _InfoRow(context, l.aiEngine, l.aiEngineSubtitle),
             ],

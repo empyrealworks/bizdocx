@@ -1033,7 +1033,7 @@ abstract class AppLocalizations {
   /// No description provided for @website.
   ///
   /// In en, this message translates to:
-  /// **'Website (e.g. www.empyreal.works)'**
+  /// **'Website'**
   String get website;
 
   /// No description provided for @localization.
@@ -1617,6 +1617,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send us your thoughts'**
   String get sendFeedback;
+
+  /// No description provided for @visitWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit our website'**
+  String get visitWebsite;
+
+  /// No description provided for @helpCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Help Center'**
+  String get helpCenter;
+
+  /// No description provided for @browseFaqs.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse FAQs & guides'**
+  String get browseFaqs;
+
+  /// No description provided for @followUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow Us'**
+  String get followUs;
 
   /// No description provided for @lastUpdated.
   ///

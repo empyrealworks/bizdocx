@@ -1,8 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/extensions/context_extensions.dart';
 
 class ContactUsScreen extends StatelessWidget {
   const ContactUsScreen({super.key});
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _sendEmail() async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'hello@empyrealworks.com',
+      query: encodeQueryParameters(<String, String>{
+        'subject': 'BizDocx Support Request',
+      }),
+    );
+
+    if (await canLaunchUrl(emailLaunchUri)) {
+      await launchUrl(emailLaunchUri);
+    }
+  }
+
+  String? encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((MapEntry<String, String> e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +46,8 @@ class ContactUsScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
             Container(
-              width: 80, height: 80,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 color: c.chipFill,
                 shape: BoxShape.circle,
@@ -37,21 +67,43 @@ class ContactUsScreen extends StatelessWidget {
               context,
               icon: Icons.email_outlined,
               title: l.emailSupport,
-              value: 'support@bizdocx.com',
-              onTap: () {
-                // In a real app, use url_launcher to open email client
-              },
+              value: 'hello@empyrealworks.com',
+              onTap: _sendEmail,
             ),
             const SizedBox(height: 16),
             _contactCard(
               context,
-              icon: Icons.chat_bubble_outline_rounded,
-              title: l.feedback,
-              value: l.sendFeedback,
-              onTap: () {
-                // Open feedback form
-              },
+              icon: Icons.help_outline_rounded,
+              title: l.helpCenter,
+              value: l.browseFaqs,
+              onTap: () => _launchUrl('https://empyrealworks.com/#contact'),
             ),
+            const SizedBox(height: 16),
+            _contactCard(
+              context,
+              icon: Icons.language_rounded,
+              title: l.website,
+              value: l.visitWebsite,
+              onTap: () => _launchUrl('https://empyrealworks.com'),
+            ),
+            const SizedBox(height: 32),
+            _SectionHeader(l.followUs),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _socialIcon(
+                  icon: Icons.alternate_email_rounded,
+                  onTap: () => _launchUrl('https://twitter.com/empyrealworks'),
+                ),
+                const SizedBox(width: 24),
+                _socialIcon(
+                  icon: Icons.business_center_rounded,
+                  onTap: () => _launchUrl('https://linkedin.com/company/empyrealworks'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -95,4 +147,34 @@ class ContactUsScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _socialIcon({required IconData icon, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.withAlpha(51)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, size: 24),
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(
+        text.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.bold,
+              color: context.colors.textMuted,
+            ),
+      );
 }

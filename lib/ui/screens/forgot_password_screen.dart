@@ -107,6 +107,7 @@ class _FormView extends StatelessWidget {
           TextFormField(
             controller: emailCtrl,
             keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email],
             decoration: InputDecoration(hintText: l.email),
             validator: (v) => (v == null || !v.contains('@')) ? l.errorInvalidEmail : null,
           ),

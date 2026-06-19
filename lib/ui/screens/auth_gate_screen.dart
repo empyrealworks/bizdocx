@@ -1,11 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/extensions/context_extensions.dart';
-import '../../core/utils/ui_utils.dart';
 import '../../services/firebase_service.dart';
 import '../widgets/app_button.dart';
 
@@ -28,6 +26,10 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
   bool _obscure    = true;
   String? _error;
 
+  // Rate limiting
+  int _failedAttempts = 0;
+  DateTime? _lockoutEndTime;
+
   @override
   void dispose() {
     _nameCtrl.dispose();
@@ -38,6 +40,12 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
   }
 
   Future<void> _submit() async {
+    if (_lockoutEndTime != null && DateTime.now().isBefore(_lockoutEndTime!)) {
+      final diff = _lockoutEndTime!.difference(DateTime.now()).inSeconds;
+      setState(() => _error = "Too many failed attempts. Try again in $diff seconds.");
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) return;
     setState(() { _loading = true; _error = null; });
     try {
@@ -51,7 +59,13 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
           name: _nameCtrl.text.trim(),
         );
       }
+      _failedAttempts = 0;
+      _lockoutEndTime = null;
     } catch (e) {
+      _failedAttempts++;
+      if (_failedAttempts >= 5) {
+        _lockoutEndTime = DateTime.now().add(const Duration(seconds: 60));
+      }
       setState(() => _error = _parseError(e));
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -69,6 +83,17 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
     }
   }
 
+  Future<void> _guestSignIn() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      await FirebaseService.instance.signInAnonymously();
+    } catch (e) {
+      setState(() => _error = _parseError(e));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   String _parseError(dynamic e) {
     final s = e.toString();
     final l = context.l10n;
@@ -77,6 +102,7 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
     if (s.contains('email-already-in-use')) return l.errorEmailInUse;
     if (s.contains('weak-password'))     return l.errorWeakPassword;
     if (s.contains('invalid-email'))     return l.errorInvalidEmail;
+    if (s.contains('credential-already-in-use')) return "Email/account already in use. Please sign in instead.";
     return l.errorGeneric;
   }
 
@@ -86,7 +112,14 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
     final l = context.l10n;
     final isDark = context.isDark;
 
+    final isGuest = FirebaseService.instance.isAnonymous;
+
     return Scaffold(
+      appBar: isGuest ? AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: const BackButton(),
+      ) : null,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -125,6 +158,7 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                 if (!_isLogin) ...[
                   TextFormField(
                     controller: _nameCtrl,
+                    autofillHints: const [AutofillHints.name],
                     decoration:
                     InputDecoration(hintText: l.fullName),
                     validator: (v) =>
@@ -136,6 +170,7 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                 TextFormField(
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
                   decoration: InputDecoration(hintText: l.email),
                   validator: (v) {
                     if (v == null || v.isEmpty) return l.required;
@@ -148,6 +183,9 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                 TextFormField(
                   controller: _passCtrl,
                   obscureText: _obscure,
+                  autofillHints: [
+                    _isLogin ? AutofillHints.password : AutofillHints.newPassword
+                  ],
                   decoration: InputDecoration(
                     hintText: l.password,
                     suffixIcon: IconButton(
@@ -171,13 +209,15 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                   TextFormField(
                     controller: _confirmCtrl,
                     obscureText: _obscure,
+                    autofillHints: const [AutofillHints.newPassword],
                     decoration: InputDecoration(
                         hintText: l.confirmPassword),
                     validator: (v) => v != _passCtrl.text
                         ? l.passwordsDoNotMatch
                         : null,
                   ),
-                ] else ...[
+                ]
+else ...[
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -213,6 +253,15 @@ class _AuthGateScreenState extends ConsumerState<AuthGateScreen> {
                   icon: Icons.login, // Google icon from URL was a bit much
                   label: l.continueWithGoogle,
                 ),
+
+                const SizedBox(height: 16),
+                if (!isGuest)
+                  AppButton(
+                    onPressed: _guestSignIn,
+                    loading: _loading,
+                    style: AppButtonStyle.text,
+                    label: l.continueAsGuest,
+                  ),
 
                 const SizedBox(height: 24),
                 Center(

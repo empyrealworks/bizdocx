@@ -17,6 +17,7 @@ import '../../providers/document_generation_provider.dart';
 import '../../providers/offline_file_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../services/prefs_service.dart';
+import '../../services/review_service.dart';
 import '../sheets/lifecycle_workflow_sheet.dart';
 import '../sheets/signature_sheet.dart';
 import '../sheets/version_history_sheet.dart';
@@ -139,6 +140,10 @@ class _DocumentViewerScreenState
           bytes: await file.readAsBytes(),
           filename: '$safeTitle.pdf',
         );
+        
+        // Track first export for review prompt
+        await ReviewService.instance.markFirstExportDone();
+        _checkReviewPrompt();
       } catch (e) {
         if (mounted) {
           UiUtils.showErrorSnackBar(context, context.l10n.exportFailed(e.toString()));
@@ -154,9 +159,48 @@ class _DocumentViewerScreenState
             bytes: await file.readAsBytes(),
             filename: '$safeTitle.png',
           );
+
+          // Track first export for review prompt
+          await ReviewService.instance.markFirstExportDone();
+          _checkReviewPrompt();
         }
       });
     }
+  }
+
+  Future<void> _checkReviewPrompt() async {
+    if (!mounted) return;
+    final shouldPrompt = await ReviewService.instance.shouldPromptReview();
+    if (shouldPrompt && mounted) {
+      await ReviewService.instance.markReviewPrompted();
+      _showReviewDialog();
+    }
+  }
+
+  void _showReviewDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Enjoying BizDocx?'),
+        content: const Text('You just exported your first document! Would you mind taking a moment to rate the app?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.l10n.maybeLater),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              // In a real app, this would trigger in_app_review
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Thank you for your feedback!')),
+              );
+            },
+            child: const Text('Rate Now'),
+          ),
+        ],
+      ),
+    );
   }
 
   int get _refinementCost {

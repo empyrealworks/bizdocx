@@ -42,6 +42,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueWithGoogle => 'Continue with Google';
 
   @override
+  String get continueAsGuest => 'Continue as Guest';
+
+  @override
   String get noAccount => 'Don\'t have an account? Sign up';
 
   @override

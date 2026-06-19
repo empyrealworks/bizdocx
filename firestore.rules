@@ -8,6 +8,11 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Helper: Is the user anonymous?
+    function isAnonymous() {
+      return isSignedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
     // Helper: Does the requested path match the authenticated user's ID?
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;

@@ -166,6 +166,12 @@ abstract class AppLocalizations {
   /// **'Continue with Google'**
   String get continueWithGoogle;
 
+  /// No description provided for @continueAsGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as Guest'**
+  String get continueAsGuest;
+
   /// No description provided for @noAccount.
   ///
   /// In en, this message translates to:

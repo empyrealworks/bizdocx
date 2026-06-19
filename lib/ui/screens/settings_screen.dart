@@ -74,6 +74,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          if (FirebaseService.instance.isAnonymous) ...[
+            _card(
+              context,
+              children: [
+                _ActionTile(
+                  label: l.signUp,
+                  subtitle: l.noAccount,
+                  icon: Icons.person_add_outlined,
+                  onTap: () => context.push('/auth'),
+                  isFirst: true,
+                  isLast: true,
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+          ],
           _SectionHeader(context, l.appearance),
           const SizedBox(height: 8),
           _card(
@@ -513,6 +529,7 @@ class _LanguageTile extends StatelessWidget {
 class _ActionTile extends StatelessWidget {
   const _ActionTile({
     required this.label,
+    this.subtitle,
     this.value,
     this.icon,
     required this.onTap,
@@ -522,6 +539,7 @@ class _ActionTile extends StatelessWidget {
   });
 
   final String label;
+  final String? subtitle;
   final String? value;
   final IconData? icon;
   final VoidCallback onTap;
@@ -549,12 +567,19 @@ class _ActionTile extends StatelessWidget {
               const SizedBox(width: 14),
             ],
             Expanded(
-              child: Text(label,
-                  style: TextStyle(
-                    color: tileColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  )),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: TextStyle(
+                        color: tileColor,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      )),
+                  if (subtitle != null)
+                    Text(subtitle!, style: TextStyle(color: c.textMuted, fontSize: 12)),
+                ],
+              ),
             ),
             if (value != null)
               Text(value!, style: TextStyle(color: c.textMuted, fontSize: 14)),

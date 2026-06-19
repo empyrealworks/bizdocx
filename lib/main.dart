@@ -17,6 +17,7 @@ import 'services/security_service.dart';
 import 'services/iap_service.dart';
 import 'services/update_service.dart';
 import 'ui/router/app_router.dart';
+import 'ui/widgets/privacy_overlay.dart';
 import 'ui/widgets/connectivity_wrapper.dart';
 import 'core/theme/app_theme.dart';
 import 'package:upgrader/upgrader.dart';
@@ -88,9 +89,11 @@ class BizDocxApp extends ConsumerWidget {
       routerConfig: router,
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
-        return ConnectivityWrapper(
-          child: UpgradeAlert(
-            child: child!,
+        return PrivacyOverlay(
+          child: ConnectivityWrapper(
+            child: UpgradeAlert(
+              child: child!,
+            ),
           ),
         );
       },

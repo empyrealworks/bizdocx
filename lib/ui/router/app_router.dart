@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/document_asset.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/onboarding_provider.dart';
+import '../../services/firebase_service.dart';
 import '../screens/auth_gate_screen.dart';
 import '../screens/document_viewer_screen.dart';
 import '../screens/ai_generation_screen.dart';
@@ -44,14 +45,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (seenLoading) return null;
 
       // 1. Forced Onboarding
-      if (!hasSeen && loc != '/onboarding') return '/onboarding';
+      if (!hasSeen) {
+        if (loc != '/onboarding') return '/onboarding';
+        return null;
+      }
 
       // 2. Auth Guard (only active after onboarding is seen)
-      // Allow forgot password even if not logged in
-      if (hasSeen && !isLoggedIn && loc != '/auth' && loc != '/auth/forgot-password') return '/auth';
+      if (!isLoggedIn) {
+        // If we are at root but not logged in, go to auth
+        if (loc == '/') return '/auth';
+        
+        // Allow other public-ish routes like auth subroutes
+        if (loc != '/auth' && loc != '/auth/forgot-password') return '/auth';
+        return null;
+      }
       
       // 3. Prevent logged-in users from seeing Auth/Onboarding pages
-      if (hasSeen && isLoggedIn && (loc == '/auth' || loc == '/onboarding')) return '/';
+      // EXCEPT for guests who want to upgrade/link their account
+      if (loc == '/onboarding') return '/';
+      if (loc == '/auth' && isLoggedIn && !FirebaseService.instance.isAnonymous) return '/';
 
       return null;
     },

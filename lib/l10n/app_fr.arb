@@ -12,6 +12,7 @@
   "confirmPassword": "Confirmer le mot de passe",
   "fullName": "Nom complet",
   "continueWithGoogle": "Continuer avec Google",
+  "continueAsGuest": "Continuer en tant qu'invité",
   "noAccount": "Vous n'avez pas de compte ? Inscrivez-vous",
   "haveAccount": "Vous avez déjà un compte ? Connectez-vous",
 

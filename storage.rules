@@ -8,6 +8,11 @@ service firebase.storage {
       return request.auth != null;
     }
 
+    // Helper: Is the user anonymous?
+    function isAnonymous() {
+      return isSignedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
     // Helper: Does the path belong to the user?
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;

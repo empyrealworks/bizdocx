@@ -74,43 +74,50 @@ class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScr
           ],
         ),
         actions: [
-          profileAsync.when(
+          profileAsync.maybeWhen(
             data: (p) => p == null ? const SizedBox() : _TierBadge(tier: p.tier),
-            loading: () => const SizedBox(),
-            error: (_, __) => const SizedBox(),
+            orElse: () => const SizedBox(),
           ),
           IconButton(
             icon: Icon(Icons.settings_outlined, size: 20, color: c.iconPrimary),
             tooltip: l.settings,
             onPressed: () => context.push('/settings'),
           ),
-          IconButton(
-            icon: Icon(Icons.logout_rounded, size: 20, color: c.iconPrimary),
-            tooltip: l.signOut,
-            onPressed: () => _confirmSignOut(context),
-          ),
+          if (FirebaseService.instance.isAnonymous)
+            TextButton.icon(
+              onPressed: () => context.push('/auth'),
+              icon: const Icon(Icons.person_add_outlined, size: 18),
+              label: Text(l.signUp, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+            )
+          else
+            IconButton(
+              icon: Icon(Icons.logout_rounded, size: 20, color: c.iconPrimary),
+              tooltip: l.signOut,
+              onPressed: () => _confirmSignOut(context),
+            ),
         ],
       ),
-      body: Column(
-        children: [
-          profileAsync.when(
-            data: (p) => p != null && !p.isFree ? _PlanBanner(profile: p) : const SizedBox(),
-            loading: () => const SizedBox(),
-            error: (_, __) => const SizedBox(),
-          ),
-          Expanded(
-            child: portfoliosAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
-                child: Text('${l.error}: $e',
-                    style: TextStyle(color: Theme.of(context).colorScheme.error)),
+      body: profileAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('${l.error}: $e')),
+        data: (profile) => Column(
+          children: [
+            if (profile != null) _VerificationBanner(profile: profile),
+            if (profile != null && !profile.isFree) _PlanBanner(profile: profile),
+            Expanded(
+              child: portfoliosAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(
+                  child: Text('${l.error}: $e',
+                      style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                ),
+                data: (portfolios) => portfolios.isEmpty
+                    ? _EmptyState(onCreateTap: () => _showCreateSheet(context, ref))
+                    : _PortfolioList(portfolios: portfolios),
               ),
-              data: (portfolios) => portfolios.isEmpty
-                  ? _EmptyState(onCreateTap: () => _showCreateSheet(context, ref))
-                  : _PortfolioList(portfolios: portfolios),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateSheet(context, ref),
@@ -127,6 +134,78 @@ class _PortfolioDashboardScreenState extends ConsumerState<PortfolioDashboardScr
       context: context,
       isScrollControlled: true,
       builder: (_) => const CreatePortfolioSheet(),
+    );
+  }
+}
+
+class _VerificationBanner extends StatefulWidget {
+  const _VerificationBanner({required this.profile});
+  final UserProfile profile;
+
+  @override
+  State<_VerificationBanner> createState() => _VerificationBannerState();
+}
+
+class _VerificationBannerState extends State<_VerificationBanner> {
+  bool _sent = false;
+
+  Future<void> _send() async {
+    try {
+      await FirebaseService.instance.sendEmailVerification();
+      setState(() => _sent = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Verification email sent.")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to send email: $e")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fb = FirebaseService.instance;
+    final isVisible = !fb.isEmailVerified && !fb.isAnonymous;
+    
+    if (!isVisible) return const SizedBox();
+
+    final c = context.colors;
+    return Container(
+      width: double.infinity,
+      color: Colors.red.withValues(alpha: 0.1),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Row(
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 16),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              "Please verify your email to secure your account.",
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.red),
+            ),
+          ),
+          TextButton(
+            onPressed: _sent ? null : _send,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              _sent ? "SENT" : "VERIFY",
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, size: 16),
+            onPressed: () async {
+              await FirebaseService.instance.reloadUser();
+              setState(() {}); // Rebuild to check isEmailVerified again
+            },
+          ),
+        ],
+      ),
     );
   }
 }

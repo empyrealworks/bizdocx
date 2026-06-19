@@ -84,11 +84,10 @@ class AppLockNotifier extends Notifier<AppLockState> {
 
   void _checkLockTimeout() {
     if (!state.isEnabled || state.isLocked) return;
-    if (state.backgroundTime == null) {
-        // If it was just started or background time lost, we lock as a precaution if enabled
-        state = state.copyWith(isLocked: true);
-        return;
-    }
+    
+    // If backgroundTime is null, it means the app was either just started 
+    // or just unlocked. In both cases, we don't need to re-lock based on timeout.
+    if (state.backgroundTime == null) return;
 
     final diff = DateTime.now().difference(state.backgroundTime!);
     if (diff >= state.timeout.duration) {

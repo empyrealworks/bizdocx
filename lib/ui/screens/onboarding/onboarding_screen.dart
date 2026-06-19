@@ -65,11 +65,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     try {
       await ref.read(onboardingSeenProvider.notifier).markSeen();
       if (mounted) {
-        context.go('/');
+        // Go to /auth explicitly to avoid flashing the protected / route
+        context.go('/auth');
       }
     } catch (e) {
       debugPrint('Onboarding completion error: $e');
-      if (mounted) context.go('/');
+      if (mounted) context.go('/auth');
     }
   }
 

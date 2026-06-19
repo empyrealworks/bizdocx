@@ -54,6 +54,16 @@ class FirebaseService {
     required String password,
     required String name,
   }) async {
+    final currentUser = _auth.currentUser;
+    if (currentUser != null && currentUser.isAnonymous) {
+      debugPrint('[Auth] Linking anonymous user to new email account');
+      final credential = EmailAuthProvider.credential(email: email, password: password);
+      final linkedCred = await currentUser.linkWithCredential(credential);
+      await linkedCred.user?.updateDisplayName(name);
+      await ensureProfile(linkedCred.user!, name: name);
+      return linkedCred;
+    }
+
     final cred = await _auth.createUserWithEmailAndPassword(
         email: email, password: password);
     await cred.user?.updateDisplayName(name);
@@ -70,6 +80,15 @@ class FirebaseService {
       final googleAuth = googleUser.authentication;
       final credential =
       GoogleAuthProvider.credential(idToken: googleAuth.idToken);
+
+      final currentUser = _auth.currentUser;
+      if (currentUser != null && currentUser.isAnonymous) {
+        debugPrint('[Auth] Linking anonymous user to Google account');
+        final linkedCred = await currentUser.linkWithCredential(credential);
+        await ensureProfile(linkedCred.user!);
+        return linkedCred;
+      }
+
       final cred = await _auth.signInWithCredential(credential);
       await ensureProfile(cred.user!);
       return cred;
@@ -255,6 +274,18 @@ class FirebaseService {
 
   Future<void> sendPasswordReset(String email) =>
       _auth.sendPasswordResetEmail(email: email);
+
+  Future<void> sendEmailVerification() async {
+    await _auth.currentUser?.sendEmailVerification();
+  }
+
+  bool get isEmailVerified => _auth.currentUser?.emailVerified ?? false;
+
+  bool get isAnonymous => _auth.currentUser?.isAnonymous ?? false;
+
+  Future<void> reloadUser() async {
+    await _auth.currentUser?.reload();
+  }
 
   Future<void> signOut() => _auth.signOut();
 

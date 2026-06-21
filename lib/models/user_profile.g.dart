@@ -24,6 +24,7 @@ _UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => _UserProfile(
   updatedAt: json['updatedAt'] == null
       ? null
       : DateTime.parse(json['updatedAt'] as String),
+  settings: json['settings'] as Map<String, dynamic>? ?? const {},
 );
 
 Map<String, dynamic> _$UserProfileToJson(_UserProfile instance) =>
@@ -39,6 +40,7 @@ Map<String, dynamic> _$UserProfileToJson(_UserProfile instance) =>
       'autoRenew': instance.autoRenew,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
+      'settings': instance.settings,
     };
 
 const _$UserTierEnumMap = {

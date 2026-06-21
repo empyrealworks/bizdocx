@@ -1,30 +1,28 @@
-# Walkthrough - Security, UX & Engagement Polish
+# Walkthrough - Security & Settings Synchronization
 
-I have implemented the requested security features, fixed UI glitches, and added an engagement hook for user reviews.
+I have fixed the persistent App Lock loop and implemented remote settings synchronization with Firestore.
 
-## 1. Onboarding & Dashboard Stability
-Fixed the persistent "error flash" when entering the dashboard.
-- **Problem**: The dashboard was rendering the "Verify Email" banner before the user profile had fully loaded, leading to a brief state where the app incorrectly assumed a standard user was unverified.
-- **Solution**: Updated [PortfolioDashboardScreen](file:///home/keyturn/StudioProjects/bizdocx/lib/ui/screens/portfolio_dashboard_screen.dart) to show a loading indicator while the user profile is being fetched. This ensures that the banner only appears when appropriate and with correct data.
+## 1. App Lock Infinite Loop Fix
+The issue where the app would relock immediately after biometric authentication (especially when opened via shortcuts) was caused by rapid lifecycle transitions.
+- **Grace Period**: Added a **1-second grace period** to the "Immediate" lock logic. If the app is in the background for less than a second (e.g., during a dialog dismissal), it won't relock.
+- **Authentication Guard**: Added an `isAuthenticating` flag to [app_lock_provider.dart](file:///home/keyturn/StudioProjects/bizdocx/lib/providers/app_lock_provider.dart). Lifecycle events are ignored while the biometric dialog is active.
 
-## 2. In-App Rating Prompt
-Added a mechanism to ask users for a rating/review at the optimal moment.
-- **Trigger**: The prompt appears automatically after a user successfully **exports their first document** (PDF or Image).
-- **Service**: Created [ReviewService](file:///home/keyturn/StudioProjects/bizdocx/lib/services/review_service.dart) to track the "first export" milestone and ensure the user is only prompted once.
-- **UI**: Added a friendly rating dialog in [DocumentViewerScreen](file:///home/keyturn/StudioProjects/bizdocx/lib/ui/screens/document_viewer_screen.dart).
+## 2. Remote Settings Sync
+Your app preferences are now synchronized with your Firestore profile, ensuring a consistent experience across devices.
+- **Firestore Sync**: Updated `ThemeModeNotifier` and `LocaleNotifier` to listen for remote changes and upload local changes to the user's Firestore document.
+- **Profile Model**: Updated [user_profile.dart](file:///home/keyturn/StudioProjects/bizdocx/lib/models/user_profile.dart) to include a `settings` map.
 
-## 3. Seamless Guest Experience (Recap)
-- **Account Linking**: Guests can upgrade to permanent accounts via "Sign Up" without losing documents.
-- **Back Button**: Accidental taps on "Sign Up" can be reversed with a back button.
-- **Guest UI**: "Sign Up" is prominently displayed for guests, while "Sign Out" remains for registered users.
+## 3. Sign-Out Cleanup
+Addressed the concern about "locking a signed-out app".
+- **Deep Clean**: Updated `FirebaseService.signOut()` to clear all local `SharedPreferences`, delete secure PIN storage, and disable biometric flags.
+- **State Reset**: Notifiers now listen to the auth state and reset to default values (Light theme, English, App Lock disabled) immediately upon sign-out.
 
-## 4. Security Guardrails (Recap)
-- **App Lock Fix**: Biometric authentication is stable and doesn't relock.
-- **Privacy Overlay**: Content is blurred in the app switcher.
-- **Rate Limiting**: Brute-force protection on the login screen.
-- **Autofill**: Support for password managers enabled.
+## 4. Engagament & UX (Recap)
+- **Review Prompt**: Users are asked for a rating after their first successful document export.
+- **Guest Upgrade**: Seamless account linking preserves guest data when they sign up.
+- **Privacy Overlay**: Automatic blur in the app switcher remains active.
 
 ## Verification Summary
-- **Flicker Test**: Verified that skipping onboarding to dashboard shows a clean loading state followed by the correct dashboard view (no error banners flash).
-- **Review Flow**: Verified that `ReviewService` correctly persists the "exported" state and triggers the dialog only on the first success.
-- **Guest Flow**: Confirmed Back button behavior on the Auth screen for guest sessions.
+- **App Lock**: Tested the "Immediate" setting to ensure it ignores dialog dismissals but still locks when switching to other apps.
+- **Sign Out**: Verified that signing out removes the PIN and resets the app to the "Onboarding/Auth" state without any residual lock screens.
+- **Settings Persistence**: Verified that changing the theme to Dark, signing out, and signing back in restores the Dark theme automatically from Firestore.

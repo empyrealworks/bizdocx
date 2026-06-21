@@ -1,6 +1,6 @@
 name: bizdocx
 description: BizDocx - AI-powered business document hub.
-version: 0.8.0+14
+version: 0.9.0+15
 publish_to: none
 
 environment:

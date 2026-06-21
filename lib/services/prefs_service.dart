@@ -44,4 +44,8 @@ class PrefsService {
   Future<void> setInt(String key, int value) => _prefs.setInt(key, value);
   String? getString(String key) => _prefs.getString(key);
   Future<void> setString(String key, String value) => _prefs.setString(key, value);
+
+  Future<void> clearAll() async {
+    await _prefs.clear();
+  }
 }

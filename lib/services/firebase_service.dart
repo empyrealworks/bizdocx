@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:bizdocx/services/prefs_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,6 +14,7 @@ import '../models/document_folder.dart';
 import '../models/document_version.dart';
 import '../models/user_context.dart';
 import '../models/user_profile.dart';
+import 'auth_security_service.dart';
 
 class FirebaseService {
   FirebaseService._();
@@ -108,6 +110,7 @@ class FirebaseService {
         displayName: name ?? user.displayName,
         createdAt: DateTime.now(),
         subscriptionCredits: 50, // Initial free allowance
+        settings: {},
       );
       await doc.set(profile.toFirestore());
       debugPrint('[Profile] Created profile for user ${user.uid}');
@@ -133,6 +136,12 @@ class FirebaseService {
     await _db
         .doc(FirestorePaths.user(profile.uid))
         .set(profile.toFirestore(), SetOptions(merge: true));
+  }
+
+  Future<void> updateSettings(Map<String, dynamic> settings) async {
+    await _db
+        .doc(FirestorePaths.user(currentUid))
+        .update({'settings': settings, 'updatedAt': Timestamp.now()});
   }
 
   // ── Usage Tracking & Credits ─────────────────────────────────────────────
@@ -287,7 +296,12 @@ class FirebaseService {
     await _auth.currentUser?.reload();
   }
 
-  Future<void> signOut() => _auth.signOut();
+  Future<void> signOut() async {
+    await _auth.signOut();
+    await AuthSecurityService.instance.clearPin();
+    await AuthSecurityService.instance.setBiometricsEnabled(false);
+    await PrefsService.instance.clearAll();
+  }
 
   Future<void> deleteUserAccount() async {
     final uid = currentUid;

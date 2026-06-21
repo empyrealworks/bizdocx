@@ -32,6 +32,9 @@ abstract class UserProfile with _$UserProfile {
     // Metadata
     required DateTime createdAt,
     DateTime? updatedAt,
+
+    // Settings
+    @Default({}) Map<String, dynamic> settings,
   }) = _UserProfile;
 
   const UserProfile._();

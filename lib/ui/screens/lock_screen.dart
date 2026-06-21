@@ -39,6 +39,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
       _isAuthenticating = true;
       _errorMessage = null;
     });
+    ref.read(appLockProvider.notifier).setAuthenticating(true);
 
     final success = await AuthSecurityService.instance.authenticateWithBiometrics(
       localizedReason: context.l10n.authenticateToContinue,
@@ -47,9 +48,12 @@ class _LockScreenState extends ConsumerState<LockScreen> {
     if (success) {
       ref.read(appLockProvider.notifier).unlock();
     } else {
-      setState(() {
-        _isAuthenticating = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isAuthenticating = false;
+        });
+        ref.read(appLockProvider.notifier).setAuthenticating(false);
+      }
     }
   }
 

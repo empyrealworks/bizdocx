@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/prefs_service.dart';
 import '../services/auth_security_service.dart';
+import 'auth_provider.dart';
 
 enum AppLockTimeout {
   immediate,
@@ -25,12 +26,14 @@ class AppLockState {
   final bool isEnabled;
   final AppLockTimeout timeout;
   final DateTime? backgroundTime;
+  final bool isAuthenticating;
 
   AppLockState({
     required this.isLocked,
     required this.isEnabled,
     required this.timeout,
     this.backgroundTime,
+    this.isAuthenticating = false,
   });
 
   AppLockState copyWith({
@@ -38,12 +41,14 @@ class AppLockState {
     bool? isEnabled,
     AppLockTimeout? timeout,
     DateTime? backgroundTime,
+    bool? isAuthenticating,
   }) {
     return AppLockState(
       isLocked: isLocked ?? this.isLocked,
       isEnabled: isEnabled ?? this.isEnabled,
       timeout: timeout ?? this.timeout,
       backgroundTime: backgroundTime ?? this.backgroundTime,
+      isAuthenticating: isAuthenticating ?? this.isAuthenticating,
     );
   }
 }
@@ -57,6 +62,17 @@ class AppLockNotifier extends Notifier<AppLockState> {
 
   @override
   AppLockState build() {
+    ref.listen(authStateProvider, (prev, next) {
+      if (next.value == null && prev?.value != null) {
+        // User signed out, reset state
+        state = AppLockState(
+          isLocked: false,
+          isEnabled: false,
+          timeout: AppLockTimeout.immediate,
+        );
+      }
+    });
+
     final isEnabled = PrefsService.instance.getBool(_enabledKey) ?? false;
     final timeoutIndex = PrefsService.instance.getInt(_timeoutKey) ?? 0;
     final timeout = AppLockTimeout.values[timeoutIndex];
@@ -73,7 +89,7 @@ class AppLockNotifier extends Notifier<AppLockState> {
   }
 
   void _onStateChange(AppLifecycleState lifecycleState) {
-    if (!state.isEnabled) return;
+    if (!state.isEnabled || state.isAuthenticating) return;
 
     if (lifecycleState == AppLifecycleState.paused || lifecycleState == AppLifecycleState.hidden) {
       state = state.copyWith(backgroundTime: DateTime.now());
@@ -84,13 +100,18 @@ class AppLockNotifier extends Notifier<AppLockState> {
 
   void _checkLockTimeout() {
     if (!state.isEnabled || state.isLocked) return;
-    
-    // If backgroundTime is null, it means the app was either just started 
-    // or just unlocked. In both cases, we don't need to re-lock based on timeout.
     if (state.backgroundTime == null) return;
 
     final diff = DateTime.now().difference(state.backgroundTime!);
-    if (diff >= state.timeout.duration) {
+    
+    // Add a small grace period (e.g. 1 second) to avoid relocking 
+    // due to rapid lifecycle changes (like dialog dismissals)
+    const gracePeriod = Duration(seconds: 1);
+    final targetDuration = state.timeout.duration > gracePeriod 
+        ? state.timeout.duration 
+        : gracePeriod;
+
+    if (diff >= targetDuration) {
       state = state.copyWith(isLocked: true);
     }
   }
@@ -110,7 +131,11 @@ class AppLockNotifier extends Notifier<AppLockState> {
   }
 
   void unlock() {
-    state = state.copyWith(isLocked: false, backgroundTime: null);
+    state = state.copyWith(isLocked: false, backgroundTime: null, isAuthenticating: false);
+  }
+
+  void setAuthenticating(bool authenticating) {
+    state = state.copyWith(isAuthenticating: authenticating);
   }
 
   void lock() {
